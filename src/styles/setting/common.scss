@@ -7,6 +7,22 @@ button {
     background: none;
 }
 
+html {
+    color: var(--black);
+    font-family: var(--mainfont);
+    font-size: 15px;
+    line-height: 1;
+    font-weight: 500;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+
+    scrollbar-width: none;
+}
+
 body {
     background-color: #404040;
     display: flex;
@@ -21,7 +37,7 @@ body {
     height: 852px;
     display: flex;
     flex-direction: column;
-    background-color: #FFFFFF;
+    background-color: var(--white);
 }
 
 button:focus-visible,
