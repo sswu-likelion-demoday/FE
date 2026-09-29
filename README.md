@@ -4,6 +4,8 @@
 
 성신여자대학교 구성원들을 위한 친구 매칭 서비스 **수정구函(수정구함)** 의 Frontend Repository입니다.
 
+
+
 ## 🛠 기술 스택
 
 | 구분 | 기술 |
@@ -12,6 +14,8 @@
 | Language | JavaScript |
 | Styling | Sass |
 | Package Manager | npm |
+
+
 
 ## 🌿 브랜치 전략
 
@@ -33,6 +37,8 @@ feature/mypage
 
 작업 완료 후 `develop` 브랜치로 Pull Request를 생성하고, 리뷰어 1인 이상의 승인 후 병합합니다.
 
+
+
 ## 📁 폴더 구조
 
 ```bash
@@ -46,6 +52,8 @@ src/
 ├─ index.js
 └─ index.scss
 ```
+
+
 
 ## 🚀 실행 방법
 
@@ -73,6 +81,8 @@ http://localhost:3000
 npm run build
 ```
 
+
+
 ## 👩‍💻 팀원
 
 | 이름 | 담당 |
@@ -80,6 +90,8 @@ npm run build
 | 김서윤 | 온보딩, 마이페이지 |
 | 김주연 | 매칭, 수정맵 |
 | 배재경 | 채팅 |
+
+
 
 ## 📌 협업 규칙
 
