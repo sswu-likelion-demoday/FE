@@ -8,8 +8,7 @@ button {
 }
 
 html {
-    color: var(--black);
-    font-family: var(--mainfont);
+    color: var(--text);
     font-size: 15px;
     line-height: 1;
     font-weight: 500;
@@ -24,17 +23,19 @@ html {
 }
 
 body {
-    background-color: #404040;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    min-width: 320px;
     min-height: 100vh;
+    min-height: 100dvh;
+    background-color: #404040;
     letter-spacing: 0;
 }
 
 .page {
-    width: 393px;
-    height: 852px;
+    width: 100%;
+    max-width: 440px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
     background-color: var(--white);
