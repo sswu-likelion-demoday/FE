@@ -1,0 +1,91 @@
+.BottomNav_wrap {
+    width: 100%;
+    max-width: 440px;
+    height: 90px;
+    margin: 0 auto;
+    background-color: var(--bg2);
+
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+
+    display: flex;
+    align-items: center;
+
+    font-weight: 400;
+    font-size: 12px;
+}
+
+// =====================================================
+
+.bottomnav_box1,
+.bottomnav_box2,
+.bottomnav_box3,
+.bottomnav_box4 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: #ACACAC;
+    flex: 1;
+    height: 100%;
+    padding-top: 17px;
+    cursor: pointer;
+}
+
+.bottomnav_box1{
+    padding-left: 15px;
+}
+.bottomnav_box4{
+    padding-right: 15px;
+}
+
+// =====================================================
+
+.bottomnav_box1.active {
+    background-color: var(--bg);
+    color: var(--main);
+    font-weight: 500;
+    border-top: 2px solid var(--main);
+}
+
+.bottomnav_box2.active {
+    background-color: var(--bg);
+    color: var(--main);
+    font-weight: 500;
+    border-top: 2px solid var(--main);
+}
+
+.bottomnav_box3.active {
+    background-color: var(--bg);
+    color: var(--main);
+    font-weight: 500;
+    border-top: 2px solid var(--main);
+}
+
+.bottomnav_box4.active {
+    background-color: var(--bg);
+    color: var(--main);
+    font-weight: 500;
+    border-top: 2px solid var(--main);
+}
+
+// =====================================================
+
+.matching_icon {
+    width: 36px;
+}
+
+.chat_icon {
+    width: 24px;
+}
+
+.map_icon {
+    width: 23px;
+}
+
+.mypage_icon {
+    width: 21px;
+}
