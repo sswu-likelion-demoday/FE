@@ -1,0 +1,110 @@
+.SignupStep04_wrap {
+  background-image: linear-gradient(
+    to bottom,
+    rgba(110, 81, 242, 0.8),
+    rgba(247, 247, 255, 0.1)
+  );
+  // rgba(110, 81, 242, 0.7) -> 원래 0.8인데 0.7로 수정
+  // rgba(247, 247, 255, 0.1) -> 원래 0.7인데 0.1로 수정
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+// ========================================
+
+.signupStep04_top {
+  position: relative;
+
+  min-height: 340px;
+  flex-shrink: 0;
+}
+
+.signupStep04_line_box {
+  display: flex;
+  align-items: flex-start;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.signupStep04_line2 {
+  margin-left: 18px;
+}
+.signupStep04_line3 {
+  margin-left: 90px;
+}
+.signupStep04_line4 {
+  margin-left: 77px;
+}
+.signupStep04_line5 {
+  margin-left: 86px;
+}
+.signupStep04_line6 {
+  margin-left: 14px;
+}
+
+.signupstep04_word {
+  display: flex;
+  align-items: flex-start;
+  position: absolute;
+  top: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.signupStep04_symbol {
+  display: flex;
+  align-items: flex-start;
+  position: absolute;
+  top: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+// ========================================
+
+.signupStep04_main {
+  display: flex;
+  flex-direction: column;
+  //   flex-shrink: 0;
+}
+
+.signupStep04_main span {
+  margin-top: 60px;
+  font-weight: 600;
+  font-size: 30px;
+  color: var(--main);
+  text-align: center;
+}
+
+.signupStep04_main p {
+  font-size: 28px;
+  margin: 76px 0 0 38px;
+}
+
+// ========================================
+
+.signupStep04_bot {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: auto;
+  padding-top: 56px;
+  padding-bottom: 178px;
+  flex-shrink: 0;
+}
+
+.signupStep04_login_btn {
+  width: 100%;
+  max-width: 350px;
+  height: 50px;
+  margin: 0 auto;
+  background-color: var(--sub1);
+  border-radius: 10px;
+
+  color: var(--main);
+  font-size: 22px;
+}
