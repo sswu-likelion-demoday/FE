@@ -5,6 +5,7 @@ import StudentVerification from "./pages/Onboarding/Signup/SignupStep01";
 import BasicInfo from "./pages/Onboarding/Signup/SignupStep02";
 import Profile from "./pages/Onboarding/Signup/SignupStep03";
 import SignupComplete from "./pages/Onboarding/Signup/SignupStep04";
+import Login from './pages/Onboarding/Login/Login'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/signup/basic-info" element={<BasicInfo />} />
         <Route path="/signup/profile" element={<Profile />} />
         <Route path="/signup/complete" element={<SignupComplete />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
     </BrowserRouter>
   );

@@ -36,7 +36,7 @@ const SignupStep04 = () => {
         </p>
       </div>
       <div className="signupStep04_bot">
-        <button className="signupStep04_login_btn" onClick={() => navigate("/")}>로그인</button>
+        <button className="signupStep04_login_btn" onClick={() => navigate("/login")}>로그인</button>
       </div>
     </div>
   );

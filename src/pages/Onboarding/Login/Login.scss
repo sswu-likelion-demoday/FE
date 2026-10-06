@@ -1,0 +1,92 @@
+.Login_wrap {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+// =======================================
+
+.login_top {
+  width: 100%;
+  font-size: 24px;
+  margin-top: 83px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.l_t_1 {
+  width: 9px;
+  position: absolute;
+  left: 29px;
+  cursor: pointer;
+}
+
+.l_t_2 {
+  width: 122px;
+  position: absolute;
+  top: 1px;
+}
+
+// =======================================
+
+.login_main {
+  margin-top: 146px;
+  font-size: 17px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.l_m_input {
+  width: 333px;
+  height: 54px;
+  border-radius: 10px;
+  background-color: var(--bg2);
+  margin-top: 12px;
+  outline: none;
+  padding: 0 15px;
+  font-size: 15px;
+}
+
+.l_m_2 {
+  margin-top: 44px;
+}
+
+// =======================================
+
+.login_bot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 100%;
+  margin-top: auto;
+  padding-top: 44px;
+  padding-bottom: 251px;
+  flex-shrink: 0;
+}
+
+.login_bot button {
+  width: 100%;
+  max-width: 350px;
+  height: 50px;
+  border-radius: 10px;
+  background-color: var(--sub1);
+  font-size: 22px;
+  color: var(--bg2);
+}
+
+.login_bot button.active {
+  background-color: var(--main);
+}
+
+.login_bot p {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 400;
+  color: #6d6d6d;
+  margin-top: 40px;
+  border-bottom: 1px solid #6d6d6d;
+}

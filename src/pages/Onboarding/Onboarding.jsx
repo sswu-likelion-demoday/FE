@@ -35,7 +35,12 @@ const Onboarding = () => {
         </p>
       </div>
       <div className="onboarding_bot">
-        <button className="onboarding_login_btn">로그인</button>
+        <button
+          className="onboarding_login_btn"
+          onClick={() => navigate("/login")}
+        >
+          로그인
+        </button>
         <button
           className="onboarding_signup_btn"
           onClick={() => navigate("/signup/student-verification")}
