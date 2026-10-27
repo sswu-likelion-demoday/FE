@@ -50,7 +50,7 @@ const Login = () => {
         >
           로그인
         </button>
-        <p>비밀번호 찾기</p>
+        <p onClick={() => navigate("/login/find-password")}>비밀번호 찾기</p>
       </div>
     </div>
   );

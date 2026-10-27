@@ -6,6 +6,8 @@ import BasicInfo from "./pages/Onboarding/Signup/SignupStep02";
 import Profile from "./pages/Onboarding/Signup/SignupStep03";
 import SignupComplete from "./pages/Onboarding/Signup/SignupStep04";
 import Login from './pages/Onboarding/Login/Login'
+import FindPassword from './pages/Onboarding/Login/FindPassword'
+import ResetPassword from './pages/Onboarding/Login/ResetPassword'
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
         <Route path="/signup/profile" element={<Profile />} />
         <Route path="/signup/complete" element={<SignupComplete />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/login/find-password" element={<FindPassword />} />
+        <Route path="/login/reset-password" element={<ResetPassword />} />
       </Routes>
     </BrowserRouter>
   );
