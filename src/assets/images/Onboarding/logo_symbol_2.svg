@@ -1,0 +1,35 @@
+<svg width="239" height="239" viewBox="0 0 239 239" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_d_307_1910)">
+<circle cx="119.415" cy="119.414" r="81.5" fill="#D8D2FF"/>
+<circle cx="119.415" cy="119.414" r="81.5" stroke="#EFEDFF" stroke-width="1.68507"/>
+</g>
+<g filter="url(#filter1_f_307_1910)">
+<path d="M174.983 114.312C176.695 129.221 171.425 163.222 136.653 179.953" stroke="#EFEDFF" stroke-width="13.7902" stroke-linecap="round"/>
+</g>
+<g filter="url(#filter2_f_307_1910)">
+<path d="M72.7922 84.133C75.3721 77.0868 85.3547 63.0758 104.646 63.4006" stroke="#EFEDFF" stroke-width="13.7902" stroke-linecap="round"/>
+</g>
+<defs>
+<filter id="filter0_d_307_1910" x="0.000160933" y="-2.21729e-05" width="238.829" height="238.828" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feMorphology radius="3.37015" operator="dilate" in="SourceAlpha" result="effect1_dropShadow_307_1910"/>
+<feOffset/>
+<feGaussianBlur stdDeviation="16.8507"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.964264 0 0 0 0 0.930833 0 0 0 0 1 0 0 0 1 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_307_1910"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_307_1910" result="shape"/>
+</filter>
+<filter id="filter1_f_307_1910" x="115.966" y="93.6259" width="79.9778" height="107.014" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="6.89509" result="effect1_foregroundBlur_307_1910"/>
+</filter>
+<filter id="filter2_f_307_1910" x="52.1048" y="42.7096" width="73.2264" height="62.1105" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="6.89509" result="effect1_foregroundBlur_307_1910"/>
+</filter>
+</defs>
+</svg>

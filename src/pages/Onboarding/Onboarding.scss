@@ -1,0 +1,113 @@
+.Onboarding_wrap {
+  background-image: linear-gradient(
+    to bottom,
+    rgba(110, 81, 242, 0.8),
+    rgba(247, 247, 255, 0.1)
+  );
+  // rgba(110, 81, 242, 0.7) -> 원래 0.8인데 0.7로 수정
+  // rgba(247, 247, 255, 0.1) -> 원래 0.7인데 0.1로 수정
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+// ========================================
+
+.onboarding_top {
+  position: relative;
+
+  min-height: 340px;
+  flex-shrink: 0;
+}
+
+.onboarding_line_box {
+  display: flex;
+  align-items: flex-start;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.onboarding_line2 {
+  margin-left: 18px;
+}
+.onboarding_line3 {
+  margin-left: 90px;
+}
+.onboarding_line4 {
+  margin-left: 77px;
+}
+.onboarding_line5 {
+  margin-left: 86px;
+}
+.onboarding_line6 {
+  margin-left: 14px;
+}
+
+.onboarding_symbol {
+  display: flex;
+  align-items: flex-start;
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+// ========================================
+
+.onboarding_main {
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.onboarding_main img {
+  margin-top: 10px;
+}
+
+.onboarding_main p {
+  color: #7a5aad;
+  text-align: center;
+  font-size: 20px;
+  margin-top: 40px;
+}
+
+// ========================================
+
+.onboarding_bot {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: auto;
+  padding-top: 133px;
+  padding-bottom: 97px;
+  flex-shrink: 0;
+}
+
+.onboarding_signup_btn {
+  width: 100%;
+  max-width: 350px;
+  height: 50px;
+  margin: 0 auto;
+  background-color: var(--main);
+  border-radius: 10px;
+
+  color: var(--bg2);
+  font-size: 22px;
+}
+
+.onboarding_login_btn {
+  width: 100%;
+  max-width: 350px;
+  height: 50px;
+  margin: 0 auto;
+  background-color: var(--sub1);
+  border-radius: 10px;
+
+  color: var(--main);
+  font-size: 22px;
+}
