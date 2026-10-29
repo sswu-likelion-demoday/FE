@@ -13,13 +13,7 @@
 }
 
 .sajusetting_main {
-  width: calc(100% - 40px);
-  max-width: 333px;
   font-size: 17px;
-
-  label {
-    display: block;
-  }
 }
 
 // ========================================
@@ -28,14 +22,12 @@
   margin-top: 47px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 125px;
   white-space: nowrap;
 
   input {
     appearance: none;
     width: 70px;
-    flex-shrink: 0;
     height: 36px;
     border-radius: 25px;
     background-color: var(--bg);
@@ -75,11 +67,6 @@
   outline: none;
   padding: 0 17px;
   font-size: 15px;
-
-  &:focus-visible {
-    outline: 2px solid var(--main);
-    outline-offset: 2px;
-  }
 
   &::placeholder {
     font-weight: 400;
@@ -147,15 +134,4 @@
   font-weight: 400;
   color: #6d6d6d;
   line-height: 1.2;
-}
-
-.sajusetting_status {
-  padding: 0 20px;
-  text-align: center;
-  font-size: 14px;
-  line-height: 1.4;
-
-  &:not(:empty) {
-    margin-top: 12px;
-  }
 }

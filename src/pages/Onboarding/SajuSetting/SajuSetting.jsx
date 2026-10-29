@@ -1,34 +1,13 @@
-import { useId, useState } from "react";
+import { useState } from "react";
 import "./SajuSetting.scss";
 
 const SajuSetting = () => {
   const [isAllowed, setIsAllowed] = useState(true);
   const [birthDate, setBirthDate] = useState("");
   const [birthTime, setBirthTime] = useState("");
-  const [saveMessage, setSaveMessage] = useState("");
-  const birthDateId = useId();
-  const birthTimeId = useId();
 
   const isActive =
     !isAllowed || (birthDate.trim() !== "" && birthTime.trim() !== "");
-
-  const handleComplete = () => {
-    if (!isActive) return;
-
-    try {
-      localStorage.setItem(
-        "sajuSettings",
-        JSON.stringify({
-          isAllowed,
-          birthDate: isAllowed ? birthDate.trim() : "",
-          birthTime: isAllowed ? birthTime.trim() : "",
-        })
-      );
-      setSaveMessage("설정이 저장되었어요.");
-    } catch {
-      setSaveMessage("설정을 저장하지 못했어요. 다시 시도해 주세요.");
-    }
-  };
 
   return (
     <div className="page SajuSetting_wrap">
@@ -39,10 +18,7 @@ const SajuSetting = () => {
           <input
             type="checkbox"
             checked={isAllowed}
-            onChange={(e) => {
-              setIsAllowed(e.target.checked);
-              setSaveMessage("");
-            }}
+            onChange={(e) => setIsAllowed(e.target.checked)}
             aria-label="사주기반 매칭 허용"
           />
         </div>
@@ -51,34 +27,26 @@ const SajuSetting = () => {
           <>
             <div className="s_m_2">
               <div className="s_m_2_top">
-                <label htmlFor={birthDateId}>생년월일</label>
+                <p>생년월일</p>
                 <input type="radio" />
               </div>
               <input
-                id={birthDateId}
                 type="text"
                 placeholder="ex) 260805"
                 className="s_m_input"
                 value={birthDate}
-                onChange={(e) => {
-                  setBirthDate(e.target.value);
-                  setSaveMessage("");
-                }}
+                onChange={(e) => setBirthDate(e.target.value)}
               />
             </div>
 
             <div className="s_m_3">
-              <label htmlFor={birthTimeId}>태어난 시간</label>
+              <p>태어난 시간</p>
               <input
-                id={birthTimeId}
                 type="text"
                 placeholder="ex) 12:00"
                 className="s_m_input"
                 value={birthTime}
-                onChange={(e) => {
-                  setBirthTime(e.target.value);
-                  setSaveMessage("");
-                }}
+                onChange={(e) => setBirthTime(e.target.value)}
               />
             </div>
           </>
@@ -95,16 +63,12 @@ const SajuSetting = () => {
 
       <div className={`sajusetting_bot ${!isAllowed ? "off" : ""}`}>
         <button
-          type="button"
-          disabled={!isActive}
-          onClick={handleComplete}
           className={`sajusetting_bot_btn ${
             isActive ? "active" : ""
           } ${!isAllowed ? "off" : ""}`}
         >
           설정 완료
         </button>
-        <p className="sajusetting_status" role="status">{saveMessage}</p>
       </div>
     </div>
   );
