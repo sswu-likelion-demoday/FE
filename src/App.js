@@ -8,6 +8,7 @@ import SignupComplete from "./pages/Onboarding/Signup/SignupStep04";
 import Login from './pages/Onboarding/Login/Login'
 import FindPassword from './pages/Onboarding/Login/FindPassword'
 import ResetPassword from './pages/Onboarding/Login/ResetPassword'
+import SajuSetting from './pages/Onboarding/SajuSetting/SajuSetting'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/login/find-password" element={<FindPassword />} />
         <Route path="/login/reset-password" element={<ResetPassword />} />
+        <Route path="/signup/saju-setting" element={<SajuSetting />} />
       </Routes>
     </BrowserRouter>
   );
