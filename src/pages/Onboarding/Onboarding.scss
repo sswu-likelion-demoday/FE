@@ -1,11 +1,9 @@
 .Onboarding_wrap {
   background-image: linear-gradient(
     to bottom,
-    rgba(110, 81, 242, 0.8),
-    rgba(247, 247, 255, 0.1)
+    rgba(110, 81, 242, 0.77),
+    rgba(247, 247, 255, 0.7) 580px
   );
-  // rgba(110, 81, 242, 0.7) -> 원래 0.8인데 0.7로 수정
-  // rgba(247, 247, 255, 0.1) -> 원래 0.7인데 0.1로 수정
   position: relative;
   display: flex;
   flex-direction: column;
