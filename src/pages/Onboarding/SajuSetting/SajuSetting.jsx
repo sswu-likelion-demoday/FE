@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./SajuSetting.scss";
 
 const SajuSetting = () => {
+  const navigate = useNavigate();
+
   const [isAllowed, setIsAllowed] = useState(true);
   const [birthDate, setBirthDate] = useState("");
   const [birthTime, setBirthTime] = useState("");
@@ -66,6 +69,7 @@ const SajuSetting = () => {
           className={`sajusetting_bot_btn ${
             isActive ? "active" : ""
           } ${!isAllowed ? "off" : ""}`}
+          onClick={() => navigate("/signup/onboarding-complete")}
         >
           설정 완료
         </button>

@@ -1,0 +1,36 @@
+.choice_btn {
+  display: flex;
+  align-items: center;
+
+  border-radius: 5px;
+  background-color: var(--bg2);
+  box-sizing: border-box;
+  border: 2px solid transparent;
+  cursor: pointer;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  &.selected {
+    border: 2px solid var(--main);
+    font-weight: 600;
+    color: var(--main);
+  }
+
+  &.list {
+    width: 353px;
+    height: 50px;
+    padding-left: 16px;
+  }
+
+  &.grid {
+    width: 100px;
+    height: 78px;
+    justify-content: center;
+  }
+
+  &.pair {
+    width: 170px;
+    height: 78px;
+  }
+}

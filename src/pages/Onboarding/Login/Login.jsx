@@ -47,6 +47,7 @@ const Login = () => {
           className={`login_btn ${
             studentId.trim() && password.trim() ? "active" : ""
           }`}
+          onClick={() => navigate("/signup/preference-intro")}
         >
           로그인
         </button>
