@@ -1,0 +1,143 @@
+@import url("https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&display=swap");
+
+.Preference01_wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+}
+
+// ========================================
+
+.preference01_top {
+  width: 100%;
+  font-size: 24px;
+  margin-top: 74px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+
+  img {
+    position: absolute;
+    left: 29px;
+    top: 3px;
+    cursor: pointer;
+  }
+}
+
+.p01_t_txt {
+  text-align: center;
+  margin-top: 25px;
+
+  span {
+    font-weight: 400;
+    font-size: 18px;
+    color: #6d6d6d;
+    margin-top: 15px;
+    display: block;
+  }
+}
+
+// ========================================
+
+.preference01_main {
+  margin-top: 55px;
+  position: relative;
+
+  .optiongroup_box {
+    white-space: pre-line;
+  }
+}
+
+.mbti_e,
+.mbti_i,
+.mbti_s,
+.mbti_n,
+.mbti_t,
+.mbti_f,
+.mbti_j,
+.mbti_p {
+  font-family: "Crimson Text";
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--sub1);
+
+  &.active {
+    color: var(--main);
+  }
+}
+
+.mbti_e {
+  position: absolute;
+  top: -11px;
+  left: 9px;
+}
+.mbti_i {
+  position: absolute;
+  top: -11px;
+  right: 9px;
+}
+.mbti_s {
+  position: absolute;
+  top: 95px;
+  left: 9px;
+}
+.mbti_n {
+  position: absolute;
+  top: 95px;
+  right: 9px;
+}
+.mbti_t {
+  position: absolute;
+  top: 205px;
+  left: 9px;
+}
+.mbti_f {
+  position: absolute;
+  top: 205px;
+  right: 9px;
+}
+.mbti_j {
+  position: absolute;
+  top: 312px;
+  left: 9px;
+}
+.mbti_p {
+  position: absolute;
+  top: 312px;
+  right: 9px;
+}
+
+.preference01_main {
+  .optiongroup_box {
+    > :nth-child(odd) {
+      justify-content: flex-start;
+      padding-left: 16px;
+
+      p {
+        text-align: left;
+      }
+    }
+
+    > :nth-child(even) {
+      justify-content: flex-end;
+      padding-right: 16px;
+
+      p {
+        text-align: right;
+      }
+    }
+  }
+}
+
+// ========================================
+
+.preference01_bot {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 57px;
+  padding-bottom: 97px;
+  display: flex;
+  justify-content: center;
+}

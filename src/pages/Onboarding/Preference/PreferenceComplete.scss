@@ -1,0 +1,73 @@
+.PreferenceComplete_wrap {
+  background-image: linear-gradient(
+    to bottom,
+    rgba(110, 81, 242, 0.77),
+    rgba(247, 247, 255, 0.7) 580px
+  );
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+// ==========================================
+
+.preferencecomplete_top {
+  display: flex;
+  justify-content: center;
+  margin-top: 88px;
+}
+
+.pc_t_star01 {
+  position: absolute;
+  left: 52px;
+  top: 91px;
+}
+.pc_t_star02 {
+  width: 48px;
+  position: absolute;
+  left: 109px;
+  top: 134px;
+}
+.pc_t_star03 {
+  width: 268px;
+  position: absolute;
+  left: -75px;
+  top: 148px;
+}
+.pc_t_star04 {
+  width: 117px;
+  position: absolute;
+  left: 256px;
+  top: 309px;
+}
+
+// ==========================================
+
+.preferencecomplete_main {
+  font-weight: 600;
+  font-size: 30px;
+  color: var(--main);
+  margin: 308px 0 0 48px;
+
+  span {
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1.1;
+    color: var(--text);
+    margin-top: 27px;
+    display: block;
+  }
+}
+
+// ==========================================
+
+.preferencecomplete_bot {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 70px;
+  padding-bottom: 178px;
+  display: flex;
+  justify-content: center;
+}
