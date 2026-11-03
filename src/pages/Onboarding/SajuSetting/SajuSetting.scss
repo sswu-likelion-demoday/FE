@@ -1,0 +1,137 @@
+.SajuSetting_wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+}
+
+// ========================================
+
+.sajusetting_top {
+  font-size: 24px;
+  margin-top: 78px;
+}
+
+.sajusetting_main {
+  font-size: 17px;
+}
+
+// ========================================
+
+.s_m_1 {
+  margin-top: 47px;
+  display: flex;
+  align-items: center;
+  gap: 125px;
+  white-space: nowrap;
+
+  input {
+    appearance: none;
+    width: 70px;
+    height: 36px;
+    border-radius: 25px;
+    background-color: var(--bg);
+    position: relative;
+    cursor: pointer;
+
+    &::before {
+      content: "";
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      top: 3px;
+      left: 4px;
+      background-color: var(--sub1);
+    }
+
+    &:checked {
+      background-color: var(--bg);
+
+      &::before {
+        left: 36px;
+        background-color: var(--main);
+      }
+    }
+  }
+}
+
+.s_m_input {
+  width: 100%;
+  max-width: 333px;
+  height: 54px;
+  border-radius: 10px;
+  background-color: var(--bg2);
+
+  margin-top: 12px;
+  outline: none;
+  padding: 0 17px;
+  font-size: 15px;
+
+  &::placeholder {
+    font-weight: 400;
+    font-size: 13px;
+    color: #6d6d6d;
+  }
+}
+
+// ========================================
+
+.s_m_2_top {
+  margin-top: 92px;
+  display: flex;
+}
+
+// ========================================
+
+.s_m_3 {
+  margin-top: 70px;
+}
+
+// ========================================
+
+.sajusetting_bot {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 174px;
+  padding-bottom: 97px;
+
+  &.off {
+    margin-top: auto;
+    padding-top: 437.5px;
+    padding-bottom: 97px;
+  }
+}
+
+.sajusetting_bot_btn {
+  width: 100%;
+  max-width: 350px;
+  height: 50px;
+  margin: 0 auto;
+  background-color: var(--sub1);
+  border-radius: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bg2);
+  font-size: 22px;
+
+  &.active {
+    background-color: var(--main);
+  }
+
+  &.off {
+    background-color: var(--main);
+  }
+}
+
+// ========================================
+
+.sajusetting_off {
+  margin-top: 31px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #6d6d6d;
+  line-height: 1.2;
+}

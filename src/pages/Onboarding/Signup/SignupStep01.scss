@@ -1,0 +1,269 @@
+.Signupstep01_wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+}
+
+// =======================================
+
+.signupstep01_top {
+  width: 100%;
+  font-size: 24px;
+  margin-top: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.signupstep01_top img {
+  position: absolute;
+  left: 29px;
+  cursor: pointer;
+}
+
+// =======================================
+
+.signupstep01_main {
+  flex-shrink: 0;
+}
+
+.s01_m_1 {
+  display: flex;
+  flex-direction: column;
+  margin-top: 51px;
+  font-size: 17px;
+}
+
+.s01_m_box {
+  width: 333px;
+  height: 54px;
+  border-radius: 10px;
+  background-color: var(--bg2);
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  margin-top: 12px;
+}
+
+.s01_m_box button {
+  padding: 5px 10px;
+  border-radius: 5px;
+  background-color: var(--sub1);
+  color: var(--bg2);
+  font-size: 14px;
+  font-weight: 600;
+  margin-right: 17px;
+}
+
+.s01_m_box button.active {
+  background-color: #8975ff;
+}
+
+.s01_m_box input {
+  background: none;
+  outline: none;
+  padding: 0 17px;
+  font-size: 15px;
+  flex: 1;
+}
+
+// =======================================
+
+.s01_m_2 {
+  display: flex;
+  flex-direction: column;
+  margin-top: 77px;
+  font-size: 17px;
+}
+
+.s01_m_2 input {
+  background: none;
+  outline: none;
+  padding: 0 17px;
+  font-size: 13px;
+  flex: 1;
+}
+
+.s01_m_2_txt {
+  display: flex;
+  margin-top: 19px;
+  margin-left: 20px;
+  font-weight: 400;
+  font-size: 13px;
+  color: #6d6d6d;
+}
+
+.s01_m_2_txt span {
+  margin-left: 10px;
+  color: var(--main);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+// =======================================
+
+.s01_m_2_box {
+  width: 333px;
+  height: 54px;
+  border-radius: 10px;
+  background-color: var(--bg2);
+  margin-top: 31px;
+  display: flex;
+  align-items: center;
+}
+
+.s01_m_2_box input {
+  font-size: 15px;
+}
+
+.s01_m_2_box input::placeholder {
+  font-weight: 400;
+  font-size: 13px;
+  color: #6d6d6d;
+}
+
+.s01_m_2_box button {
+  padding: 5px 10px;
+  border-radius: 5px;
+  background-color: var(--sub1);
+  color: var(--bg2);
+  font-size: 14px;
+  font-weight: 600;
+  margin-right: 17px;
+}
+
+.s01_m_2_box button.active{
+  background-color: #8975FF;
+}
+
+// =======================================
+
+.s01_m_3 {
+  display: flex;
+  justify-content: center;
+  margin-top: 62px;
+  font-weight: 400;
+  font-size: 14px;
+  color: #6d6d6d;
+}
+
+.s01_m_3 span {
+  color: var(--main);
+  font-weight: 500;
+  margin-left: 10px;
+  cursor: pointer;
+}
+// =======================================
+
+.signupstep01_bot {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 99px;
+  padding-bottom: 97px;
+  flex-shrink: 0;
+}
+
+.signupstep01_bot_btn {
+  width: 100%;
+  max-width: 350px;
+  height: 50px;
+  margin: 0 auto;
+  background-color: var(--sub1);
+  border-radius: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bg2);
+  font-size: 22px;
+}
+
+// ================================================================
+
+.signupstep01_modal_wrap {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 100%;
+  max-width: 440px;
+  background-color: rgba(216, 210, 255, 0.3);
+  backdrop-filter: blur(7px);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// ========================================
+
+.s01_modal_box {
+  width: 320px;
+  height: 421px;
+  background-color: var(--white);
+  border: 1px solid var(--main);
+  border-radius: 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+// ========================================
+
+.s01_modal_top {
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.s01_modal_top img {
+  position: absolute;
+  top: -35px;
+  right: 15px;
+  cursor: pointer;
+}
+
+.s01_modal_top p {
+  color: var(--main);
+  font-size: 22px;
+}
+
+// ========================================
+
+.s01_modal_main {
+  margin-top: 32px;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.s01_modal_main span {
+  color: #8975ff;
+}
+
+// ========================================
+
+.s01_modal_bot {
+  width: 187px;
+  height: 44px;
+  border-radius: 10px;
+  background-color: var(--main);
+  margin-top: 54px;
+
+  color: var(--bg2);
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.signupstep01_bot_btn.active{
+  background-color: var(--main);
+}

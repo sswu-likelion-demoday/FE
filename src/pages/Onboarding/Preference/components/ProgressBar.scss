@@ -1,0 +1,15 @@
+.ProgressBar_wrap {
+  display: flex;
+  gap: 5px;
+
+  .progress_step {
+    width: 40px;
+    height: 6px;
+    border-radius: 2px;
+    background-color: #d9d9d9;
+
+    &.active {
+      background-color: var(--main);
+    }
+  }
+}
