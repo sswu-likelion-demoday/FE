@@ -69,6 +69,7 @@
   padding: 0 17px;
   font-size: 15px;
   flex: 1;
+  min-width: 0;
 }
 
 // =======================================
@@ -118,6 +119,7 @@
 
 .s01_m_2_box input {
   font-size: 15px;
+  min-width: 0;
 }
 
 .s01_m_2_box input::placeholder {
