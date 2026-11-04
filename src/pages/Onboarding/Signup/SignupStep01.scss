@@ -55,6 +55,8 @@
   font-size: 14px;
   font-weight: 600;
   margin-right: 17px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .s01_m_box button.active {
@@ -132,10 +134,12 @@
   font-size: 14px;
   font-weight: 600;
   margin-right: 17px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.s01_m_2_box button.active{
-  background-color: #8975FF;
+.s01_m_2_box button.active {
+  background-color: #8975ff;
 }
 
 // =======================================
@@ -264,6 +268,6 @@
   font-weight: 400;
 }
 
-.signupstep01_bot_btn.active{
+.signupstep01_bot_btn.active {
   background-color: var(--main);
 }
