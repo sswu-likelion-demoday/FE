@@ -41,7 +41,7 @@ const EditProfile = () => {
       <div className="editprofile_bot">
         <button
           className="editprofile_bot_btn"
-          onClick={() => navigate("/signup/profile")}
+          onClick={() => navigate("/mypage")}
         >
           설정 완료
         </button>

@@ -27,7 +27,7 @@ const Mypage = () => {
             내 정보 수정
           </button>
         </div>
-        <div className="m_t_3">
+        <div className="m_t_3" onClick={() => navigate("/mypage/item-history")}>
           <img src={sujeonggu} alt="" />
           <div className="m_t_3_txt">
             <span>보유한 수정구</span>
