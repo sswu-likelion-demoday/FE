@@ -1,0 +1,20 @@
+.quest_complete_notice {
+    align-self: center;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 7px 12px;
+    border-radius: 999px;
+
+    background-color: var(--bg);
+    color: #4A2FD0;
+
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.quest_complete_notice_icon {
+    width: 12px;
+    height: 12px;
+}
