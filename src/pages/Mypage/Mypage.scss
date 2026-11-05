@@ -1,0 +1,144 @@
+.Mypage_wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+}
+
+// =======================================
+
+.mypage_top {
+  margin: 52px 20px 0 20px;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 145%;
+  letter-spacing: -2%;
+}
+
+.m_t_2 {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  button {
+    width: 83px;
+    height: 31px;
+    border-radius: 999px;
+    border: 1px solid #d8d2ff;
+
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 140%;
+    color: #4a2fd0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+  }
+}
+
+.m_t_2_txt {
+  font-size: 20px;
+  line-height: 1.1;
+
+  span {
+    font-weight: 400;
+    font-size: 13px;
+    color: #5f5a75;
+  }
+}
+
+.m_t_3 {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+  width: 353px;
+  height: 84px;
+  background: linear-gradient(to right, #f3efff, #e0d6ff);
+  border-radius: 20px;
+  margin: 16px auto 0;
+
+  .m_t_3_txt {
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1.2;
+
+    span {
+      font-weight: 400;
+      font-size: 13px;
+      color: #574f80;
+    }
+  }
+
+  .m_t_3_btn {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 0 18px 0 auto;
+    font-weight: 400;
+    font-size: 13px;
+    color: #4a2fd0;
+  }
+}
+
+.m_m_box {
+  width: 353px;
+  border: 1px solid #e6e2f7;
+  border-radius: 20px;
+
+  .MenuItem_wrap + .MenuItem_wrap {
+    border-top: 1px solid #e6e2f7;
+  }
+}
+
+.m_m_3 {
+  .MenuItem_wrap {
+    height: 61px;
+  }
+}
+
+.mypage_main {
+  p {
+    font-size: 12px;
+    font-weight: 700;
+    color: #6e6887;
+    line-height: 145%;
+    letter-spacing: -2%;
+  }
+}
+
+.m_m_1,
+.m_m_2,
+.m_m_3 {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.m_m_1 {
+  margin-top: 20px;
+}
+
+.m_m_2,
+.m_m_3 {
+  margin-top: 12px;
+}
+
+.m_m_4 {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+
+  font-size: 13px;
+  line-height: 145%;
+  letter-spacing: -2%;
+  color: #6e6887;
+
+  p {
+    color: #cfcae0;
+  }
+}
