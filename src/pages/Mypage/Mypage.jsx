@@ -23,7 +23,9 @@ const Mypage = () => {
             <p>나리</p>
             <span>컴퓨터공학과 · 24학번</span>
           </div>
-          <button>내 정보 수정</button>
+          <button onClick={() => navigate("/mypage/edit-profile")}>
+            내 정보 수정
+          </button>
         </div>
         <div className="m_t_3">
           <img src={sujeonggu} alt="" />
