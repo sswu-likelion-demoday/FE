@@ -1,0 +1,56 @@
+
+.matching_card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+
+  width: 100%;
+  max-width: 343px;
+  height: 80px;
+  padding: 0 19px;
+
+  border: 1px solid var(--sub1);
+  border-radius: 10px;
+  background: var(--bg2);
+
+  text-align: left;
+  cursor: pointer;
+
+  &_text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  &_title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  &_description {
+    margin: 0;
+    font-size: 12px;
+    color: #6D6D6D;
+  }
+
+  &_arrow {
+    flex-shrink: 0;
+    margin-left: 10px;
+    font-size: 28px;
+    color: var(--sub1);
+  }
+
+  &:disabled {
+    background: #D9D9D9;
+    border-color: #C0C0C0;
+    cursor: not-allowed;
+
+    .matching_card_arrow {
+      color: #C0C0C0;
+    }
+  }
+}

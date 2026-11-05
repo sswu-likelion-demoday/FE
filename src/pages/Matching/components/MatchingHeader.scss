@@ -1,0 +1,38 @@
+
+.matching_header {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  background: #fff;
+
+  &_back {
+    position: absolute;
+    top: 83px;
+    left: 29px;
+
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+
+    img {
+      display: block;
+      width: 9px;
+      height: 19px;
+    }
+  }
+
+  &_title {
+    position: absolute;
+    top: 63px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 100%;
+    color: var(--text);
+    white-space: nowrap;
+  }
+}
