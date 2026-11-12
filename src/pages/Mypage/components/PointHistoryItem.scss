@@ -1,0 +1,21 @@
+.PointHistoryItem_wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  line-height: 145%;
+  letter-spacing: -2%;
+  padding: 12px 16px;
+
+  .point_history_txt {
+    span {
+      font-size: 12px;
+      font-weight: 400;
+      color: #6e6887;
+    }
+  }
+
+  .point_history_amount {
+    font-size: 16px;
+    color: #4A2FD0;
+  }
+}

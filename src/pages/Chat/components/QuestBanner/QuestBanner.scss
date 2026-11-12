@@ -1,0 +1,125 @@
+.quest_banner {
+    margin: 12px 16px 0;
+    padding: 16px;
+    border-radius: 18px;
+    background-color: var(--bg);
+}
+
+.quest_banner_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.quest_banner_status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.quest_banner_step {
+    padding: 4px 8px;
+    border-radius: 999px;
+    background-color: var(--main);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 400;
+}
+
+.quest_banner_status_text {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.quest_banner_quest {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #4A2FD0;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.quest_banner_arrow {
+    width: 5.25px;
+    height: 10.5px;
+}
+
+.quest_banner_progress {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.quest_banner_bar {
+    flex: 1;
+    height: 5px;
+    border-radius: 999px;
+    background-color: #D8D2FF;
+}
+
+.quest_banner_bar_active {
+    background-color: var(--main);
+}
+
+.quest_banner_bar_mid {
+    background-color: #A792FF;
+}
+
+.quest_banner_card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 13px;
+    padding: 13px 10px;
+    border-radius: 12px;
+    background-color: var(--white);
+}
+
+.quest_banner_logo {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    transform: scale(1.5);
+}
+
+.quest_banner_card_text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.quest_banner_label {
+    color: #5F5A75;
+    font-size: 11px;
+    font-weight: 400;
+}
+
+.quest_banner_title {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.quest_banner_unlock {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 11.5px;
+    color: #4A2FD0;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.quest_banner_lock {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.quest_banner_unlock_text {
+    font-weight: 500;
+}
+
+.quest_banner_unlock_text strong {
+    font-weight: 700;
+}
