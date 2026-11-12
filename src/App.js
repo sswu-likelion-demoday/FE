@@ -17,6 +17,7 @@ import Preference04 from "./pages/Onboarding/Preference/pages/Preference04";
 import Preference05 from "./pages/Onboarding/Preference/pages/Preference05";
 import PreferenceComplete from "./pages/Onboarding/Preference/PreferenceComplete";
 import OnboardingComplete from "./pages/Onboarding/SajuSetting/OnboardingComplete";
+import Matchinghome from "./pages/Matching/Matching-home/Matchinghome";
 
 function App() {
   return (
@@ -42,6 +43,8 @@ function App() {
         <Route path="/signup/preference05" element={<Preference05 />} />
         <Route path="/signup/preference-complete" element={<PreferenceComplete />} />
         <Route path="/signup/onboarding-complete" element={<OnboardingComplete />} />
+        <Route path="/matching" element={<Matchinghome />} />
+        <Route path="/matching_home" element={<Matchinghome />} />
       </Routes>
     </BrowserRouter>
   );

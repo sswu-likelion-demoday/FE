@@ -2,50 +2,105 @@
 .matching_btn {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  gap: 12px;
   box-sizing: border-box;
 
-  border: none;
   border-radius: 10px;
-  padding: 0;
-  font-weight: 500;
+  padding: 0 16px;
+  font-family: var(--mainfont);
+  color: var(--text);
+  text-align: left;
   cursor: pointer;
 
+  // 시안 기준: 343 × 80, 위·아래 21 / 왼쪽 19
   &.large {
     width: 100%;
-    max-width: 353px;
-    height: 50px;
+    max-width: 343px;
+    height: 80px;
+    padding: 21px 24px 21px 19px;
   }
 
+  // 시안 기준: 위·아래 10 / 왼쪽 22 / 오른쪽 27, 너비는 내용만큼
   &.medium {
-    width: 100px;
+    justify-content: flex-start;
+    gap: 10px; // 아이콘 ↔ 글자
+    width: auto;
     height: 40px;
+    padding: 10px 27px 10px 22px;
   }
 
-
-
+  // --line-color: 외곽선과 화살표가 같이 쓰는 색
   &.primary {
-    background: var(--main);
-    color: var(--bg2);
-    font-size: 22px;
+    --line-color: var(--sub1);
+    background: var(--bg2);
+    border: 1px solid var(--line-color);
   }
 
   &.secondary {
+    --line-color: var(--main);
     background: var(--sub1);
+    border: none;
     color: var(--main);
-    font-size: 17px;
   }
 
   &.danger {
+    --line-color: #d6336c;
     background: #ffadca;
+    border: none;
     color: #d6336c;
-    font-size: 17px;
   }
 
-  
   &:disabled {
-    background: #6e6887;
-    color: var(--bg2);
+    --line-color: #C0C0C0;
+    background: #D9D9D9;
+    border: 1px solid var(--line-color);
     cursor: not-allowed;
   }
+}
+
+.matching_btn_text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px; // 80 - 21×2 - 제목 20 - 설명 14 = 4
+  min-width: 0;
+}
+
+// 시안: Pretendard Medium 17, 행간 자동, 자간 0% → 높이 20
+.matching_btn_title {
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0;
+}
+
+// 시안: Pretendard Regular 12, 행간 자동, 자간 0% → 높이 14
+.matching_btn_description {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 14px;
+  letter-spacing: 0;
+  color: #6D6D6D;
+}
+
+// 왼쪽 아이콘(✓ / ✕) — 글자색을 따라감
+// 크기는 JSX의 svg 수치를 그대로 씀
+// margin -1px: 선이 튀어나온 1px을 레이아웃에서 빼서
+// 피그마처럼 선 기준 크기(12.14 / 11.5)로 간격 10px이 계산되게 함
+.matching_btn_icon {
+  display: flex;
+  flex-shrink: 0;
+  margin: -1px;
+}
+
+// 오른쪽 얇은 화살표(›)
+.matching_btn_arrow {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+  border-top: 1.5px solid var(--line-color);
+  border-right: 1.5px solid var(--line-color);
+  transform: rotate(45deg);
 }
