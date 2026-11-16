@@ -44,6 +44,9 @@
     background-color: #F7F7FF;
     color: var(--text);
     font-size: 14px;
+    font-weight: 400;
+    line-height: 145%;
+    letter-spacing: -0.02em;
 }
 
 .chat_input_field::placeholder {

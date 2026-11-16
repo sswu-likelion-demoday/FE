@@ -18,17 +18,20 @@
 }
 
 .quest_banner_step {
-    padding: 4px 8px;
+    padding: 2px 8px;
     border-radius: 999px;
     background-color: var(--main);
     color: var(--white);
     font-size: 11px;
     font-weight: 400;
+    line-height: 140%;
 }
 
 .quest_banner_status_text {
     font-size: 14px;
     font-weight: 500;
+    line-height: 145%;
+    letter-spacing: 0.02em;
 }
 
 .quest_banner_quest {
@@ -38,23 +41,25 @@
     color: #4A2FD0;
     font-size: 12px;
     font-weight: 400;
+    line-height: 145%;
+    letter-spacing: 0.02em;
 }
 
 .quest_banner_arrow {
-    width: 5.25px;
-    height: 10.5px;
+    width: 6px;
+    height: 10px;
 }
 
 .quest_banner_progress {
     display: flex;
-    gap: 6px;
-    margin-top: 12px;
+    gap: 4px;
+    margin-top: 10px;
 }
 
 .quest_banner_bar {
     flex: 1;
-    height: 5px;
-    border-radius: 999px;
+    height: 6px;
+    border-radius: 3px;
     background-color: #D8D2FF;
 }
 
@@ -71,7 +76,7 @@
     align-items: center;
     gap: 10px;
     margin-top: 13px;
-    padding: 13px 10px;
+    padding: 10px 12px 10px 10px;
     border-radius: 12px;
     background-color: var(--white);
 }
@@ -86,28 +91,34 @@
 .quest_banner_card_text {
     display: flex;
     flex-direction: column;
-    gap: 3px;
 }
 
 .quest_banner_label {
     color: #5F5A75;
     font-size: 11px;
     font-weight: 400;
+    line-height: 135%;
+    letter-spacing: 0.02em;
 }
 
 .quest_banner_title {
     font-size: 14px;
     font-weight: 500;
+    line-height: 135%;
+    letter-spacing: 0.02em;
 }
 
 .quest_banner_unlock {
     display: flex;
     align-items: center;
-    gap: 4px;
-    margin-top: 11.5px;
+    gap: 6px;
+    margin-top: 10px;
     color: #4A2FD0;
     font-size: 12px;
     font-weight: 500;
+    line-height: 145%;
+    letter-spacing: 0.02em;
+    
 }
 
 .quest_banner_lock {
