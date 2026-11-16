@@ -1,0 +1,79 @@
+.mi_card {
+  width: 353px;
+  padding: 16px;
+  border: 1px solid #e6e2f7;
+  border-radius: 18px;
+  background-color: #ffffff;
+
+  line-height: 120%;
+  letter-spacing: -2.4%;
+}
+
+.mi_card_top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mi_card_info {
+  display: flex;
+  flex-direction: column;
+}
+
+.mi_card_title {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.mi_card_desc {
+  font-weight: 400;
+  font-size: 12px;
+  color: #6e6887;
+}
+
+.mi_card_edit {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #4a2fd0;
+  font-weight: 400;
+  font-size: 13px;
+
+  img {
+    width: 5px;
+  }
+}
+
+.mi_card_items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.mi_card_item {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background-color: var(--bg);
+  color: #4a2fd0;
+  font-weight: 500;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+// MBTI
+.mi_card_items.mbti {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.mbti .mi_card_item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 73.75px;
+  height: 44px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 900;
+}

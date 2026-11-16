@@ -48,7 +48,7 @@ const Mypage = () => {
               icon={matchingInfo_icon}
               title="매칭 정보"
               detail="온보딩 답변"
-              onClick={() => navigate("")}
+              onClick={() => navigate("/mypage/matching-info")}
             />
           </div>
         </div>
