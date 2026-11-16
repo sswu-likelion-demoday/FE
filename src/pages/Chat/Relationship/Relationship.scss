@@ -1,0 +1,59 @@
+.relationship {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg2);
+}
+
+.relationship_header {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 52px 8px 8px;
+    height: 104px;
+
+    background-color: var(--bg2);
+}
+
+.relationship_back {
+    position: absolute;
+    left: 8px;
+
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.relationship_back img {
+    width: 24px;
+    height: 24px;
+}
+
+.relationship_title {
+    color: var(--text);
+
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 145%;
+    letter-spacing: -0.02em;
+}
+
+.relationship_content {
+    flex: 1;
+
+    padding: 12px 20px 32px;
+}
+
+.relationship_stage_list {
+    margin-top: 16px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}

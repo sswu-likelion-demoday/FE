@@ -10,13 +10,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 52px 20px 18px;
+    padding: 52px 8px 8px;
+    margin-bottom: 10px;
 }
 
 .partner_profile_back {
     position: absolute;
-    left: 20px;
-
+    left: 18px;
     width: 24px;
     height: 24px;
 }
@@ -27,13 +27,15 @@
 }
 
 .partner_profile_header_title {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 700;
+    line-height: 145%;
+    letter-spacing: -0.02em;
 }
 
 .partner_profile_content {
     flex: 1;
-    padding: 0 20px 24px;
+    padding: 4px 20px 16px 20px;
 }
 
 .partner_profile_main {
@@ -44,8 +46,16 @@
 
 .partner_profile_image_wrap {
     position: relative;
-    width: 92px;
-    height: 92px;
+    width: 96px;
+    height: 96px;
+    border-radius: 48px;
+    background: radial-gradient(circle at 35% 30%,
+            #d8ceff 0%,
+            #a792ff 30%,
+            #8f77ff 58%,
+            #5a3be0 100%);
+
+    box-shadow: 0 0 24px rgba(115, 84, 247, 0.4);
 }
 
 .partner_profile_image {
@@ -56,62 +66,63 @@
 .partner_profile_lock {
     position: absolute;
     right: -2px;
-    bottom: 2px;
-
-    width: 28px;
-    height: 28px;
+    bottom: -2px;
+    width: 30px;
+    height: 30px;
 
     display: flex;
     align-items: center;
     justify-content: center;
-
     border: 1px solid #D8D2FF;
     border-radius: 50%;
     background-color: var(--white);
 }
 
 .partner_profile_lock img {
-    width: 14px;
-    height: 14px;
+    width: 15px;
+    height: 15px;
 }
 
 .partner_profile_name {
-    margin-top: 14px;
-
+    margin-top: 8px;
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 500;
+    line-height: 145%;
+    letter-spacing: -0.02em;
 }
 
 .partner_profile_stage {
-    margin-top: 10px;
-    padding: 6px 12px;
-
+    margin-top: 8px;
+    padding: 4px 10px;
     border-radius: 999px;
     background-color: var(--bg);
-
     color: #4A2FD0;
+
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 400;
+    line-height: 140%;
+    letter-spacing: -0.02em;
 }
 
 .partner_profile_guide {
-    margin-top: 12px;
-
-    color: #6E6887;
+    margin-top: 8px;
+    color: #5F5A75;
     font-size: 12px;
+    font-weight: 400;
+    line-height: 145%;
+    letter-spacing: -0.02em;
 }
 
 .partner_profile_card {
-    margin-top: 18px;
+    margin-top: 16px;
     padding: 16px;
-
     border: 1px solid #E6E2F7;
-    border-radius: 18px;
+    border-radius: 20px;
     background-color: var(--white);
 }
 
 .partner_profile_card_active {
-    border: 2px solid var(--main);
+    border: 1.5px solid var(--main);
 }
 
 .partner_profile_card_header {
@@ -121,59 +132,62 @@
 }
 
 .partner_profile_card_header h3 {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 145%;
+    letter-spacing: -0.02em;
 }
 
 .partner_profile_unlock {
     display: flex;
     align-items: center;
     gap: 4px;
-
-    padding: 5px 8px;
+    padding: 2px 8px;
     border-radius: 999px;
     background-color: var(--bg);
 
     color: #4A2FD0;
     font-size: 11px;
-    font-weight: 500;
+    font-weight: 400;
+    line-height: 140%;
+    letter-spacing: -0.02em;
 }
 
 .partner_profile_unlock img {
-    width: 12px;
-    height: 12px;
+    width: 11px;
+    height: 11px;
 }
 
 .partner_profile_tags {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
-
-    margin-top: 14px;
+    margin-top: 10px;
 }
 
 .partner_profile_tags span {
-    padding: 8px 12px;
-
+    padding: 6px 12px;
     border-radius: 999px;
     background-color: #F1EFF8;
-
     color: var(--text);
-    font-size: 12px;
+    font-size: 13px;
+    line-height: 140%;
+    letter-spacing: -0.02em;
 }
 
 .partner_profile_info_row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-
-    margin-top: 14px;
-
-    font-size: 13px;
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 145%;
+    letter-spacing: -0.02em;
 }
 
 .partner_profile_info_row span {
-    color: #6E6887;
+    color: #5F5A75;
 }
 
 .partner_profile_info_row strong {
@@ -182,37 +196,36 @@
 }
 
 .partner_profile_locked {
-    margin-top: 18px;
+    margin-top: 12px;
     padding: 16px;
-
-    border-radius: 18px;
-    background-color: #F1F0F7;
-
-    color: #6E6887;
+    border-radius: 20px;
+    background-color: #F3F2F8;
+    color: #5F5A75;
 }
 
 .partner_profile_locked_header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
+    line-height: 145%;
+    letter-spacing: -0.02em;
 }
 
 .partner_profile_locked_header img {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
 }
 
 .partner_profile_skeleton {
-    margin-top: 16px;
+    margin-top: 10px;
 }
 
 .partner_profile_skeleton div {
-    height: 8px;
-    border-radius: 999px;
-    background-color: #E2DFEE;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #E4E1EE;
 }
 
 .partner_profile_skeleton div:first-child {
@@ -225,19 +238,21 @@
 }
 
 .partner_profile_locked p {
-    margin-top: 14px;
-
+    margin-top: 10px;
     font-size: 12px;
+    font-weight: 400;
+    line-height: 145%;
+    letter-spacing: -0.02em;
 }
 
 .partner_profile_return {
-    margin: 0 20px 28px;
-    height: 52px;
-
-    border-radius: 14px;
+    margin: 12px 20px 34px 20px;
+    height: 56px;
+    border-radius: 16px;
     background-color: var(--main);
-
     color: var(--white);
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 145%;
+    letter-spacing: -0.02em;
 }
