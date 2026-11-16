@@ -1,0 +1,244 @@
+.relationship_stage_item {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #E6E2F7;
+    border-radius: 18px;
+    background-color: var(--white);
+}
+
+.relationship_stage_item_progress {
+    border: 2px solid var(--main);
+    box-shadow: 0 6px 18px rgba(74, 46, 209, 0.12);
+}
+
+.relationship_stage_item_complete {
+    background-color: var(--white);
+}
+
+.relationship_stage_item_locked {
+    background-color: #F3F2F8;
+    color: #6E6887;
+}
+
+.relationship_stage_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.relationship_stage_title_area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.relationship_stage_compact,
+.relationship_stage_complete_content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.relationship_stage_compact_text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.relationship_stage_complete_content {
+    width: 100%;
+}
+
+.relationship_stage_number {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid var(--main);
+    border-radius: 50%;
+    background-color: #EFEDFF;
+
+    color: #4A2FD0;
+    font-size: 14px;
+    font-weight: 900;
+    line-height: 145%;
+    letter-spacing: -0.02em;
+}
+
+.relationship_stage_item_complete .relationship_stage_number {
+    border: none;
+    background-color: var(--main);
+}
+
+.relationship_stage_item_complete .relationship_stage_number img {
+    width: 16px;
+    height: 16px;
+}
+
+.relationship_stage_item_locked .relationship_stage_number {
+    border: none;
+    background-color: #E8E6F0;
+}
+
+.relationship_stage_item_locked .relationship_stage_number img {
+    width: 16px;
+    height: 16px;
+}
+
+.relationship_stage_title {
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 145%;
+    letter-spacing: -0.02em;
+}
+
+.relationship_stage_item_locked .relationship_stage_title {
+    color: #6E6887;
+}
+
+.relationship_stage_status {
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background-color: var(--main);
+
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 140%;
+    letter-spacing: -0.02em;
+}
+
+.relationship_stage_item_complete .relationship_stage_status {
+    margin-left: auto;
+    background-color: #D8D2FF;
+    color: #4A2FD0;
+}
+
+.relationship_stage_complete_unlock {
+    color: #4A2FD0;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 145%;
+    letter-spacing: -0.02em;
+}
+
+.relationship_stage_locked_unlock {
+    color: #6E6887;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 145%;
+    letter-spacing: -0.02em;
+}
+
+.relationship_stage_quest {
+    width: 100%;
+    min-height: 42px;
+    margin-top: 10px;
+    padding: 10px 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    border-radius: 12px;
+    background-color: #F7F5FF;
+}
+
+.relationship_stage_quest.current {
+    background-color: var(--bg);
+}
+
+.relationship_stage_quest_left {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    color: #5F5A75;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 145%;
+    letter-spacing: -0.02em;    
+}
+
+.relationship_stage_quest_icon {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.relationship_stage_quest.complete .relationship_stage_quest_icon {
+    background-color: var(--main);
+}
+
+.relationship_stage_quest.complete .relationship_stage_quest_icon img {
+    width: 14px;
+    height: 14px;
+}
+
+.relationship_stage_quest.current .relationship_stage_quest_left {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.relationship_stage_quest_orb {
+    width: 24px;
+    height: 24px;
+    transform: scale(1.7);
+}
+
+.relationship_stage_quest_right {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    color: #4A2FD0;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 145%;
+    letter-spacing: -0.02em;
+
+    border: none;
+    background: none;
+    padding: 0;
+}
+
+.relationship_stage_quest_right img {
+    width: 5px;
+    height: 10px;
+}
+
+.relationship_stage_unlock {
+    margin-top: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    border: 1px solid #D8D2FF;
+    border-radius: 14px;
+    color: #4A2FD0;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 145%;
+    letter-spacing: -0.02em;
+}
+
+.relationship_stage_unlock img {
+    width: 15px;
+    height: 15px;
+}
