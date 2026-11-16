@@ -30,11 +30,13 @@ const InterestCategory = () => {
   return (
     <div className="page InterestCategory_wrap">
       <div className="interestcategory_header">
-        <img
-          src={prev_btn}
-          alt=""
+        <button
+          type="button"
+          aria-label="뒤로 가기"
           onClick={() => navigate("/mypage/matching-info")}
-        />
+        >
+          <img src={prev_btn} alt="" />
+        </button>
         <h1>관심 카테고리</h1>
       </div>
 

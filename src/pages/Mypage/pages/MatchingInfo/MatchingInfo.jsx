@@ -68,7 +68,9 @@ const MatchingInfo = () => {
           <SajuMatchingCard
             birthDate="2004.08.05 (양력)"
             birthTime="12:00"
-            onEdit={() => navigate("/saju-setting")}
+            onEdit={() => {
+              // TODO: 사주 매칭 수정 페이지 구현 후 라우팅 연결
+            }}
           />
         </div>
       </div>
