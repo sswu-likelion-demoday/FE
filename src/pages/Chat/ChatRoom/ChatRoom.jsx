@@ -1,7 +1,11 @@
 import './ChatRoom.scss';
 
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+} from 'react-router-dom';
 
 import ChatHeader from '../components/ChatHeader/ChatHeader';
 import MessageBubble from '../components/MessageBubble/MessageBubble';
@@ -23,6 +27,9 @@ import quest_orb from '../../../assets/images/Chat/quest_orb.svg';
 const ChatRoom = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { chatId } = useParams();
+
+  const numericChatId = Number(chatId);
 
   const isRelationshipComplete =
     location.state?.relationshipComplete === true;
@@ -137,6 +144,17 @@ const ChatRoom = () => {
     return ordinals[questNumber];
   };
 
+  const getCurrentQuestPath = () => {
+    if (!currentQuest.path) {
+      return `/chat/${chatId}`;
+    }
+
+    return currentQuest.path.replace(
+      '/chat/1',
+      `/chat/${chatId}`
+    );
+  };
+
   const getQuestCardData = () => {
     if (currentQuest.type === 'AI_QUIZ') {
       return {
@@ -181,12 +199,15 @@ const ChatRoom = () => {
 
   const handleQuestPrimaryClick = () => {
     if (currentQuest.path) {
-      navigate(currentQuest.path, {
-        state: {
-          stage: currentStage,
-          quest: currentQuestNumber,
-        },
-      });
+      navigate(
+        getCurrentQuestPath(),
+        {
+          state: {
+            stage: currentStage,
+            quest: currentQuestNumber,
+          },
+        }
+      );
 
       return;
     }
@@ -196,7 +217,7 @@ const ChatRoom = () => {
       currentStageData.quests.length;
 
     if (!isLastQuest) {
-      navigate('/chat/1', {
+      navigate(`/chat/${chatId}`, {
         state: {
           stage: currentStage,
           quest:
@@ -217,7 +238,7 @@ const ChatRoom = () => {
 
     setShowStageComplete(false);
 
-    navigate('/chat/1', {
+    navigate(`/chat/${chatId}`, {
       state: {
         stage: nextStage,
         quest: 1,
@@ -226,14 +247,19 @@ const ChatRoom = () => {
   };
 
   const handleRelationshipClick = () => {
-    navigate('/chat/1/relationship', {
-      state: {
-        stage: currentStage,
-        quest: currentQuestNumber,
-        relationshipComplete:
-          isRelationshipComplete,
-      },
-    });
+    navigate(
+      `/chat/${chatId}/relationship`,
+      {
+        state: {
+          stage: currentStage,
+          quest: currentQuestNumber,
+          relationshipComplete:
+            isRelationshipComplete,
+          relationshipEnded:
+            isRelationshipEnded,
+        },
+      }
+    );
   };
 
   const handleBlock = () => {
@@ -255,7 +281,8 @@ const ChatRoom = () => {
 
     navigate('/chat', {
       state: {
-        blockedChatId: 1,
+        blockedChatId:
+          numericChatId,
       },
     });
   };
@@ -265,7 +292,8 @@ const ChatRoom = () => {
 
     navigate('/chat', {
       state: {
-        endedChatId: 1,
+        endedChatId:
+          numericChatId,
       },
     });
   };
@@ -283,6 +311,9 @@ const ChatRoom = () => {
           }
           isRelationshipComplete={
             isRelationshipComplete
+          }
+          isRelationshipEnded={
+            isRelationshipEnded
           }
         />
 
@@ -311,12 +342,16 @@ const ChatRoom = () => {
               type="button"
               className="relationship_complete_banner_link"
               onClick={() =>
-                navigate('/chat/1/profile', {
-                  state: {
-                    completedStage: 4,
-                    currentStage: 4,
-                  },
-                })
+                navigate(
+                  `/chat/${chatId}/profile`,
+                  {
+                    state: {
+                      completedStage: 4,
+                      currentStage: 4,
+                      currentQuestNumber: 4,
+                    },
+                  }
+                )
               }
             >
               상대 프로필 보기 &gt;
@@ -441,14 +476,19 @@ const ChatRoom = () => {
             profileButtonText="프로필에서 보기"
             continueButtonText="대화 계속하기"
             onProfile={() =>
-              navigate('/chat/1/profile', {
-                state: {
-                  completedStage:
-                    currentStage,
-                  currentStage:
-                    currentStage + 1,
-                },
-              })
+              navigate(
+                `/chat/${chatId}/profile`,
+                {
+                  state: {
+                    completedStage:
+                      currentStage,
+                    currentStage:
+                      currentStage + 1,
+                    currentQuestNumber:
+                      1,
+                  },
+                }
+              )
             }
             onContinue={
               handleStageContinue
@@ -465,12 +505,16 @@ const ChatRoom = () => {
             infoValue="sujeong_0408"
             continueButtonText="채팅으로 돌아가기"
             onProfile={() =>
-              navigate('/chat/1/profile', {
-                state: {
-                  completedStage: 4,
-                  currentStage: 4,
-                },
-              })
+              navigate(
+                `/chat/${chatId}/profile`,
+                {
+                  state: {
+                    completedStage: 4,
+                    currentStage: 4,
+                    currentQuestNumber: 4,
+                  },
+                }
+              )
             }
             onContinue={() =>
               setShowUnlockModal(false)
@@ -484,21 +528,30 @@ const ChatRoom = () => {
               setShowMenu(false)
             }
             onProfile={() =>
-              navigate('/chat/1/profile', {
-                state: {
-                  completedStage:
-                    isRelationshipComplete
-                      ? 4
-                      : Math.max(
-                        currentStage - 1,
-                        0
-                      ),
-                  currentStage:
-                    isRelationshipComplete
-                      ? 4
-                      : currentStage,
-                },
-              })
+              navigate(
+                `/chat/${chatId}/profile`,
+                {
+                  state: {
+                    completedStage:
+                      isRelationshipComplete
+                        ? 4
+                        : Math.max(
+                          currentStage - 1,
+                          0
+                        ),
+                    currentStage:
+                      isRelationshipComplete
+                        ? 4
+                        : currentStage,
+                    currentQuestNumber:
+                      isRelationshipComplete
+                        ? 4
+                        : currentQuestNumber,
+                    relationshipEnded:
+                      isRelationshipEnded,
+                  },
+                }
+              )
             }
             onBlock={handleBlock}
             onLeave={handleLeave}

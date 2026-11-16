@@ -1,13 +1,18 @@
 import './QuestVerification.scss';
 
 import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {
+    useNavigate,
+    useParams,
+} from 'react-router-dom';
 
 import arrow_left from '../../../../assets/images/Chat/arrow_left.svg';
 import ChatModal from '../../components/ChatModal/ChatModal';
 
 const QuestVerification = () => {
     const navigate = useNavigate();
+    const { chatId } = useParams();
+
     const fileInputRef = useRef(null);
 
     const [image, setImage] =
@@ -45,7 +50,7 @@ const QuestVerification = () => {
     const handleComplete = () => {
         setShowCompleteModal(false);
 
-        navigate('/chat/1', {
+        navigate(`/chat/${chatId}`, {
             state: {
                 relationshipComplete: true,
                 completedStage: 4,

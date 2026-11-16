@@ -3,6 +3,7 @@ import './Relationship.scss';
 import {
     useLocation,
     useNavigate,
+    useParams,
 } from 'react-router-dom';
 
 import arrow_left from '../../../assets/images/Chat/arrow_left.svg';
@@ -17,16 +18,25 @@ import {
 const Relationship = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { chatId } = useParams();
 
     const isRelationshipComplete =
         location.state?.relationshipComplete === true;
 
+    const isRelationshipEnded =
+        location.state?.relationshipEnded === true;
+
+    /*
+     * ChatRoom과 동일하게
+     * 기본 진행도는 1단계 1번째 퀘스트
+     */
     const currentStage =
         location.state?.stage ??
-        (isRelationshipComplete ? 4 : 2);
+        (isRelationshipComplete ? 4 : 1);
 
     const currentQuestNumber =
-        location.state?.quest ?? 4;
+        location.state?.quest ??
+        (isRelationshipComplete ? 4 : 1);
 
     const currentStageData =
         relationshipStages[currentStage];
@@ -66,6 +76,17 @@ const Relationship = () => {
         return `완료하면 해금 · ${stageData.unlockTitle}`;
     };
 
+    const getQuestPath = (quest) => {
+        if (!quest.path) {
+            return `/chat/${chatId}`;
+        }
+
+        return quest.path.replace(
+            '/chat/1',
+            `/chat/${chatId}`
+        );
+    };
+
     const getStageQuests = (stage) => {
         const stageData =
             relationshipStages[stage];
@@ -103,13 +124,15 @@ const Relationship = () => {
                     complete: isCompleted,
 
                     path: isCurrent
-                        ? quest.path || '/chat/1'
+                        ? getQuestPath(quest)
                         : undefined,
 
                     state: isCurrent
                         ? {
                             stage: currentStage,
                             quest: currentQuestNumber,
+                            relationshipEnded:
+                                isRelationshipEnded,
                         }
                         : undefined,
                 };
@@ -118,7 +141,7 @@ const Relationship = () => {
     };
 
     const handleBack = () => {
-        navigate('/chat/1', {
+        navigate(`/chat/${chatId}`, {
             state: isRelationshipComplete
                 ? {
                     relationshipComplete: true,
@@ -130,6 +153,8 @@ const Relationship = () => {
                 : {
                     stage: currentStage,
                     quest: currentQuestNumber,
+                    relationshipEnded:
+                        isRelationshipEnded,
                 },
         });
     };

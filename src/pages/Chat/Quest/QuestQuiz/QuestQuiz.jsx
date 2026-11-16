@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
     useLocation,
     useNavigate,
+    useParams,
 } from 'react-router-dom';
 
 import arrow_left from '../../../../assets/images/Chat/arrow_left.svg';
@@ -38,13 +39,11 @@ const quizOptions = [
 const QuestQuiz = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { chatId } = useParams();
 
     /*
      * AI 퀴즈는 기본적으로
      * 2단계 4번째 퀘스트
-     *
-     * ChatRoom에서 state가 넘어오면
-     * 그 상태를 그대로 사용
      */
     const currentStage =
         location.state?.stage ?? 2;
@@ -86,10 +85,6 @@ const QuestQuiz = () => {
     };
 
     const handleResultClose = () => {
-        /*
-         * 정답
-         * → 2단계 완료 모달 표시
-         */
         if (result === 'correct') {
             setResult(null);
             setShowStageComplete(true);
@@ -98,14 +93,12 @@ const QuestQuiz = () => {
         }
 
         /*
-         * 오답
-         * → 처음부터 초기화하지 않고
-         * 현재 2단계 4/4 상태를 유지한 채
-         * 채팅방으로 돌아감
+         * 오답이어도 현재
+         * 2단계 4/4 상태 유지
          */
         setResult(null);
 
-        navigate('/chat/1', {
+        navigate(`/chat/${chatId}`, {
             state: {
                 stage: currentStage,
                 quest: currentQuestNumber,
@@ -114,7 +107,7 @@ const QuestQuiz = () => {
     };
 
     const handleBack = () => {
-        navigate('/chat/1', {
+        navigate(`/chat/${chatId}`, {
             state: {
                 stage: currentStage,
                 quest: currentQuestNumber,
@@ -123,7 +116,7 @@ const QuestQuiz = () => {
     };
 
     const handleContinue = () => {
-        navigate('/chat/1', {
+        navigate(`/chat/${chatId}`, {
             state: {
                 stage: 3,
                 quest: 1,
@@ -241,12 +234,19 @@ const QuestQuiz = () => {
                         profileButtonText="프로필에서 보기"
                         continueButtonText="대화 계속하기"
                         onProfile={() =>
-                            navigate('/chat/1/profile', {
-                                state: {
-                                    completedStage: 2,
-                                    currentStage: 3,
-                                },
-                            })
+                            navigate(
+                                `/chat/${chatId}/profile`,
+                                {
+                                    state: {
+                                        completedStage:
+                                            2,
+                                        currentStage:
+                                            3,
+                                        currentQuestNumber:
+                                            1,
+                                    },
+                                }
+                            )
                         }
                         onContinue={
                             handleContinue

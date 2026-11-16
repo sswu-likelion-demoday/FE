@@ -8,6 +8,7 @@ import {
 import {
   useLocation,
   useNavigate,
+  useParams,
 } from 'react-router-dom';
 
 import arrow_left from '../../../../assets/images/Chat/arrow_left.svg';
@@ -23,9 +24,13 @@ import {
 const PartnerProfile = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { chatId } = useParams();
 
   const currentStage =
     location.state?.currentStage ?? 1;
+
+  const currentQuestNumber =
+    location.state?.currentQuestNumber ?? 1;
 
   const completedStage =
     location.state?.completedStage ??
@@ -33,6 +38,9 @@ const PartnerProfile = () => {
 
   const isRelationshipComplete =
     completedStage >= 4;
+
+  const isRelationshipEnded =
+    location.state?.relationshipEnded === true;
 
   const currentStageData =
     getRelationshipStage(currentStage);
@@ -69,7 +77,7 @@ const PartnerProfile = () => {
 
   const handleBackToChat = () => {
     if (isRelationshipComplete) {
-      navigate('/chat/1', {
+      navigate(`/chat/${chatId}`, {
         state: {
           relationshipComplete: true,
           completedStage: 4,
@@ -82,10 +90,12 @@ const PartnerProfile = () => {
       return;
     }
 
-    navigate('/chat/1', {
+    navigate(`/chat/${chatId}`, {
       state: {
         stage: currentStage,
-        quest: 1,
+        quest: currentQuestNumber,
+        relationshipEnded:
+          isRelationshipEnded,
       },
     });
   };

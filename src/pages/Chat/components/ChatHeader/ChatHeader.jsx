@@ -1,6 +1,9 @@
 import './ChatHeader.scss';
 
-import { useNavigate } from 'react-router-dom';
+import {
+  useNavigate,
+  useParams,
+} from 'react-router-dom';
 
 import arrow_left from '../../../../assets/images/Chat/arrow_left.svg';
 import menu_icon from '../../../../assets/images/Chat/menu_icon.svg';
@@ -11,14 +14,28 @@ const ChatHeader = ({
   currentStage = 1,
   currentQuestNumber = 1,
   isRelationshipComplete = false,
+  isRelationshipEnded = false,
 }) => {
   const navigate = useNavigate();
+  const { chatId } = useParams();
+
+  const numericChatId = Number(chatId);
 
   const handleBack = () => {
     if (isRelationshipComplete) {
       navigate('/chat', {
         state: {
-          completedChatId: 1,
+          completedChatId: numericChatId,
+        },
+      });
+
+      return;
+    }
+
+    if (isRelationshipEnded) {
+      navigate('/chat', {
+        state: {
+          endedChatId: numericChatId,
         },
       });
 
@@ -30,22 +47,20 @@ const ChatHeader = ({
 
   const handleRelationshipClick = () => {
     navigate(
-      '/chat/1/relationship',
+      `/chat/${chatId}/relationship`,
       {
-        state:
-          isRelationshipComplete
-            ? {
-              relationshipComplete:
-                true,
-              stage: 4,
-              quest: 4,
-            }
-            : {
-              stage:
-                currentStage,
-              quest:
-                currentQuestNumber,
-            },
+        state: isRelationshipComplete
+          ? {
+            relationshipComplete: true,
+            stage: 4,
+            quest: 4,
+          }
+          : {
+            stage: currentStage,
+            quest: currentQuestNumber,
+            relationshipEnded:
+              isRelationshipEnded,
+          },
       }
     );
   };
