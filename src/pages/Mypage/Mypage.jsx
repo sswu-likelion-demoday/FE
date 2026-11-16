@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Mypage.scss";
 import MenuItem from "./components/MenuItem";
+import LogoutModal from "./components/LogoutModal";
 import BottomNav from "../../components/BottomNav/BottomNav";
 import profile_icon from "../../assets/images/Mypage/profile_icon.svg";
 import sujeonggu from "../../assets/images/Mypage/sujeonggu.svg";
@@ -12,6 +14,7 @@ import contact_icon from "../../assets/images/Mypage/contact_icon.svg";
 
 const Mypage = () => {
   const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   return (
     <div className="page Mypage_wrap">
@@ -69,7 +72,7 @@ const Mypage = () => {
             <MenuItem
               icon={notice_icon}
               title="공지사항"
-              onClick={() => navigate("")}
+              onClick={() => navigate("/mypage/notice")}
             />
             <MenuItem
               icon={contact_icon}
@@ -79,15 +82,26 @@ const Mypage = () => {
           </div>
         </div>
         <div className="m_m_4">
-          <button>로그아웃</button>
+          <button onClick={() => setShowLogoutModal(true)}>로그아웃</button>
           <p>|</p>
-          <button>회원 탈퇴</button>
+          <button type="button" onClick={() => navigate("/mypage/withdraw")}>
+            회원 탈퇴
+          </button>
         </div>
       </div>
 
       <div className="mypage_bot">
         <BottomNav />
       </div>
+
+      {showLogoutModal && (
+        <LogoutModal
+          onCancel={() => setShowLogoutModal(false)}
+          onConfirm={() => {
+            setShowLogoutModal(false);
+          }}
+        />
+      )}
     </div>
   );
 };
