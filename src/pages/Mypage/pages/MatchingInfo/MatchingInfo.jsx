@@ -27,6 +27,7 @@ const MatchingInfo = () => {
       title: "관심 카테고리",
       description: "최소 3개",
       items: ["#운동", "#카페", "#전시", "#음악"],
+      path: "/mypage/interest-category",
     },
     {
       id: "hobby",
