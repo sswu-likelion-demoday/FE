@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import OptionGroup from "../../../Onboarding/Preference/components/OptionGroup";
 import BottomButton from "../../../Onboarding/Preference/components/BottomButton";
+import MypageHeader from "../../../Mypage/components/MypageHeader";
 import "./InterestCategory.scss";
-import prev_btn from "../../../../assets/images/Mypage/prev_btn.svg";
 
 const categoryOptions = [
   { id: 1, label: "예술·전시" },
@@ -30,14 +30,10 @@ const InterestCategory = () => {
   return (
     <div className="page InterestCategory_wrap">
       <div className="interestcategory_header">
-        <button
-          type="button"
-          aria-label="뒤로 가기"
-          onClick={() => navigate("/mypage/matching-info")}
-        >
-          <img src={prev_btn} alt="" />
-        </button>
-        <h1>관심 카테고리</h1>
+        <MypageHeader
+          title="관심 카테고리"
+          onBack={() => navigate("/mypage/matching-info")}
+        />
       </div>
 
       <div className="interestcategory_main">

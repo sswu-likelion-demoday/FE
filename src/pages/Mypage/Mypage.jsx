@@ -59,7 +59,7 @@ const Mypage = () => {
               icon={block_icon}
               title="차단 목록"
               detail="2명"
-              onClick={() => navigate("")}
+              onClick={() => navigate("/mypage/block-list")}
             />
           </div>
         </div>
