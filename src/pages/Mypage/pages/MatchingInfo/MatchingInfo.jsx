@@ -68,8 +68,12 @@ const MatchingInfo = () => {
             />
           ))}
         </div>
-        <div className="mi_m_2" onClick={() => navigate("/mypage/saju-edit")}>
-          <SajuMatchingCard birthDate="2004.08.05 (양력)" birthTime="12:00" />
+        <div className="mi_m_2">
+          <SajuMatchingCard
+            birthDate="2004.08.05 (양력)"
+            birthTime="12:00"
+            onEdit={() => navigate("/mypage/saju-edit")}
+          />
         </div>
       </div>
     </div>
