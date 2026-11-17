@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./SignupStep02.scss";
 
 const SignupStep02 = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [name, setName] = useState("");
   const [department, setDepartment] = useState("");
@@ -49,7 +50,18 @@ const SignupStep02 = () => {
           className={`signupstep02_bot_btn ${
             name.trim() && department.trim() && kakaoId.trim() ? "active" : ""
           }`}
-          onClick={() => navigate("/signup/profile")}
+          onClick={() => {
+            if (!name.trim() || !department.trim() || !kakaoId.trim()) return;
+
+            navigate("/signup/profile", {
+              state: {
+                ...location.state,
+                name: name.trim(),
+                department_name: department.trim(),
+                kakaoId: kakaoId.trim(),
+              },
+            });
+          }}
         >
           다음
         </button>
