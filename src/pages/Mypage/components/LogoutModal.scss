@@ -1,0 +1,47 @@
+.LogoutModal_overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(22, 16, 48, 0.55);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.LogoutModal_wrap {
+  width: 318px;
+  padding: 28px 24px 20px;
+  border-radius: 20px;
+  background-color: #ffffff;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  font-size: 20px;
+}
+
+.logoutmodal_buttons {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+
+  button {
+    flex: 1;
+    height: 50px;
+    border-radius: 10px;
+    font-size: 22px;
+  }
+}
+
+.logoutmodal_cancel {
+  background-color: var(--bg);
+  color: #4a2fd0;
+}
+
+.logoutmodal_confirm {
+  background-color: var(--main);
+  color: #ffffff;
+}
