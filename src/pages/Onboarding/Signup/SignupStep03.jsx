@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { signup } from "../../../api/auth";
 import "./SignupStep03.scss";
@@ -9,6 +9,8 @@ import camera_icon from "../../../assets/images/Onboarding/camera_icon_purple.sv
 const SignupStep03 = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const fileReaderRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
@@ -16,6 +18,18 @@ const SignupStep03 = () => {
   const [profileImage, setProfileImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isPasswordValid =
+    password.length >= 8 &&
+    password.trim().length > 0 &&
+    /[\p{P}\p{S}]/u.test(password);
+
+  const canSignup = Boolean(
+    nickname.trim() &&
+    isPasswordValid &&
+    passwordConfirm.trim() &&
+    password === passwordConfirm,
+  );
 
   const handleSignup = async () => {
     if (isSubmitting) return;
@@ -27,6 +41,11 @@ const SignupStep03 = () => {
 
     if (password !== passwordConfirm) {
       alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    if (!isPasswordValid) {
+      alert("비밀번호는 특수문자를 포함해 8자리 이상 입력해주세요.");
       return;
     }
 
@@ -65,12 +84,21 @@ const SignupStep03 = () => {
     const file = e.target.files?.[0] ?? null;
     if (!file) return;
 
+    if (fileReaderRef.current?.readyState === FileReader.LOADING) {
+      fileReaderRef.current.abort();
+    }
+
     setProfileImage(file);
 
     const reader = new FileReader();
+    fileReaderRef.current = reader;
+
     reader.onload = () => {
-      setPreviewImage(reader.result);
+      if (fileReaderRef.current === reader) {
+        setPreviewImage(reader.result);
+      }
     };
+
     reader.readAsDataURL(file);
   };
 
@@ -80,16 +108,22 @@ const SignupStep03 = () => {
         <img
           src={prev_btn}
           alt=""
-          onClick={() => navigate("/signup/basic-info")}
+          onClick={() =>
+            navigate("/signup/basic-info", {
+              state: location.state,
+            })
+          }
         />
         <p>회원정보 입력</p>
       </div>
       <div className="signupstep03_main">
         <div className="s03_m_1">
           <p>사진 등록</p>
-          <div
+          <button
+            type="button"
             className="s03_m_1_icon"
-            onClick={() => document.getElementById("profileImage").click()}
+            aria-label="프로필 사진 선택"
+            onClick={() => fileInputRef.current?.click()}
           >
             <img
               src={previewImage || camera_icon}
@@ -100,14 +134,15 @@ const SignupStep03 = () => {
                   : {}
               }
             />
-            <input
-              id="profileImage"
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={handleImageChange}
-            />
-          </div>
+          </button>
+          <input
+            ref={fileInputRef}
+            id="profileImage"
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={handleImageChange}
+          />
         </div>
         <div className="s03_m_2">
           <p>닉네임</p>
@@ -156,16 +191,10 @@ const SignupStep03 = () => {
       <div className="signupstep03_bot">
         <button
           className={`signupstep03_bot_btn ${
-            nickname.trim() &&
-            password.trim() &&
-            passwordConfirm.trim() &&
-            password === passwordConfirm &&
-            !isSubmitting
-              ? "active"
-              : ""
+            canSignup && !isSubmitting ? "active" : ""
           }`}
           onClick={handleSignup}
-          disabled={isSubmitting}
+          disabled={!canSignup || isSubmitting}
         >
           {isSubmitting ? "가입 중" : "가입완료"}
         </button>

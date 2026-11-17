@@ -25,6 +25,17 @@ const SignupStep01 = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifiedEmail, setVerifiedEmail] = useState(null);
 
+  const isEmailValid =
+    studentId.trim() !== "" &&
+    email.trim().toLowerCase() === `${studentId.trim()}@sungshin.ac.kr`;
+
+  const canGoNext = Boolean(
+    studentId.trim() &&
+    checkedStudentId === studentId.trim() &&
+    isEmailValid &&
+    verifiedEmail === email.trim(),
+  );
+
   const handleCheckStudentId = async () => {
     if (!studentId.trim() || isChecking) return;
 
@@ -48,7 +59,7 @@ const SignupStep01 = () => {
   };
 
   const handleSendEmail = async () => {
-    if (!email.trim() || isSending) return;
+    if (!isEmailValid || isSending) return;
 
     setIsSending(true);
 
@@ -120,9 +131,9 @@ const SignupStep01 = () => {
               }}
             />
             <button
-              className={email.trim() && !isSending ? "active" : ""}
+              className={isEmailValid && !isSending ? "active" : ""}
               onClick={handleSendEmail}
-              disabled={!email.trim() || isSending}
+              disabled={!isEmailValid || isSending}
             >
               {isSending ? "전송 중" : "전송"}
             </button>
@@ -155,14 +166,8 @@ const SignupStep01 = () => {
       </div>
       <div className="signupstep01_bot">
         <button
-          className={`signupstep01_bot_btn ${
-            studentId.trim() &&
-            checkedStudentId === studentId.trim() &&
-            email.trim() &&
-            verifiedEmail === email.trim()
-              ? "active"
-              : ""
-          }`}
+          className={`signupstep01_bot_btn ${canGoNext ? "active" : ""}`}
+          disabled={!canGoNext}
           onClick={() => {
             if (!studentId.trim() || checkedStudentId !== studentId.trim()) {
               alert("학번 중복확인을 완료해주세요.");

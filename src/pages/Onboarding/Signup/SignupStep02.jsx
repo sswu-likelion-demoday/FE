@@ -6,9 +6,13 @@ const SignupStep02 = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [name, setName] = useState("");
-  const [department, setDepartment] = useState("");
-  const [kakaoId, setKakaoId] = useState("");
+  const [name, setName] = useState(location.state?.name ?? "");
+  const [department, setDepartment] = useState(
+    location.state?.department_name ?? "",
+  );
+  const [kakaoId, setKakaoId] = useState(location.state?.kakaoId ?? "");
+
+  const canGoNext = Boolean(name.trim() && department.trim() && kakaoId.trim());
 
   return (
     <div className="page SignupStep02_wrap">
@@ -47,9 +51,8 @@ const SignupStep02 = () => {
       </div>
       <div className="signupstep02_bot">
         <button
-          className={`signupstep02_bot_btn ${
-            name.trim() && department.trim() && kakaoId.trim() ? "active" : ""
-          }`}
+          className={`signupstep02_bot_btn ${canGoNext ? "active" : ""}`}
+          disabled={!canGoNext}
           onClick={() => {
             if (!name.trim() || !department.trim() || !kakaoId.trim()) return;
 
