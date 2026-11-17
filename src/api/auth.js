@@ -1,6 +1,8 @@
+import { BASE_URL } from "./config";
+
 export const checkStudentNumber = async (studentNumber) => {
   const response = await fetch(
-    `https://sujeongguham.riveryunny.store/auth/student-numbers/check?studentNumber=${encodeURIComponent(studentNumber)}`,
+    `${BASE_URL}/auth/student-numbers/check?studentNumber=${encodeURIComponent(studentNumber)}`,
   );
 
   if (!response.ok) {
@@ -13,16 +15,13 @@ export const checkStudentNumber = async (studentNumber) => {
 };
 
 export const sendVerificationEmail = async (email) => {
-  const response = await fetch(
-    "https://sujeongguham.riveryunny.store/auth/email/send",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email }),
-    }
-  );
+  const response = await fetch(`${BASE_URL}/auth/email/send`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email }),
+  });
 
   const result = await response.json();
 
@@ -34,16 +33,13 @@ export const sendVerificationEmail = async (email) => {
 };
 
 export const verifyEmail = async (email, verificationCode) => {
-  const response = await fetch(
-    "https://sujeongguham.riveryunny.store/auth/email/verify",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, verificationCode }),
-    }
-  );
+  const response = await fetch(`${BASE_URL}/auth/email/verify`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, verificationCode }),
+  });
 
   const result = await response.json();
 
@@ -63,18 +59,36 @@ export const signup = async (signupData, profileImage) => {
     formData.append("profileImage", profileImage);
   }
 
-  const response = await fetch(
-    "https://sujeongguham.riveryunny.store/auth/signup",
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
+  const response = await fetch(`${BASE_URL}/auth/signup`, {
+    method: "POST",
+    body: formData,
+  });
 
   const result = await response.json();
 
   if (!response.ok || !result.success) {
     throw new Error(result.message || "회원가입에 실패했습니다.");
+  }
+
+  return result.data;
+};
+
+export const login = async (studentNumber, password) => {
+  const response = await fetch(`${BASE_URL}/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      studentNumber,
+      password,
+    }),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok || !result.success) {
+    throw new Error(result.message || "로그인에 실패했습니다.");
   }
 
   return result.data;
