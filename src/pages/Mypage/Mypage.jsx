@@ -77,7 +77,7 @@ const Mypage = () => {
             <MenuItem
               icon={contact_icon}
               title="고객센터"
-              onClick={() => navigate("")}
+              onClick={() => navigate("/mypage/customer-center")}
             />
           </div>
         </div>

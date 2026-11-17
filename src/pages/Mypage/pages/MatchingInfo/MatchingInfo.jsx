@@ -15,12 +15,14 @@ const MatchingInfo = () => {
       description: "MBTI",
       items: ["I", "N", "F", "J"],
       isMbti: true,
+      path: "/mypage/mbti-edit",
     },
     {
       id: "meeting",
       title: "사람을 만나는 방식",
       description: "최대 2개",
       items: ["소수와 깊게", "1:1 대화"],
+      path: "/mypage/meeting-style-edit",
     },
     {
       id: "category",
@@ -34,11 +36,13 @@ const MatchingInfo = () => {
       title: "즐겨하는 취미",
       description: "최소 3개",
       items: ["#러닝", "#보드게임", "#사진"],
+      path: "/mypage/hobby-edit",
     },
     {
       id: "friend",
       title: "만나고 싶은 친구",
       items: ["함께 운동할 친구", "대화가 잘 통하는 친구"],
+      path: "/mypage/friend-type-edit",
     },
   ];
 
@@ -64,14 +68,8 @@ const MatchingInfo = () => {
             />
           ))}
         </div>
-        <div className="mi_m_2">
-          <SajuMatchingCard
-            birthDate="2004.08.05 (양력)"
-            birthTime="12:00"
-            onEdit={() => {
-              // TODO: 사주 매칭 수정 페이지 구현 후 라우팅 연결
-            }}
-          />
+        <div className="mi_m_2" onClick={() => navigate("/mypage/saju-edit")}>
+          <SajuMatchingCard birthDate="2004.08.05 (양력)" birthTime="12:00" />
         </div>
       </div>
     </div>

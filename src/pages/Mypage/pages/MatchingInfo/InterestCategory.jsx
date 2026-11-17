@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import OptionGroup from "../../../Onboarding/Preference/components/OptionGroup";
-import BottomButton from "../../../Onboarding/Preference/components/BottomButton";
-import MypageHeader from "../../../Mypage/components/MypageHeader";
+import MatchingEditLayout from "../../components/MatchingEditLayout";
 import "./InterestCategory.scss";
 
 const categoryOptions = [
@@ -28,48 +27,30 @@ const InterestCategory = () => {
   const [selectedValues, setSelectedValues] = useState([1, 3, 5, 14]);
 
   return (
-    <div className="page InterestCategory_wrap">
-      <div className="interestcategory_header">
-        <MypageHeader
-          title="관심 카테고리"
-          onBack={() => navigate("/mypage/matching-info")}
-        />
-      </div>
-
-      <div className="interestcategory_main">
-        <div className="i_m_top">
-          <h2>
-            관심있는 카테고리를
-            <br />
-            선택해 주세요
-          </h2>
-          <div className="interestcategory_count">
-            <p>최소 3개 이상 선택</p>
-            <span>{selectedValues.length}개 선택됨</span>
-          </div>
-        </div>
-
-        <div className="interestcategory_options">
-          <OptionGroup
-            options={categoryOptions}
-            columns={3}
-            variant="grid"
-            selectedValues={selectedValues}
-            onChange={setSelectedValues}
-          />
-        </div>
-      </div>
-
-      <div className="interestcategory_bottom">
-        <BottomButton
-          onClick={() => navigate("/mypage/matching-info")}
-          disabled={selectedValues.length < 3}
-        >
-          저장하기
-        </BottomButton>
-        <p>변경한 관심사는 다음 매칭부터 반영돼요</p>
-      </div>
-    </div>
+    <MatchingEditLayout
+      className="InterestCategory_wrap"
+      title="관심 카테고리"
+      heading={
+        <>
+          관심있는 카테고리를
+          <br />
+          선택해 주세요
+        </>
+      }
+      description="최소 3개 이상 선택"
+      selectedCount={selectedValues.length}
+      onSave={() => navigate("/mypage/matching-info")}
+      disabled={selectedValues.length < 3}
+      footerText="변경한 관심사는 다음 매칭부터 반영돼요"
+    >
+      <OptionGroup
+        options={categoryOptions}
+        columns={3}
+        variant="grid"
+        selectedValues={selectedValues}
+        onChange={setSelectedValues}
+      />
+    </MatchingEditLayout>
   );
 };
 
