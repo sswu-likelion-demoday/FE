@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import "./Matchinghome.scss";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import MatchingButton from "../components/MatchingButton";
@@ -5,6 +6,8 @@ import MatchingCard from "../components/MatchingCard";
 import logo_matching from "../../../assets/images/Matching/logo_symbol_matching.svg";
 
 const Matchinghome = () => {
+  const navigate = useNavigate();
+
   // 0이면 꽉 찬 화면, 1 이상이면 빈 수정이 있는 화면
   const emptySlotCount = 1;
   const isFull = emptySlotCount === 0;
@@ -23,7 +26,11 @@ const Matchinghome = () => {
           <p>오늘 나리님에게는</p>
           <p>어떤 인연이 찾아올까요?</p>
         </div>
-        <button type="button" className="mh_m_crystal">
+        <button
+          type="button"
+          className="mh_m_crystal"
+          onClick={() => !isFull && navigate("/matching/request")}
+        >
           <span>비어있는 수정 {emptySlotCount}개</span>
           <span className="mh_m_arrow" />
         </button>

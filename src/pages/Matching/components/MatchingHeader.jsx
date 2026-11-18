@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import backArrow from "../../../assets/images/Matching/header_back.svg";
+import backArrow from "../../../assets/images/Matching/header.back.svg";
 import "./MatchingHeader.scss";
 
 const MatchingHeader = ({

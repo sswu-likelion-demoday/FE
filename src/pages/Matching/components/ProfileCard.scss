@@ -21,10 +21,11 @@
 
   &_image {
     display: block;
-    width: 163px;
-    height: 163px;
-    object-fit: contain;
-    margin-top: 36px;
+    width: 239px;
+    height: 239px;
+    max-width: none;
+    margin-top: -2px;
+    margin-bottom: -38px;
   }
 
   &_info {
