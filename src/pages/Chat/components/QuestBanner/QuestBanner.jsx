@@ -12,6 +12,7 @@ const QuestBanner = ({
   title,
   questLabel = '진행 중 퀘스트',
   unlockText,
+  onProgressClick,
 }) => {
   return (
     <section className="quest_banner">
@@ -29,6 +30,8 @@ const QuestBanner = ({
         <button
           type="button"
           className="quest_banner_quest"
+          onClick={onProgressClick}
+          aria-label="관계 단계 보기"
         >
           <span>
             퀘스트 {currentQuest}/{totalQuest}
@@ -43,13 +46,17 @@ const QuestBanner = ({
       </div>
 
       <div className="quest_banner_progress">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <span
-            key={index}
-            className={`quest_banner_bar ${index < stage ? 'quest_banner_bar_active' : ''
-              }`}
-          />
-        ))}
+        {Array.from({ length: 4 }).map(
+          (_, index) => (
+            <span
+              key={index}
+              className={`quest_banner_bar ${index < stage
+                  ? 'quest_banner_bar_active'
+                  : ''
+                }`}
+            />
+          )
+        )}
       </div>
 
       <div className="quest_banner_card">

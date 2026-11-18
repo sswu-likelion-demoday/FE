@@ -1,29 +1,89 @@
 import './ChatHeader.scss';
 
-import { useNavigate } from 'react-router-dom';
+import {
+  useNavigate,
+  useParams,
+} from 'react-router-dom';
 
 import arrow_left from '../../../../assets/images/Chat/arrow_left.svg';
 import menu_icon from '../../../../assets/images/Chat/menu_icon.svg';
 import profile_purple from '../../../../assets/images/Chat/profile_purple.svg';
 
-const ChatHeader = () => {
+const ChatHeader = ({
+  onProfileClick,
+  currentStage = 1,
+  currentQuestNumber = 1,
+  isRelationshipComplete = false,
+  isRelationshipEnded = false,
+}) => {
   const navigate = useNavigate();
+  const { chatId } = useParams();
+
+  const numericChatId = Number(chatId);
+
+  const handleBack = () => {
+    if (isRelationshipComplete) {
+      navigate('/chat', {
+        state: {
+          completedChatId: numericChatId,
+        },
+      });
+
+      return;
+    }
+
+    if (isRelationshipEnded) {
+      navigate('/chat', {
+        state: {
+          endedChatId: numericChatId,
+        },
+      });
+
+      return;
+    }
+
+    navigate('/chat');
+  };
+
+  const handleRelationshipClick = () => {
+    navigate(
+      `/chat/${chatId}/relationship`,
+      {
+        state: isRelationshipComplete
+          ? {
+            relationshipComplete: true,
+            stage: 4,
+            quest: 4,
+          }
+          : {
+            stage: currentStage,
+            quest: currentQuestNumber,
+            relationshipEnded:
+              isRelationshipEnded,
+          },
+      }
+    );
+  };
 
   return (
     <header className="chat_header">
       <button
         type="button"
         className="chat_header_back"
-        onClick={() => navigate('/chat')}
+        onClick={handleBack}
         aria-label="채팅 목록으로 돌아가기"
       >
-        <img src={arrow_left} alt="" />
+        <img
+          src={arrow_left}
+          alt=""
+        />
       </button>
 
       <button
         type="button"
         className="chat_header_user"
-        onClick={() => navigate('/chat/1/profile')}
+        onClick={onProfileClick}
+        aria-label="달빛여우 메뉴 열기"
       >
         <div className="chat_header_profile_wrap">
           <img
@@ -45,9 +105,15 @@ const ChatHeader = () => {
       <button
         type="button"
         className="chat_header_menu"
-        aria-label="채팅 메뉴 열기"
+        onClick={
+          handleRelationshipClick
+        }
+        aria-label="관계 단계 보기"
       >
-        <img src={menu_icon} alt="" />
+        <img
+          src={menu_icon}
+          alt=""
+        />
       </button>
     </header>
   );

@@ -2,7 +2,6 @@ import './QuestCard.scss';
 
 import quest_orb from '../../../../assets/images/Chat/quest_orb.svg';
 import star from '../../../../assets/images/Chat/star.svg';
-import close_icon from '../../../../assets/images/Chat/close.svg';
 
 const QuestCard = ({
   label = '새 퀘스트가 열렸어요',
@@ -11,17 +10,11 @@ const QuestCard = ({
   subDescription,
   primaryText = '퀘스트 보기',
   secondaryText = '나중에',
+  onPrimaryClick,
+  onSecondaryClick,
 }) => {
   return (
     <div className="quest_card">
-      <button
-        type="button"
-        className="quest_card_close"
-        aria-label="퀘스트 카드 닫기"
-      >
-        <img src={close_icon} alt="" />
-      </button>
-
       <div className="quest_card_label">
         <img
           src={star}
@@ -58,6 +51,7 @@ const QuestCard = ({
         <button
           type="button"
           className="quest_card_button quest_card_button_secondary"
+          onClick={onSecondaryClick}
         >
           {secondaryText}
         </button>
@@ -65,6 +59,7 @@ const QuestCard = ({
         <button
           type="button"
           className="quest_card_button quest_card_button_primary"
+          onClick={onPrimaryClick}
         >
           {primaryText}
         </button>
