@@ -1,0 +1,127 @@
+
+.matching_card {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  width: 100%;
+  max-width: 343px;
+  height: 227px;
+  padding: 0;
+
+  // 외곽선(내부 1px): border를 쓰면 안쪽 좌표가 1px씩 밀려서
+  // 피그마 X/Y와 안 맞음 → inset 그림자로 그려서 좌표 기준을 카드 바깥 모서리로 맞춤
+  border: none;
+  box-shadow: inset 0 0 0 1px var(--sub1);
+  border-radius: 10px;
+
+  // 비어있는 수정 1개 이상
+  // 시안: 선형, 위→아래 / 0% #F7F7FF 70% → 100% #6E51F2 100%
+  &.available {
+    background: linear-gradient(180deg, rgba(247, 247, 255, 0.7) 0%, #6E51F2 100%);
+  }
+
+  // 비어있는 수정 0개
+  // 시안: 선형, 위→아래 / 0% #F7F7FF 70% → 100% #6E6887 100%
+  &.full {
+    background: linear-gradient(180deg, rgba(247, 247, 255, 0.7) 0%, #6E6887 100%);
+  }
+
+  font-family: var(--mainfont);
+  cursor: pointer;
+
+  &:disabled {
+    filter: grayscale(1);
+    cursor: not-allowed;
+  }
+}
+
+// 반짝이: matching_star.svg (117 × 117, 흰색 20%)
+.matching_card_star {
+  position: absolute;
+  max-width: none; // 전역 reset의 img { max-width: 100% } 무시
+  pointer-events: none;
+
+  &.star_s {
+    top: 46px;
+    left: 76px;
+    width: 24px;
+    height: 24px;
+  }
+
+  &.star_m {
+    top: 63px;
+    left: 35px;
+    width: 42px;
+    height: 42px;
+  }
+
+  &.star_l {
+    top: 95px;
+    left: 226px;
+    width: 117px;
+    height: 117px;
+  }
+}
+
+// 수정구슬: 구슬 자체는 110 × 110
+// matching_ring.svg는 그림자 때문에 162 × 162라서,
+// 박스는 110으로 잡고 svg를 사방 26px씩 밖으로 넘치게 둠
+.matching_card_crystal {
+  position: absolute;
+  // 시안: 카드 안 X 116, Y 33
+  top: 33px;
+  left: 116px;
+  width: 110px;
+  height: 110px;
+
+  // svg 안 구슬 중심이 (80.586, 80.586)이라 55 - 80.586 = -25.586
+  img {
+    position: absolute;
+    top: -25.586px;
+    left: -25.586px;
+    width: 162px;
+    height: 162px;
+    max-width: none; // 전역 reset의 img { max-width: 100% } 때문에 110px로 줄어들던 문제
+  }
+}
+
+.matching_card_question {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+  color: #F7F7FF;
+}
+
+// 제목 + 화살표 묶음
+// 시안: 묶음 전체가 카드 안 X 88, Y 170 / 제목 ↔ 화살표 21px
+.matching_card_label {
+  position: absolute;
+  top: 170px;
+  left: 88px;
+  display: flex;
+  align-items: center;
+  gap: 21px;
+  color: #FFFFFF;
+}
+
+.matching_card_title {
+  white-space: nowrap;
+  font-size: 20px;
+  font-weight: 600; // SemiBold
+  line-height: 22px;
+}
+
+// 화살표: svg 박스(10 × 20)가 곧 꺾쇠 크기라 gap이 그대로 보이는 간격이 됨
+.matching_card_arrow {
+  display: block;
+  flex-shrink: 0;
+  max-width: none;
+}
