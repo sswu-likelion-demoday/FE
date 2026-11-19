@@ -26,6 +26,10 @@
   width: auto;
 }
 
+.matchingprofile_main.found .profile_card_message {
+  margin-top: 51px;
+}
+
 // ==========================================
 
 .matchingprofile_bot {
@@ -35,8 +39,13 @@
   margin-top: 26px;
 }
 
-.matchingprofile_bot.sent {
+.matchingprofile_bot.sent,
+.matchingprofile_bot.found {
   margin-top: 16px;
+}
+
+.matchingprofile_bot .bottom_btn {
+  width: 353px;
 }
 
 .mp_b_btns {
@@ -65,7 +74,7 @@
   color: var(--bg2);
 }
 
-.mp_b_cancel {
+.mp_b_link {
   margin-top: 12px;
   font-weight: 500;
   font-size: 17px;

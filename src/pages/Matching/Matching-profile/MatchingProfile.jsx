@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./MatchingProfile.scss";
 import BottomNav from "../../../components/BottomNav/BottomNav";
+import BottomButton from "../../Onboarding/Preference/components/BottomButton";
 import MatchingHeader from "../components/MatchingHeader";
-import RequestButtons from "../components/RequestButtons";
 import ProfileCard from "../components/ProfileCard";
+import RequestButtons from "../components/RequestButtons";
 import MatchingModal from "../components/MatchingModal";
 
 const MatchingProfile = () => {
@@ -20,8 +21,10 @@ const MatchingProfile = () => {
     expireText: "2일 후에 만료돼요",
   };
 
-  // 보낸 요청(채팅 요청 후)인지, 받은 요청인지
+  // 보낸 요청(채팅 요청 후) / 매칭으로 찾은 사람 / 받은 요청
   const isSent = profile.type === "sent";
+  const isFound = profile.type === "found";
+  const isReceived = !isSent && !isFound;
 
   let title = "나와 잘 맞을 수 있는\n수정이 찾아왔어요!";
   let message = "상대방이 수락을 기다리고 있어요";
@@ -31,10 +34,15 @@ const MatchingProfile = () => {
     message = "상대방의 수락을 기다리고 있어요";
   }
 
+  if (isFound) {
+    title = "함께 즐길 수 있는 것이\n많은 수정이에요";
+    message = "더 알아보고 싶다면 채팅을 시작해보세요";
+  }
+
   return (
     <div className="page MatchingProfile_wrap">
-      <MatchingHeader title="프로필" />
-      <div className="matchingprofile_main">
+      <MatchingHeader title="프로필" showBack={!isFound} />
+      <div className={isFound ? "matchingprofile_main found" : "matchingprofile_main"}>
         <ProfileCard
           title={title}
           nickname={profile.name}
@@ -43,14 +51,21 @@ const MatchingProfile = () => {
         />
         <p className="profile_card_message">{message}</p>
       </div>
-      {isSent ? (
+      {isSent && (
         <div className="matchingprofile_bot sent">
           <div className="mp_b_wait">수락 대기 중</div>
-          <p className="mp_b_cancel" onClick={() => setShowModal(true)}>
+          <p className="mp_b_link" onClick={() => setShowModal(true)}>
             매칭 취소
           </p>
         </div>
-      ) : (
+      )}
+      {isFound && (
+        <div className="matchingprofile_bot found">
+          <BottomButton>채팅 요청하기</BottomButton>
+          <p className="mp_b_link">다른 사람을 더 찾아볼래요</p>
+        </div>
+      )}
+      {isReceived && (
         <div className="matchingprofile_bot">
           <RequestButtons className="mp_b_btns" />
           <p className="mp_b_expire">{profile.expireText}</p>

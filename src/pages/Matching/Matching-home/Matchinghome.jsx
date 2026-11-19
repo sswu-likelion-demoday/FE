@@ -39,7 +39,10 @@ const Matchinghome = () => {
             ? "맺어진 수정에 집중해 주세요"
             : "하나의 수정을 더 찾을 수 있어요."}
         </p>
-        <MatchingCard isFull={isFull} onClick={handleMatchingClick} />
+        <MatchingCard
+          isFull={isFull}
+          onClick={() => !isFull && navigate("/matching/start")}
+        />
         <MatchingButton
           label="테마별 수정구함"
           description="카테고리를 선택해 목적에 맞는 수정을 찾아요"
