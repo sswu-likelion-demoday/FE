@@ -51,7 +51,7 @@
   border-radius: 50%;
   background-color: var(--bg2);
   filter: blur(20px);
-  animation: glowShape 12s ease-in-out infinite;
+  animation: glowShape 6s ease-in-out infinite;
 }
 
 @keyframes glowShape {

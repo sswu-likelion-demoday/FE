@@ -1,0 +1,153 @@
+.MatchingSajuResult_wrap {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+// ==========================================
+
+.matchingsajuresult_main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.msr_m_cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 10px;
+  width: 350px;
+  margin-top: 35px;
+
+  img {
+    width: 88px;
+    height: 97px;
+    max-width: none;
+    margin: -4px;
+  }
+}
+
+.msr_m_title {
+  position: relative;
+  z-index: 1;
+  margin-top: 62px;
+  font-weight: 500;
+  font-size: 20px;
+  color: var(--text);
+}
+
+.msr_m_title.second {
+  margin-top: 12px;
+}
+
+.msr_m_title.zero {
+  margin-top: 34px;
+}
+
+.msr_m_crystal {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  margin-top: 51px;
+
+  img {
+    max-width: none;
+    width: 103px;
+    height: 103px;
+    position: absolute;
+    left: -16px;
+    top: -16px;
+    z-index: 1;
+  }
+}
+
+.msr_m_glow {
+  position: absolute;
+  top: -72px;
+  left: -46px;
+  width: 162px;
+  height: 174px;
+  border-radius: 50%;
+  background-image: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 102, 102, 0.7)
+  );
+  filter: blur(20px);
+}
+
+.msr_m_badge {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 33px;
+  padding: 4px 9px;
+  border: 1px solid var(--bg);
+  border-radius: 10px;
+  background-color: var(--sub1);
+  font-weight: 400;
+  font-size: 10px;
+  color: var(--text);
+}
+
+.msr_m_orb {
+  width: 18px;
+  height: 18px;
+}
+
+.msr_m_message {
+  position: relative;
+  z-index: 1;
+  margin-top: 17px;
+  font-weight: 400;
+  font-size: 15px;
+  color: #6d6d6d;
+}
+
+// ==========================================
+
+.matchingsajuresult_bot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 80px;
+}
+
+.matchingsajuresult_bot.zero {
+  margin-top: 12px;
+}
+
+.matchingsajuresult_bot .bottom_btn {
+  width: 353px;
+}
+
+.msr_b_orb {
+  display: inline-block;
+  vertical-align: middle;
+  width: 26px;
+  height: 26px;
+  margin: 0 3px 0 10px;
+}
+
+.msr_b_wait {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 353px;
+  height: 50px;
+  border-radius: 10px;
+  background-color: #6e6887;
+  font-weight: 500;
+  font-size: 22px;
+  color: var(--bg2);
+}
+
+.msr_b_count {
+  margin-top: 12px;
+  font-weight: 500;
+  font-size: 17px;
+  color: var(--main);
+}

@@ -15,13 +15,13 @@ const MatchingSaju = () => {
     location.state ? location.state.showSetting : false,
   );
 
-  // 설정 창이 없을 때 12초 기다린 뒤 결과 화면으로 이동
+  // 설정 창이 없을 때 6초 기다린 뒤 결과 화면으로 이동
   useEffect(() => {
     if (showSetting) return;
 
     const timer = setTimeout(() => {
       navigate("/matching/saju/result", { replace: true });
-    }, 12000);
+    }, 6000);
 
     return () => clearTimeout(timer);
   }, [showSetting, navigate]);
