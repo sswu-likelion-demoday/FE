@@ -1,0 +1,71 @@
+.Matchinghome_wrap {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+// ==========================================
+
+.matchinghome_top {
+  display: flex;
+  justify-content: center;
+  margin-top: 88px;
+}
+
+// ==========================================
+
+.matchinghome_main {
+  width: 100%;
+  max-width: 343px;
+  margin: 0 auto;
+
+  .matching_card {
+    margin-top: 29px;
+  }
+
+  .matching_card + .matching_btn {
+    margin-top: 27px;
+  }
+
+  .matching_btn + .matching_btn {
+    margin-top: 13px;
+  }
+}
+
+.mh_m_title {
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--text);
+  margin-top: 31px;
+}
+
+.mh_m_crystal {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  height: 28px;
+  padding: 5px 12px 5px 20px;
+  border-radius: 10px;
+  background-color: var(--bg);
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--main);
+  margin-top: 12px;
+}
+
+.mh_m_arrow {
+  width: 7px;
+  height: 7px;
+  margin-left: 12.5px;
+  border-top: 1.5px solid var(--main);
+  border-right: 1.5px solid var(--main);
+  transform: rotate(45deg);
+}
+
+.mh_m_desc {
+  font-weight: 500;
+  font-size: 14px;
+  color: #6d6d6d;
+  margin-top: 13px;
+}

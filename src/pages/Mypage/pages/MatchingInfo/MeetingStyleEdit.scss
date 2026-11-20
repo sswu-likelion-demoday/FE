@@ -1,0 +1,24 @@
+.MeetingStyleEdit_wrap {
+  .matchingedit_options {
+    width: calc(100% - 40px);
+
+    .optiongroup_box {
+      width: 100%;
+      gap: 12px;
+    }
+
+    .choice_btn.list {
+      width: 100%;
+      height: 50px;
+      padding: 0 16px;
+
+      display: flex;
+      align-items: center;
+      text-align: left;
+
+      &.selected {
+        font-weight: 600;
+      }
+    }
+  }
+}

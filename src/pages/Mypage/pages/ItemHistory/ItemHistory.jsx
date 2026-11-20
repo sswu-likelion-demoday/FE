@@ -66,7 +66,38 @@ const ItemHistory = () => {
             </div>
           </>
         ) : (
-          <div className="i_m_usage">{/* 사용 내역 UI는 추후 구현 */}</div>
+          <div className="i_m_usage">
+            <div className="i_m_u_1">
+              <span>9월 24일</span>
+              <div className="i_m_u_box">
+                <PointHistoryItem
+                  category="관계 단계 달성"
+                  title="달빛여우님과 2단계"
+                  amount={10}
+                />
+                <PointHistoryItem
+                  category="AI 퀴즈 정답"
+                  title="달빛여우님 퀴즈 맞히기"
+                  amount={5}
+                />
+              </div>
+            </div>
+            <div className="i_m_u_2">
+              <span>9월 22일</span>
+              <div className="i_m_u_box">
+                <PointHistoryItem
+                  category="관계 단계 달성"
+                  title="고양이집사님과 3단계"
+                  amount={10}
+                />
+                <PointHistoryItem
+                  category="AI 퀴즈 정답"
+                  title="고양이집사님 퀴즈 맞히기"
+                  amount={5}
+                />
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

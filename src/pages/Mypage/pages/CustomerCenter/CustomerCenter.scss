@@ -1,0 +1,103 @@
+.CustomerCenter_wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+
+  line-height: 140%;
+  letter-spacing: -2.4%;
+}
+
+// ============================================
+
+.customercenter_top {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-self: flex-start;
+  margin-top: 25px;
+
+  font-size: 22px;
+
+  p {
+    font-weight: 400;
+    font-size: 13px;
+    color: #5f5a75;
+  }
+}
+
+.CustomerCenter_main {
+  width: 100%;
+  padding: 0 20px;
+}
+
+// ============================================
+
+.customercenter_cards {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.customercenter_card {
+  flex: 1;
+  height: 105px;
+  padding: 16px;
+  border-radius: 20px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  img {
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-size: 15px;
+  }
+
+  span {
+    font-size: 12px;
+    font-weight: 400;
+  }
+}
+
+.customercenter_card.inquiry {
+  cursor: pointer;
+  color: #ffffff;
+  background-color: var(--main);
+
+  span {
+    color: #e9e3ff;
+  }
+}
+
+.customercenter_card.history {
+  cursor: pointer;
+  border: 1px solid #e6e2f7;
+  background-color: #ffffff;
+
+  span {
+    color: #5f5a75;
+  }
+}
+
+.customercenter_faq {
+  width: 100%;
+  margin-top: 24px;
+
+  h3 {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+}
+
+.customercenter_faq_list {
+  width: 100%;
+  border: 1px solid #e6e2f7;
+  border-radius: 20px;
+  padding: 0 16px;
+}
