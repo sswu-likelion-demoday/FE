@@ -26,7 +26,7 @@ const OnboardingComplete = () => {
         </span>
       </div>
       <div className="onboardingcomplete_bot">
-        <BottomButton onClick={() => navigate("/mypage")}>
+        <BottomButton onClick={() => navigate("/matching")}>
           확인
         </BottomButton>
       </div>
