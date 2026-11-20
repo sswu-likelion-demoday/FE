@@ -39,6 +39,10 @@ const MatchingProfile = () => {
     message = "더 알아보고 싶다면 채팅을 시작해보세요";
   }
 
+  if (isFound && profile.saju) {
+    title = "부족한 기운을 채워줄\n수정을 찾았어요!";
+  }
+
   return (
     <div className="page MatchingProfile_wrap">
       <MatchingHeader title="프로필" showBack={!isFound} />
