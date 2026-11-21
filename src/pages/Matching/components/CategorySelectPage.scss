@@ -1,0 +1,88 @@
+.category_select {
+  display: flex;
+  flex-direction: column;
+  padding: 80px 22px 40px;
+
+  &_grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 162px));
+    justify-content: center;
+    gap: 24px;
+  }
+
+  &_card {
+    position: relative;
+    width: 162px;
+    max-width: 100%;
+    height: 173px;
+    padding: 0;
+    border: 1px solid var(--main);
+    border-radius: 10px;
+    background: var(--bg2);
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 26px;
+
+    img {
+      position: absolute;
+      top: 26px;
+      left: 50%;
+      width: auto;
+      height: auto;
+      transform: translateX(-50%);
+    }
+
+    &[data-category="MENTORING"] img { top: 31.49px; }
+    &[data-category="STUDY"] img { top: 31.27px; }
+    &[data-category="EXERCISE"] img {
+      top: 25px;
+      width: 84px;
+      height: 84px;
+      object-fit: scale-down;
+    }
+
+    > span {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      transform: translateX(-50%);
+    }
+    &:focus-visible { outline: 2px solid var(--main); outline-offset: 4px; }
+  }
+
+  &_badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--main);
+    color: var(--white);
+    font-size: 11px;
+  }
+
+  &_request {
+    align-self: center;
+    width: 393px;
+    max-width: 100%;
+    height: 59px;
+    margin-top: 92px;
+    padding: 12px;
+    border: 1px solid var(--sub1);
+    border-radius: 10px;
+    background: var(--bg2);
+    font-size: 17px;
+    font-weight: 500;
+    &:focus-visible { outline: 2px solid var(--main); outline-offset: 3px; }
+  }
+
+  @media (max-width: 360px) {
+    padding-inline: 18px;
+  }
+}
