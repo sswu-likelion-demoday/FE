@@ -1,0 +1,54 @@
+.category_waiting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 38px 20px 66px;
+  background-color: var(--white);
+  background-image: linear-gradient(
+    to top,
+    rgba(110, 81, 242, 0.2),
+    rgba(247, 247, 255, 0.2)
+  );
+  text-align: center;
+
+  h2 { font-size: 22px; font-weight: 500; line-height: 1.5; }
+  // SVG의 투명 여백을 제외한 그림 크기와 간격을 맞춘다.
+  &_artwork {
+    position: relative;
+    width: 273.08px;
+    max-width: 100%;
+    height: 252.5px;
+    margin-top: 51px;
+  }
+  &_image {
+    position: absolute;
+    top: -18.6726px;
+    // 자동매칭 화면처럼 이미지 박스 대신 물음표의 중심을 정렬한다.
+    left: -34.395px;
+    width: 334px;
+    max-width: none;
+  }
+  &_description {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-top: 64.5px;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 26px;
+  }
+  &_bottom {
+    display: flex;
+    width: 353px;
+    max-width: 100%;
+    height: 50px;
+    margin-top: 46px;
+    .bottom_btn {
+      width: 100%;
+      padding: 12px;
+      color: var(--white);
+      font-weight: 500;
+      &:focus-visible { outline: 2px solid var(--main); outline-offset: 4px; }
+    }
+  }
+}
