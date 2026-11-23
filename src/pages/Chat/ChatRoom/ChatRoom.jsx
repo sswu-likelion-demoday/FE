@@ -7,6 +7,8 @@ import {
   useParams,
 } from 'react-router-dom';
 
+import { getChatRoomDetail } from '../../../api/chat';
+
 import ChatHeader from '../components/ChatHeader/ChatHeader';
 import MessageBubble from '../components/MessageBubble/MessageBubble';
 import ChatInput from '../components/ChatInput/ChatInput';
@@ -31,34 +33,20 @@ const ChatRoom = () => {
 
   const numericChatId = Number(chatId);
 
-  const isRelationshipComplete =
-    location.state?.relationshipComplete === true;
+  const [
+    chatRoomDetail,
+    setChatRoomDetail,
+  ] = useState(null);
 
-  const isRelationshipEnded =
-    location.state?.relationshipEnded === true;
+  const [
+    isLoading,
+    setIsLoading,
+  ] = useState(true);
 
-  const currentStage =
-    location.state?.stage ?? 1;
-
-  const currentQuestNumber =
-    location.state?.quest ?? 1;
-
-  const currentStageData =
-    getRelationshipStage(currentStage);
-
-  const currentQuest =
-    getQuest(
-      currentStage,
-      currentQuestNumber
-    );
-
-  const previousQuest =
-    currentQuestNumber > 1
-      ? getQuest(
-        currentStage,
-        currentQuestNumber - 1
-      )
-      : null;
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] = useState('');
 
   const [showMenu, setShowMenu] =
     useState(false);
@@ -66,20 +54,14 @@ const ChatRoom = () => {
   const [modalType, setModalType] =
     useState(null);
 
-  const [showQuestCard, setShowQuestCard] =
-    useState(
-      !isRelationshipComplete &&
-      !isRelationshipEnded
-    );
-
   const [
-    showStageComplete,
-    setShowStageComplete,
+    showQuestCard,
+    setShowQuestCard,
   ] = useState(false);
 
   /*
-   * 4단계 해금 모달은
-   * 첫 만남 인증 직후에만 표시
+   * 첫 만남 인증 직후에만
+   * 외부 연락 수단 해금 모달 표시
    */
   const [
     showUnlockModal,
@@ -88,20 +70,138 @@ const ChatRoom = () => {
     location.state?.showUnlockModal === true
   );
 
+  /*
+   * 채팅방 상세 조회
+   */
   useEffect(() => {
-    if (
-      !isRelationshipComplete &&
-      !isRelationshipEnded
-    ) {
-      setShowQuestCard(true);
-    }
-  }, [
-    currentStage,
-    currentQuestNumber,
-    isRelationshipComplete,
-    isRelationshipEnded,
-  ]);
+    const fetchChatRoomDetail =
+      async () => {
+        try {
+          setIsLoading(true);
+          setErrorMessage('');
 
+          const data =
+            await getChatRoomDetail(
+              chatId
+            );
+
+          setChatRoomDetail(data);
+
+          if (
+            data.relationshipStatus ===
+            'ACTIVE' &&
+            data.currentQuest
+          ) {
+            setShowQuestCard(true);
+          } else {
+            setShowQuestCard(false);
+          }
+        } catch (error) {
+          setErrorMessage(
+            error.message ||
+            '채팅방 정보를 불러오지 못했습니다.'
+          );
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+    fetchChatRoomDetail();
+  }, [chatId]);
+
+  /*
+   * 상세 API 기준 상태
+   */
+  const partner =
+    chatRoomDetail?.partner ?? {};
+
+  const relationshipId =
+    chatRoomDetail?.relationshipId;
+
+  const relationshipStatus =
+    chatRoomDetail?.relationshipStatus;
+
+  const isRelationshipComplete =
+    relationshipStatus ===
+    'COMPLETED';
+
+  /*
+   * ENDED 관계는 상세 조회 API에서
+   * 409로 처리되므로 일반적으로
+   * 여기까지 들어오지 않음.
+   *
+   * 기존 화면 이동 state는
+   * 퍼블리싱 테스트 호환용으로만 유지.
+   */
+  const isRelationshipEnded =
+    location.state?.relationshipEnded ===
+    true;
+
+  const writable =
+    chatRoomDetail?.writable === true;
+
+  const apiCurrentStage =
+    chatRoomDetail?.currentStage;
+
+  const questProgress =
+    chatRoomDetail?.questProgress;
+
+  const apiCurrentQuest =
+    chatRoomDetail?.currentQuest;
+
+  /*
+   * API의 questProgress.completed는
+   * 현재 단계에서 완료한 퀘스트 수.
+   *
+   * 따라서 현재 활성 퀘스트 번호는
+   * completed + 1
+   */
+  const currentStage =
+    apiCurrentStage?.stage ??
+    (isRelationshipComplete ? 4 : 1);
+
+  const currentQuestNumber =
+    questProgress
+      ? Math.min(
+        questProgress.completed + 1,
+        questProgress.total
+      )
+      : isRelationshipComplete
+        ? 4
+        : 1;
+
+  const currentStageData =
+    getRelationshipStage(
+      currentStage
+    );
+
+  /*
+   * relationshipData는
+   * 화면 이동 경로/guide 등
+   * 프론트 표시용 보조 데이터로만 사용.
+   *
+   * 진행 상태의 원본은 API.
+   */
+  const localCurrentQuest =
+    !isRelationshipComplete
+      ? getQuest(
+        currentStage,
+        currentQuestNumber
+      )
+      : null;
+
+  const previousQuest =
+    !isRelationshipComplete &&
+      currentQuestNumber > 1
+      ? getQuest(
+        currentStage,
+        currentQuestNumber - 1
+      )
+      : null;
+
+  /*
+   * 메시지 내역은 다음 API 연동에서 교체.
+   */
   const messages = [
     {
       id: 1,
@@ -133,7 +233,9 @@ const ChatRoom = () => {
     },
   ];
 
-  const getOrdinal = (questNumber) => {
+  const getOrdinal = (
+    questNumber
+  ) => {
     const ordinals = {
       1: '첫 번째',
       2: '두 번째',
@@ -144,52 +246,81 @@ const ChatRoom = () => {
     return ordinals[questNumber];
   };
 
+  /*
+   * relationshipData에 남아 있는
+   * /chat/1 경로를 현재 chatId로 변환.
+   */
   const getCurrentQuestPath = () => {
-    if (!currentQuest.path) {
-      return `/chat/${chatId}`;
+    if (!localCurrentQuest?.path) {
+      return null;
     }
 
-    return currentQuest.path.replace(
+    return localCurrentQuest.path.replace(
       '/chat/1',
       `/chat/${chatId}`
     );
   };
 
   const getQuestCardData = () => {
-    if (currentQuest.type === 'AI_QUIZ') {
+    if (
+      !apiCurrentQuest ||
+      !localCurrentQuest
+    ) {
+      return null;
+    }
+
+    if (
+      apiCurrentQuest.type ===
+      'AI_QUIZ'
+    ) {
       return {
-        label: 'AI 퀴즈가 도착했어요',
-        title: currentQuest.title,
-        description:
-          '대화를 바탕으로 만든 달빛여우님 퀴즈예요.',
+        label:
+          'AI 퀴즈가 도착했어요',
+        title:
+          apiCurrentQuest.title,
+        description: `대화를 바탕으로 만든 ${partner.nickname ?? '상대방'}님 퀴즈예요.`,
         subDescription: `${currentStage}단계의 마지막 퀘스트예요!`,
         primaryText: '퀴즈 풀기',
         secondaryText: '나중에',
       };
     }
 
+    /*
+     * 현재 퍼블리싱의
+     * 4단계 마지막 인증 퀘스트 판별.
+     */
     if (
-      currentQuest.type === 'VERIFICATION'
+      localCurrentQuest.type ===
+      'VERIFICATION'
     ) {
       return {
-        label: '새 퀘스트가 열렸어요',
-        title: currentQuest.title,
+        label:
+          '새 퀘스트가 열렸어요',
+        title:
+          apiCurrentQuest.title,
         description:
           '실제로 만났다면 첫 만남을 인증해보세요.',
         subDescription: `${currentStage}단계의 마지막 퀘스트예요!`,
-        primaryText: '인증하러 가기',
+        primaryText:
+          '인증하러 가기',
         secondaryText: '나중에',
       };
     }
 
     return {
-      label: '새 퀘스트가 열렸어요',
-      title: currentQuest.title,
-      description: `채팅으로 ${currentQuest.guide}.`,
+      label:
+        '새 퀘스트가 열렸어요',
+      title:
+        apiCurrentQuest.title,
+      description:
+        localCurrentQuest.guide
+          ? `채팅으로 ${localCurrentQuest.guide}.`
+          : '채팅을 통해 퀘스트를 진행해보세요.',
       subDescription: `${currentStage}단계의 ${getOrdinal(
         currentQuestNumber
       )} 퀘스트예요!`,
-      primaryText: '퀘스트 보기',
+      primaryText:
+        '퀘스트 보기',
       secondaryText: '나중에',
     };
   };
@@ -197,88 +328,89 @@ const ChatRoom = () => {
   const questCardData =
     getQuestCardData();
 
-  const handleQuestPrimaryClick = () => {
-    if (currentQuest.path) {
+  const handleQuestPrimaryClick =
+    () => {
+      /*
+       * AI 퀴즈 / 인증처럼
+       * 별도 화면이 존재하는 퀘스트만 이동.
+       */
+      const questPath =
+        getCurrentQuestPath();
+
+      if (questPath) {
+        navigate(questPath, {
+          state: {
+            relationshipId,
+            relationshipQuestId:
+              apiCurrentQuest?.relationshipQuestId,
+            stage: currentStage,
+            quest:
+              currentQuestNumber,
+          },
+        });
+
+        return;
+      }
+
+      /*
+       * 일반 채팅 퀘스트는
+       * 클릭했다고 완료시키지 않음.
+       *
+       * 완료 여부는 백엔드가
+       * 메시지를 분석해서 결정.
+       */
+      setShowQuestCard(false);
+    };
+
+  const handleRelationshipClick =
+    () => {
       navigate(
-        getCurrentQuestPath(),
+        `/chat/${chatId}/relationship`,
         {
           state: {
+            relationshipId,
             stage: currentStage,
-            quest: currentQuestNumber,
+            quest:
+              currentQuestNumber,
+            relationshipComplete:
+              isRelationshipComplete,
+            relationshipEnded:
+              isRelationshipEnded,
           },
         }
       );
-
-      return;
-    }
-
-    const isLastQuest =
-      currentQuestNumber ===
-      currentStageData.quests.length;
-
-    if (!isLastQuest) {
-      navigate(`/chat/${chatId}`, {
-        state: {
-          stage: currentStage,
-          quest:
-            currentQuestNumber + 1,
-        },
-      });
-
-      return;
-    }
-
-    setShowQuestCard(false);
-    setShowStageComplete(true);
-  };
-
-  const handleStageContinue = () => {
-    const nextStage =
-      currentStage + 1;
-
-    setShowStageComplete(false);
-
-    navigate(`/chat/${chatId}`, {
-      state: {
-        stage: nextStage,
-        quest: 1,
-      },
-    });
-  };
-
-  const handleRelationshipClick = () => {
-    navigate(
-      `/chat/${chatId}/relationship`,
-      {
-        state: {
-          stage: currentStage,
-          quest: currentQuestNumber,
-          relationshipComplete:
-            isRelationshipComplete,
-          relationshipEnded:
-            isRelationshipEnded,
-        },
-      }
-    );
-  };
+    };
 
   const handleBlock = () => {
     setShowMenu(false);
-    setModalType('blockConfirm');
+    setModalType(
+      'blockConfirm'
+    );
   };
 
   const handleLeave = () => {
     setShowMenu(false);
-    setModalType('leaveConfirm');
+    setModalType(
+      'leaveConfirm'
+    );
   };
 
   const handleBlockConfirm = () => {
-    setModalType('blockDone');
+    /*
+     * 차단 API는 이후 별도 연동.
+     */
+    setModalType(
+      'blockDone'
+    );
   };
 
   const handleBlockDone = () => {
     setModalType(null);
 
+    /*
+     * 차단 API 연동 전
+     * 기존 퍼블리싱 동작 유지.
+     */
     navigate('/chat', {
       state: {
         blockedChatId:
@@ -287,16 +419,53 @@ const ChatRoom = () => {
     });
   };
 
-  const handleLeaveConfirm = () => {
-    setModalType(null);
+  const handleLeaveConfirm =
+    () => {
+      setModalType(null);
 
-    navigate('/chat', {
-      state: {
-        endedChatId:
-          numericChatId,
-      },
-    });
-  };
+      /*
+       * 관계 종료 API 연동 전
+       * 기존 퍼블리싱 동작 유지.
+       */
+      navigate('/chat', {
+        state: {
+          endedChatId:
+            numericChatId,
+        },
+      });
+    };
+
+  if (isLoading) {
+    return (
+      <div className="page">
+        <div className="chat_room">
+          <p>
+            채팅방 정보를 불러오는
+            중이에요.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <div className="page">
+        <div className="chat_room">
+          <p>{errorMessage}</p>
+
+          <button
+            type="button"
+            onClick={() =>
+              navigate('/chat')
+            }
+          >
+            채팅 목록으로 돌아가기
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page">
@@ -305,7 +474,9 @@ const ChatRoom = () => {
           onProfileClick={() =>
             setShowMenu(true)
           }
-          currentStage={currentStage}
+          currentStage={
+            currentStage
+          }
           currentQuestNumber={
             currentQuestNumber
           }
@@ -314,6 +485,17 @@ const ChatRoom = () => {
           }
           isRelationshipEnded={
             isRelationshipEnded
+          }
+          partnerName={
+            partner.nickname ??
+            '상대방'
+          }
+          partnerProfileImage={
+            partner.profileImageUrl
+          }
+          partnerProfileImageUnlocked={
+            partner.profileImageUnlocked ??
+            false
           }
         />
 
@@ -332,10 +514,11 @@ const ChatRoom = () => {
             </div>
 
             <p className="relationship_complete_banner_description">
-              4단계의 모든 퀘스트를 완료했어요.
+              4단계의 모든 퀘스트를
+              완료했어요.
               <br />
-              이제 이 채팅방은 읽기 전용으로
-              보관돼요.
+              이제 이 채팅방은 읽기
+              전용으로 보관돼요.
             </p>
 
             <button
@@ -346,9 +529,12 @@ const ChatRoom = () => {
                   `/chat/${chatId}/profile`,
                   {
                     state: {
-                      completedStage: 4,
+                      relationshipId,
+                      completedStage:
+                        4,
                       currentStage: 4,
-                      currentQuestNumber: 4,
+                      currentQuestNumber:
+                        4,
                     },
                   }
                 )
@@ -360,35 +546,45 @@ const ChatRoom = () => {
         ) : isRelationshipEnded ? (
           <div className="relationship_end_banner">
             <strong className="relationship_end_banner_title">
-              이번 수정과의 인연은 여기서
-              마무리되었어요.
+              이번 수정과의 인연은
+              여기서 마무리되었어요.
             </strong>
 
             <p className="relationship_end_banner_description">
-              지금까지 나눈 대화는 읽기모드로
-              확인할 수 있어요.
+              지금까지 나눈 대화는
+              읽기모드로 확인할 수
+              있어요.
             </p>
           </div>
         ) : (
           <QuestBanner
-            stage={currentStageData.stage}
+            stage={
+              apiCurrentStage?.stage
+            }
             stageName={
-              currentStageData.stageName
+              apiCurrentStage?.name
             }
             currentQuest={
               currentQuestNumber
             }
             totalQuest={
-              currentStageData.quests.length
+              questProgress?.total ??
+              currentStageData.quests
+                .length
             }
-            title={currentQuest.title}
+            title={
+              apiCurrentQuest?.title ??
+              ''
+            }
             questLabel={
               showQuestCard
                 ? '새 퀘스트 · 진행 중'
                 : '진행 중 퀘스트'
             }
             unlockText={
-              currentStageData.unlockText
+              chatRoomDetail
+                ?.unlockGuideMessage ??
+              ''
             }
             onProgressClick={
               handleRelationshipClick
@@ -399,19 +595,23 @@ const ChatRoom = () => {
         <div className="chat_room_body">
           <main
             className={`chat_room_messages ${isRelationshipComplete ||
-                isRelationshipEnded
-                ? 'chat_room_messages_complete'
-                : ''
+              isRelationshipEnded
+              ? 'chat_room_messages_complete'
+              : ''
               }`}
           >
-            {messages.map((message) => (
-              <MessageBubble
-                key={message.id}
-                type={message.type}
-                message={message.message}
-                time={message.time}
-              />
-            ))}
+            {messages.map(
+              (message) => (
+                <MessageBubble
+                  key={message.id}
+                  type={message.type}
+                  message={
+                    message.message
+                  }
+                  time={message.time}
+                />
+              )
+            )}
 
             {isRelationshipComplete && (
               <QuestCompleteNotice
@@ -423,7 +623,9 @@ const ChatRoom = () => {
               !isRelationshipEnded &&
               previousQuest && (
                 <QuestCompleteNotice
-                  title={previousQuest.title}
+                  title={
+                    previousQuest.title
+                  }
                 />
               )}
           </main>
@@ -434,8 +636,12 @@ const ChatRoom = () => {
           showQuestCard &&
           questCardData && (
             <QuestCard
-              label={questCardData.label}
-              title={questCardData.title}
+              label={
+                questCardData.label
+              }
+              title={
+                questCardData.title
+              }
               description={
                 questCardData.description
               }
@@ -457,44 +663,11 @@ const ChatRoom = () => {
             />
           )}
 
-        {!isRelationshipComplete &&
+        {writable &&
+          !isRelationshipComplete &&
           !isRelationshipEnded && (
             <ChatInput />
           )}
-
-        {showStageComplete && (
-          <StageCompleteModal
-            stage={
-              currentStageData.stage
-            }
-            title={`${currentStageData.unlockTitle}가 해금됐어요!`}
-            reward="+10 수정구"
-            infoLabel="해금된 정보"
-            infoValue={
-              currentStageData.unlockTitle
-            }
-            profileButtonText="프로필에서 보기"
-            continueButtonText="대화 계속하기"
-            onProfile={() =>
-              navigate(
-                `/chat/${chatId}/profile`,
-                {
-                  state: {
-                    completedStage:
-                      currentStage,
-                    currentStage:
-                      currentStage + 1,
-                    currentQuestNumber:
-                      1,
-                  },
-                }
-              )
-            }
-            onContinue={
-              handleStageContinue
-            }
-          />
-        )}
 
         {showUnlockModal && (
           <StageCompleteModal
@@ -509,15 +682,20 @@ const ChatRoom = () => {
                 `/chat/${chatId}/profile`,
                 {
                   state: {
-                    completedStage: 4,
+                    relationshipId,
+                    completedStage:
+                      4,
                     currentStage: 4,
-                    currentQuestNumber: 4,
+                    currentQuestNumber:
+                      4,
                   },
                 }
               )
             }
             onContinue={() =>
-              setShowUnlockModal(false)
+              setShowUnlockModal(
+                false
+              )
             }
           />
         )}
@@ -532,11 +710,13 @@ const ChatRoom = () => {
                 `/chat/${chatId}/profile`,
                 {
                   state: {
+                    relationshipId,
                     completedStage:
                       isRelationshipComplete
                         ? 4
                         : Math.max(
-                          currentStage - 1,
+                          currentStage -
+                          1,
                           0
                         ),
                     currentStage:
@@ -553,9 +733,15 @@ const ChatRoom = () => {
                 }
               )
             }
-            onBlock={handleBlock}
-            onLeave={handleLeave}
-            currentStage={currentStage}
+            onBlock={
+              handleBlock
+            }
+            onLeave={
+              handleLeave
+            }
+            currentStage={
+              currentStage
+            }
             isRelationshipComplete={
               isRelationshipComplete
             }
@@ -579,7 +765,9 @@ const ChatRoom = () => {
           'blockDone' && (
             <ChatModal
               type="blockDone"
-              onClose={handleBlockDone}
+              onClose={
+                handleBlockDone
+              }
             />
           )}
 
