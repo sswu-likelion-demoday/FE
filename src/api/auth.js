@@ -115,3 +115,21 @@ export const resetPassword = async (email, studentNumber, newPassword) => {
 
   return result.data;
 };
+
+export const reissueToken = async (refreshToken) => {
+  const response = await fetch(`${BASE_URL}/auth/reissue`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ refreshToken }),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok || !result.success) {
+    throw new Error(result.message || "토큰 재발급에 실패했습니다.");
+  }
+
+  return result.data;
+};
