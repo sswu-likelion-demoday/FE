@@ -1,0 +1,128 @@
+.category_result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 38px 20px 40px;
+  background-color: var(--white);
+  background-image: linear-gradient(
+    to top,
+    rgba(110, 81, 242, 0.2),
+    rgba(247, 247, 255, 0.2)
+  );
+  text-align: center;
+
+  h2 { font-size: 22px; font-weight: 500; line-height: 1.5; }
+  button { border-radius: 10px; }
+  &_counter { margin-top: 9px; color: var(--main); font-size: 17px; font-weight: 500; }
+  // 카드 폭 284px에서 80px 구슬을 가운데 두면 카드 안 x=102px이 된다.
+  &_carousel { position: relative; width: 328px; max-width: 100%; margin-top: 9px; padding: 0 22px; }
+  &_card { padding: 18px 17px; border-radius: 22px; background: var(--white); }
+  &_avatar {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 23px;
+
+    // 각 SVG의 그림자 여백을 보정해 구슬 지름을 80px로 유지한다.
+    &.purple img {
+      position: absolute;
+      top: -18.6081px;
+      left: -18.6081px;
+      width: 117.3006px;
+      height: auto;
+      max-width: none;
+    }
+    &.blue img,
+    &.pink img {
+      position: absolute;
+      left: -37.9142px;
+      max-width: none;
+    }
+    &.blue img {
+      top: -25px;
+      width: 147px;
+      height: 143px;
+    }
+    &.pink img {
+      top: -18px;
+      width: 156px;
+      height: 136px;
+    }
+  }
+  &_image { width: 100%; height: 100%; object-fit: contain; }
+  h3 { font-size: 22px; font-weight: 500; line-height: 1.4; }
+  &_info { margin-top: 9px; font-size: 17px; font-weight: 500; line-height: 1.4; }
+  &_student { display: flex; align-items: center; justify-content: center; column-gap: 10px; }
+
+  &_contact {
+    width: 249px;
+    max-width: 100%;
+    height: 79px;
+    margin-top: 23px;
+    margin-inline: auto;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: var(--bg2);
+    text-align: left;
+    > span { display: block; color: var(--main); font-size: 14px; font-weight: 400; line-height: 17px; }
+    > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+    p { min-width: 0; font-size: 22px; font-weight: 500; line-height: 26px; overflow-wrap: anywhere; user-select: text; }
+    button { display: grid; place-items: center; flex: 0 0 32px; min-height: 26px; }
+    img { width: 23px; height: 23px; }
+  }
+
+  &_open {
+    display: block;
+    width: 249px;
+    max-width: 100%;
+    height: 38px;
+    margin-top: 5px;
+    margin-inline: auto;
+    padding: 8px;
+    border-radius: 10px;
+    background: var(--sub1);
+    color: var(--main);
+    font-size: 17px;
+    font-weight: 400;
+  }
+
+  &_arrow {
+    position: absolute;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    min-height: 52px;
+    transform: translateY(-50%);
+    color: var(--main);
+    svg { width: 16px; height: 44px; fill: none; stroke: currentColor; stroke-width: 2; }
+    &.previous { left: -4px; }
+    &.next { right: -4px; }
+    &:disabled { color: #d3cde8; cursor: default; }
+  }
+
+  &_guide { margin-top: 21px; color: var(--main); font-size: 17px; font-weight: 400; line-height: 1.4; }
+  &_feedback { min-height: 20px; margin-top: 12px; color: var(--main); font-size: 13px; line-height: 1.5; }
+  &_complete {
+    display: flex;
+    width: 353px;
+    max-width: 100%;
+    height: 50px;
+    margin-top: 8px;
+    .bottom_btn {
+      width: 100%;
+      padding: 12px;
+      color: var(--white);
+      font-weight: 500;
+    }
+  }
+  &_empty { padding: 80px 0; font-size: 18px; line-height: 1.5; }
+  button:focus-visible { outline: 2px solid var(--main); outline-offset: 3px; }
+  button:disabled { cursor: default; }
+
+  @media (max-width: 360px) {
+    padding-inline: 14px;
+    &_card { padding-inline: 12px; }
+    &_contact { padding-inline: 10px; }
+  }
+}

@@ -15,10 +15,6 @@ const Matchinghome = () => {
   // 사주 매칭 허용 여부 (확인용 임시 값)
   const isSajuAllowed = false;
 
-  const handleMatchingClick = () => {
-    console.log("매칭 버튼 클릭");
-  };
-
   // 사주 매칭 화면으로 이동 (허용 안 한 사람은 설정 창이 같이 뜸)
   const handleSajuClick = () => {
     navigate("/matching/saju", { state: { showSetting: !isSajuAllowed } });
@@ -54,7 +50,7 @@ const Matchinghome = () => {
         <MatchingButton
           label="테마별 수정구함"
           description="카테고리를 선택해 목적에 맞는 수정을 찾아요"
-          onClick={handleMatchingClick}
+          onClick={() => navigate("/matching/category")}
         />
         <MatchingButton
           label="기운을 보완해 줄 수정구함"
