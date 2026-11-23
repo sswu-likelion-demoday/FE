@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getMypage } from "../../api/mypage";
 import "./Mypage.scss";
 import MenuItem from "./components/MenuItem";
 import LogoutModal from "./components/LogoutModal";
@@ -15,16 +16,38 @@ import contact_icon from "../../assets/images/Mypage/contact_icon.svg";
 const Mypage = () => {
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [mypageData, setMypageData] = useState(null);
+
+  useEffect(() => {
+    const fetchMypage = async () => {
+      const accessToken = sessionStorage.getItem("accessToken");
+
+      if (!accessToken) return;
+
+      try {
+        const data = await getMypage(accessToken);
+        setMypageData(data);
+      } catch (error) {
+        console.error("마이페이지 조회 실패:", error);
+      }
+    };
+
+    fetchMypage();
+  }, []);
 
   return (
     <div className="page Mypage_wrap">
       <div className="mypage_top">
         <div className="m_t_1">마이</div>
         <div className="m_t_2">
-          <img src={profile_icon} alt="" />
+          <img src={mypageData?.profileImageUrl || profile_icon} alt="" />
           <div className="m_t_2_txt">
-            <p>나리</p>
-            <span>컴퓨터공학과 · 24학번</span>
+            <p>{mypageData?.nickname ?? "-"}</p>
+            <span>
+              {mypageData
+                ? `${mypageData.departmentName} · ${mypageData.studentNumber}`
+                : "-"}
+            </span>
           </div>
           <button onClick={() => navigate("/mypage/edit-profile")}>
             내 정보 수정
@@ -34,7 +57,7 @@ const Mypage = () => {
           <img src={sujeonggu} alt="" />
           <div className="m_t_3_txt">
             <span>보유한 수정구</span>
-            <p>120개</p>
+            <p>{mypageData ? `${mypageData.currencyBalance}개` : "-"}</p>
           </div>
           <div className="m_t_3_btn">
             <p>내역 보기</p>
@@ -61,7 +84,7 @@ const Mypage = () => {
             <MenuItem
               icon={block_icon}
               title="차단 목록"
-              detail="2명"
+              detail={mypageData ? `${mypageData.blockedUserCount}명` : "-"}
               onClick={() => navigate("/mypage/block-list")}
             />
           </div>

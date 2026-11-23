@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getMatchingProfile } from "../../../../api/mypage";
 import "./MatchingInfo.scss";
 import MatchingInfoCard from "../../components/MatchingInfoCard";
 import SajuMatchingCard from "../../components/SajuMatchingCard";
@@ -7,13 +9,31 @@ import star_purple from "../../../../assets/images/Mypage/star_purple.svg";
 
 const MatchingInfo = () => {
   const navigate = useNavigate();
+  const [matchingData, setMatchingData] = useState(null);
+
+  useEffect(() => {
+    const fetchMatchingProfile = async () => {
+      const accessToken = sessionStorage.getItem("accessToken");
+
+      if (!accessToken) return;
+
+      try {
+        const data = await getMatchingProfile(accessToken);
+        setMatchingData(data);
+      } catch (error) {
+        console.error("매칭 정보 조회 실패:", error);
+      }
+    };
+
+    fetchMatchingProfile();
+  }, []);
 
   const infoList = [
     {
       id: "mbti",
       title: "나의 성향",
       description: "MBTI",
-      items: ["I", "N", "F", "J"],
+      items: matchingData?.mbti?.split("") ?? [],
       isMbti: true,
       path: "/mypage/mbti-edit",
     },
@@ -21,27 +41,29 @@ const MatchingInfo = () => {
       id: "meeting",
       title: "사람을 만나는 방식",
       description: "최대 2개",
-      items: ["소수와 깊게", "1:1 대화"],
+      items: matchingData?.socialStyle
+        ? Object.values(matchingData.socialStyle)
+        : [],
       path: "/mypage/meeting-style-edit",
     },
     {
       id: "category",
       title: "관심 카테고리",
       description: "최소 3개",
-      items: ["#운동", "#카페", "#전시", "#음악"],
+      items: matchingData?.interests?.map((item) => `#${item.name}`) ?? [],
       path: "/mypage/interest-category",
     },
     {
       id: "hobby",
       title: "즐겨하는 취미",
       description: "최소 3개",
-      items: ["#러닝", "#보드게임", "#사진"],
+      items: matchingData?.hobbies?.map((item) => `#${item.name}`) ?? [],
       path: "/mypage/hobby-edit",
     },
     {
       id: "friend",
       title: "만나고 싶은 친구",
-      items: ["함께 운동할 친구", "대화가 잘 통하는 친구"],
+      items: matchingData?.friendTypes?.map((item) => item.name) ?? [],
       path: "/mypage/friend-type-edit",
     },
   ];
@@ -70,8 +92,22 @@ const MatchingInfo = () => {
         </div>
         <div className="mi_m_2">
           <SajuMatchingCard
-            birthDate="2004.08.05 (양력)"
-            birthTime="12:00"
+            birthDate={
+              matchingData?.saju?.enabled
+                ? `${matchingData.saju.birthDate?.replaceAll("-", ".") ?? ""} (${
+                    matchingData.saju.calendarType === "SOLAR"
+                      ? "양력"
+                      : matchingData.saju.calendarType === "LUNAR"
+                        ? "음력"
+                        : "-"
+                  })`
+                : "사주 매칭 미사용"
+            }
+            birthTime={
+              matchingData?.saju?.enabled
+                ? (matchingData.saju.birthTime ?? "-")
+                : "-"
+            }
             onEdit={() => navigate("/mypage/saju-edit")}
           />
         </div>
