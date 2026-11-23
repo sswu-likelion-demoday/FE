@@ -5,18 +5,13 @@ import quest_true from '../../../../assets/images/Chat/quest_true.svg';
 import eye from '../../../../assets/images/Chat/eye.svg';
 import gem from '../../../../assets/images/Chat/gem.svg';
 
-const OPTION_LETTERS = {
-    1: 'A',
-    2: 'B',
-    3: 'C',
-    4: 'D',
-};
-
 const ChatModal = ({
     type,
     onClose,
     onConfirm,
     correctAnswer,
+    correctAnswerLetter,
+    partnerName = '상대방',
     reward,
     partnerParticipationStatus,
 }) => {
@@ -42,12 +37,14 @@ const ChatModal = ({
         type ===
         'leaveConfirm';
 
+    const partnerLabel = partnerName === '상대방' ? partnerName : partnerName + '님';
+
     if (isBlockConfirm) {
         return (
             <div className="chat_modal_overlay">
                 <div className="chat_modal chat_modal_confirm">
                     <h2 className="chat_modal_confirm_title">
-                        달빛여우님을 차단할까요?
+                        {partnerLabel}을 차단할까요?
                     </h2>
 
                     <div className="chat_modal_confirm_buttons">
@@ -79,7 +76,7 @@ const ChatModal = ({
             <div className="chat_modal_overlay">
                 <div className="chat_modal chat_modal_confirm">
                     <h2 className="chat_modal_confirm_title">
-                        달빛여우님을 차단했어요
+                        {partnerLabel}을 차단했어요
                     </h2>
 
                     <button
@@ -99,7 +96,7 @@ const ChatModal = ({
             <div className="chat_modal_overlay">
                 <div className="chat_modal chat_modal_confirm">
                     <h2 className="chat_modal_confirm_title">
-                        달빛여우님과
+                        {partnerLabel}과
                         <br />
                         관계를 종료할까요?
                     </h2>
@@ -179,13 +176,7 @@ const ChatModal = ({
                             <span>
                                 정답은{' '}
                                 <strong>
-                                    {OPTION_LETTERS[
-                                        correctAnswer
-                                            .optionId
-                                    ] ??
-                                        correctAnswer
-                                            .optionId}
-                                    .{' '}
+                                    {correctAnswerLetter && `${correctAnswerLetter}. `}
                                     {
                                         correctAnswer
                                             .content

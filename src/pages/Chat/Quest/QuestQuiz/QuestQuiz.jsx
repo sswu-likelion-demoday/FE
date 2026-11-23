@@ -47,23 +47,12 @@ const QuestQuiz = () => {
     const { chatId } =
         useParams();
 
-    const [
-        relationshipId,
-        setRelationshipId,
-    ] = useState(
-        location.state
-            ?.relationshipId ??
-        null
-    );
-
-    const [
-        relationshipQuestId,
-        setRelationshipQuestId,
-    ] = useState(
-        location.state
-            ?.relationshipQuestId ??
-        null
-    );
+    const routeRelationshipId = location.state?.relationshipId;
+    const routeRelationshipQuestId = location.state?.relationshipQuestId;
+    const [resolvedIds, setResolvedIds] = useState(null);
+    const relationshipId = resolvedIds?.relationshipId ?? routeRelationshipId;
+    const relationshipQuestId =
+        resolvedIds?.relationshipQuestId ?? routeRelationshipQuestId;
 
     const [
         quizData,
@@ -107,17 +96,16 @@ const QuestQuiz = () => {
      * relationshipId와 현재 퀘스트 ID를 찾는다.
      */
     useEffect(() => {
+        let ignore = false;
+
         const fetchQuiz =
             async () => {
+                let resolvedRelationshipId = routeRelationshipId;
+                let resolvedRelationshipQuestId = routeRelationshipQuestId;
+
                 try {
                     setIsLoading(true);
                     setErrorMessage('');
-
-                    let resolvedRelationshipId =
-                        relationshipId;
-
-                    let resolvedRelationshipQuestId =
-                        relationshipQuestId;
 
                     if (
                         !resolvedRelationshipId ||
@@ -128,6 +116,10 @@ const QuestQuiz = () => {
                                 chatId
                             );
 
+                        if (ignore) {
+                            return;
+                        }
+
                         resolvedRelationshipId =
                             chatRoom.relationshipId;
 
@@ -135,13 +127,6 @@ const QuestQuiz = () => {
                             chatRoom.currentQuest
                                 ?.relationshipQuestId;
 
-                        setRelationshipId(
-                            resolvedRelationshipId
-                        );
-
-                        setRelationshipQuestId(
-                            resolvedRelationshipQuestId
-                        );
                     }
 
                     if (
@@ -159,16 +144,20 @@ const QuestQuiz = () => {
                             resolvedRelationshipQuestId
                         );
 
-                    setQuizData(data);
+                    if (ignore) {
+                        return;
+                    }
 
-                    /*
-                     * API에서 받은 ID를
-                     * 최종 기준으로 다시 저장
-                     */
-                    setRelationshipQuestId(
-                        data.relationshipQuestId
-                    );
+                    setResolvedIds({
+                        relationshipId: resolvedRelationshipId,
+                        relationshipQuestId:
+                            data.relationshipQuestId ?? resolvedRelationshipQuestId,
+                    });
+                    setQuizData(data);
                 } catch (error) {
+                    if (ignore) {
+                        return;
+                    }
                     console.error(
                         'AI 퀴즈 조회 실패:',
                         error
@@ -182,7 +171,7 @@ const QuestQuiz = () => {
                             `/chat/${chatId}/relationship`,
                             {
                                 state: {
-                                    relationshipId,
+                                    relationshipId: resolvedRelationshipId,
                                 },
                             }
                         );
@@ -202,7 +191,7 @@ const QuestQuiz = () => {
                             `/chat/${chatId}/relationship`,
                             {
                                 state: {
-                                    relationshipId,
+                                    relationshipId: resolvedRelationshipId,
                                 },
                             }
                         );
@@ -226,17 +215,18 @@ const QuestQuiz = () => {
                         'AI 퀴즈를 불러오지 못했습니다.'
                     );
                 } finally {
-                    setIsLoading(false);
+                    if (!ignore) {
+                        setIsLoading(false);
+                    }
                 }
             };
 
         fetchQuiz();
-    }, [
-        chatId,
-        relationshipId,
-        relationshipQuestId,
-        navigate,
-    ]);
+
+        return () => {
+            ignore = true;
+        };
+    }, [chatId, routeRelationshipId, routeRelationshipQuestId, navigate]);
 
     /*
      * 서버에서 받은 단계가 기준.
@@ -391,6 +381,10 @@ const QuestQuiz = () => {
             }
         };
 
+    const correctAnswerIndex = (quizData?.options ?? []).findIndex(
+        (option) => option.optionId === quizResult?.correctAnswer?.optionId
+    );
+
     /*
      * 정답/오답 결과 모달 닫기
      */
@@ -412,8 +406,6 @@ const QuestQuiz = () => {
                     .completion
                     ?.stageCompleted
             ) {
-                setQuizResult(null);
-
                 setShowStageComplete(
                     true
                 );
@@ -673,13 +665,14 @@ const QuestQuiz = () => {
                     </button>
                 </div>
 
-                {quizResult && (
+                {quizResult && !showStageComplete && (
                     <ChatModal
                         type={
                             quizResult.correct
                                 ? 'correct'
                                 : 'wrong'
                         }
+                        correctAnswerLetter={OPTION_LETTERS[correctAnswerIndex]}
                         correctAnswer={
                             quizResult
                                 .correctAnswer

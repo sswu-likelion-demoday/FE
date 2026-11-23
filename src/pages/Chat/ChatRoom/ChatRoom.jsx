@@ -3,6 +3,8 @@ import './ChatRoom.scss';
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
+  useRef,
   useState,
 } from 'react';
 
@@ -43,6 +45,53 @@ import {
 
 import quest_orb from '../../../assets/images/Chat/quest_orb.svg';
 
+const mergeMessages = (previous, incoming) => {
+  const byId = new Map(
+    [...incoming, ...previous].map((message) => [
+      String(message.messageId),
+      message,
+    ])
+  );
+
+  return [...byId.values()].sort(
+    (first, second) =>
+      Date.parse(first.createdAt) - Date.parse(second.createdAt) ||
+      Number(first.messageId) - Number(second.messageId)
+  );
+};
+
+const getLatestMessage = (
+  messageList
+) => {
+  if (
+    !messageList ||
+    messageList.length === 0
+  ) {
+    return null;
+  }
+
+  return messageList.reduce(
+    (
+      latest,
+      current
+    ) => {
+      if (!latest) {
+        return current;
+      }
+
+      return Number(
+        current.messageId
+      ) >
+        Number(
+          latest.messageId
+        )
+        ? current
+        : latest;
+    },
+    null
+  );
+};
+
 const ChatRoom = () => {
   const navigate =
     useNavigate();
@@ -55,8 +104,9 @@ const ChatRoom = () => {
 
   const {
     isSocketConnected,
-    latestMessage,
+    subscribeToMessages,
     latestEvent,
+    reconnectCount,
     relationshipCompleted,
     sendMessage,
     syncRelationshipStatus,
@@ -150,243 +200,179 @@ const ChatRoom = () => {
     );
   };
 
-  const getLatestMessage = (
-    messageList
-  ) => {
-    if (
-      !messageList ||
-      messageList.length === 0
-    ) {
-      return null;
+  const detailRequestRef = useRef(0);
+  const disconnectedMessageRef = useRef(null);
+  const mountedRef = useRef(false);
+
+  const fetchChatRoomDetail = useCallback(async () => {
+    const requestId = ++detailRequestRef.current;
+
+    try {
+      const data = await getChatRoomDetail(chatId);
+      if (detailRequestRef.current !== requestId) {
+        return;
+      }
+
+      setChatRoomDetail(data);
+      syncRelationshipStatus(data.relationshipStatus);
+      setShowQuestCard(
+        data.relationshipStatus === 'ACTIVE' && Boolean(data.currentQuest)
+      );
+    } catch (error) {
+      if (detailRequestRef.current === requestId) {
+        throw error;
+      }
     }
+  }, [chatId, syncRelationshipStatus]);
 
-    return messageList.reduce(
-      (
-        latest,
-        current
-      ) => {
-        if (!latest) {
-          return current;
+  const refreshChatRoomDetail = useCallback(() => {
+    fetchChatRoomDetail().catch((error) => {
+      console.error('채팅방 상세 갱신 실패:', error);
+    });
+  }, [fetchChatRoomDetail]);
+
+  useLayoutEffect(() => {
+    let ignore = false;
+    mountedRef.current = true;
+
+    const fetchChatRoom = async () => {
+      try {
+        const [, messageData] = await Promise.all([
+          fetchChatRoomDetail(),
+          getChatMessages(chatId),
+        ]);
+
+        if (ignore) {
+          return;
         }
 
-        return Number(
-          current.messageId
-        ) >
-          Number(
-            latest.messageId
-          )
-          ? current
-          : latest;
-      },
-      null
-    );
-  };
+        const fetchedMessages = messageData.messages ?? [];
+        setMessages((previousMessages) =>
+          mergeMessages(previousMessages, fetchedMessages)
+        );
+        setNextCursor(messageData.nextCursor ?? null);
+        setHasNextMessages(messageData.hasNext ?? false);
 
-  const refreshChatRoomDetail =
-    useCallback(
-      async () => {
-        try {
-          const data =
-            await getChatRoomDetail(
-              chatId
-            );
-
-          setChatRoomDetail(
-            data
-          );
-
-          syncRelationshipStatus(
-            data.relationshipStatus
-          );
-
-          if (
-            data.relationshipStatus ===
-            'ACTIVE' &&
-            data.currentQuest
-          ) {
-            setShowQuestCard(
-              true
-            );
-          } else {
-            setShowQuestCard(
-              false
-            );
-          }
-        } catch (error) {
-          console.error(
-            '채팅방 상세 갱신 실패:',
-            error
-          );
+        const latest = getLatestMessage(fetchedMessages);
+        if (latest) {
+          markChatRoomAsRead(chatId, latest.messageId).catch((error) => {
+            console.error('메시지 읽음 처리 실패:', error);
+          });
         }
-      },
-      [
-        chatId,
-        syncRelationshipStatus,
-      ]
-    );
-
-  /*
-   * 최초 상세 + 메시지 조회
-   */
-  useEffect(() => {
-    const fetchChatRoom =
-      async () => {
-        try {
-          setIsLoading(true);
-          setErrorMessage('');
-
-          const [
-            detailData,
-            messageData,
-          ] = await Promise.all([
-            getChatRoomDetail(
-              chatId
-            ),
-
-            getChatMessages(
-              chatId
-            ),
-          ]);
-
-          setChatRoomDetail(
-            detailData
-          );
-
-          syncRelationshipStatus(
-            detailData
-              .relationshipStatus
-          );
-
-          const fetchedMessages =
-            messageData.messages ??
-            [];
-
-          setMessages(
-            fetchedMessages
-          );
-
-          setNextCursor(
-            messageData.nextCursor ??
-            null
-          );
-
-          setHasNextMessages(
-            messageData.hasNext ??
-            false
-          );
-
-          const latest =
-            getLatestMessage(
-              fetchedMessages
-            );
-
-          if (latest) {
-            try {
-              await markChatRoomAsRead(
-                chatId,
-                latest.messageId
-              );
-            } catch (
-            readError
-            ) {
-              console.error(
-                '메시지 읽음 처리 실패:',
-                readError
-              );
-            }
-          }
-
-          if (
-            detailData
-              .relationshipStatus ===
-            'ACTIVE' &&
-            detailData.currentQuest
-          ) {
-            setShowQuestCard(
-              true
-            );
-          } else {
-            setShowQuestCard(
-              false
-            );
-          }
-        } catch (error) {
-          setErrorMessage(
-            error.message ||
-            '채팅방 정보를 불러오지 못했습니다.'
-          );
-        } finally {
-          setIsLoading(
-            false
-          );
+      } catch (error) {
+        if (!ignore) {
+          setErrorMessage(error.message || '채팅방 정보를 불러오지 못했습니다.');
         }
-      };
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
+    };
 
     fetchChatRoom();
-  }, [
-    chatId,
-    syncRelationshipStatus,
-  ]);
+
+    return () => {
+      ignore = true;
+      mountedRef.current = false;
+      detailRequestRef.current += 1;
+    };
+  }, [chatId, fetchChatRoomDetail]);
+
+  useLayoutEffect(() => {
+    if (!reconnectCount || isLoading) {
+      return;
+    }
+
+    let ignore = false;
+    const lastKnownMessage = disconnectedMessageRef.current;
+
+    const recoverMessages = async () => {
+      const recoveredMessages = [];
+      let cursor = null;
+      let hasNext = false;
+
+      do {
+        const page = await getChatMessages(chatId, cursor);
+        if (ignore) {
+          return;
+        }
+
+        const pageMessages = page.messages ?? [];
+        recoveredMessages.push(...pageMessages);
+
+        const next = page.nextCursor ?? null;
+        hasNext = Boolean(page.hasNext && next !== null && next !== cursor);
+        cursor = next;
+
+        if (
+          !lastKnownMessage ||
+          pageMessages.some(
+            (message) => Number(message.messageId) <= Number(lastKnownMessage.messageId)
+          )
+        ) {
+          break;
+        }
+      } while (hasNext);
+
+      setMessages((previousMessages) =>
+        mergeMessages(previousMessages, recoveredMessages)
+      );
+      if (!lastKnownMessage) {
+        setNextCursor(cursor);
+        setHasNextMessages(hasNext);
+      }
+
+      const latest = getLatestMessage(recoveredMessages);
+      if (latest) {
+        await markChatRoomAsRead(chatId, latest.messageId);
+      }
+    };
+
+    refreshChatRoomDetail();
+    recoverMessages().catch((error) => {
+      if (!ignore) {
+        console.error('재연결 후 메시지 동기화 실패:', error);
+      }
+    });
+
+    return () => {
+      ignore = true;
+    };
+  }, [chatId, isLoading, reconnectCount, refreshChatRoomDetail]);
+
+  useLayoutEffect(() => {
+    if (!isSocketConnected) {
+      disconnectedMessageRef.current = getLatestMessage(messages);
+    }
+  }, [isSocketConnected, messages]);
 
   /*
    * 실시간 메시지
    */
-  useEffect(() => {
-    if (
-      !latestMessage ||
-      relationshipCompleted
-    ) {
+  useLayoutEffect(() => {
+    if (relationshipCompleted) {
       return;
     }
 
-    setMessages(
-      (
-        previousMessages
-      ) => {
-        const duplicated =
-          previousMessages.some(
-            (message) =>
-              message.messageId ===
-              latestMessage.messageId
-          );
-
-        if (duplicated) {
-          return previousMessages;
-        }
-
-        return [
-          ...previousMessages,
-          latestMessage,
-        ];
-      }
-    );
-
-    if (
-      latestMessage.messageId
-    ) {
-      markChatRoomAsRead(
-        chatId,
-        latestMessage.messageId
-      ).catch(
-        (error) => {
-          console.error(
-            '실시간 메시지 읽음 처리 실패:',
-            error
-          );
-        }
+    return subscribeToMessages((message) => {
+      setMessages((previousMessages) =>
+        mergeMessages(previousMessages, [message])
       );
-    }
-  }, [
-    latestMessage,
-    chatId,
-    relationshipCompleted,
-  ]);
+
+      if (message.messageId) {
+        markChatRoomAsRead(chatId, message.messageId).catch((error) => {
+          console.error('실시간 메시지 읽음 처리 실패:', error);
+        });
+      }
+    });
+  }, [chatId, relationshipCompleted, subscribeToMessages]);
 
   /*
    * WebSocket 이벤트
    */
   useEffect(() => {
-    if (!latestEvent) {
+    if (isLoading || !latestEvent) {
       return;
     }
 
@@ -423,6 +409,7 @@ const ChatRoom = () => {
       refreshChatRoomDetail();
     }
   }, [
+    isLoading,
     latestEvent,
     refreshChatRoomDetail,
   ]);
@@ -656,6 +643,10 @@ const ChatRoom = () => {
         {
           state: {
             relationshipId,
+            partnerNickname: partner.nickname,
+            partnerImageUrl: partner.profileImageUnlocked
+              ? partner.profileImageUrl
+              : undefined,
 
             stage:
               currentStage,
@@ -696,6 +687,10 @@ const ChatRoom = () => {
             chatId,
             nextCursor
           );
+
+        if (!mountedRef.current) {
+          return;
+        }
 
         setMessages(
           (
@@ -806,6 +801,10 @@ const ChatRoom = () => {
           partner.userId
         );
 
+        if (!mountedRef.current) {
+          return;
+        }
+
         /*
          * 성공 후 기존 완료 모달 사용
          */
@@ -813,6 +812,10 @@ const ChatRoom = () => {
           'blockDone'
         );
       } catch (error) {
+        if (!mountedRef.current) {
+          return;
+        }
+
         console.error(
           '사용자 차단 실패:',
           error
@@ -892,6 +895,10 @@ const ChatRoom = () => {
           relationshipId
         );
 
+        if (!mountedRef.current) {
+          return;
+        }
+
         /*
          * 관계 종료 후에는
          * 채팅 목록으로 이동
@@ -908,6 +915,10 @@ const ChatRoom = () => {
           }
         );
       } catch (error) {
+        if (!mountedRef.current) {
+          return;
+        }
+
         console.error(
           '관계 종료 실패:',
           error
@@ -1312,6 +1323,7 @@ const ChatRoom = () => {
           'blockConfirm' && (
             <ChatModal
               type="blockConfirm"
+              partnerName={partner.nickname || '상대방'}
               onClose={() => {
                 if (
                   !isActionLoading
@@ -1331,6 +1343,7 @@ const ChatRoom = () => {
           'blockDone' && (
             <ChatModal
               type="blockDone"
+              partnerName={partner.nickname || '상대방'}
               onClose={
                 handleBlockDone
               }
@@ -1341,6 +1354,7 @@ const ChatRoom = () => {
           'leaveConfirm' && (
             <ChatModal
               type="leaveConfirm"
+              partnerName={partner.nickname || '상대방'}
               onClose={() => {
                 if (
                   !isActionLoading

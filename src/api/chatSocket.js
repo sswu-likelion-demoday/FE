@@ -26,6 +26,17 @@ export const createChatSocket = ({
 }) => {
     const accessToken = getAccessToken();
 
+    let connected = false;
+
+    const notifyDisconnected = () => {
+        if (!connected) {
+            return;
+        }
+
+        connected = false;
+        onDisconnected?.();
+    };
+
     const client = new Client({
         brokerURL: `${getWebSocketUrl()}/ws`,
 
@@ -115,12 +126,12 @@ export const createChatSocket = ({
                 }
             );
 
+            connected = true;
             onConnected?.();
         },
 
-        onDisconnect: () => {
-            onDisconnected?.();
-        },
+        onDisconnect: notifyDisconnected,
+        onWebSocketClose: notifyDisconnected,
 
         onStompError: (frame) => {
             console.error(

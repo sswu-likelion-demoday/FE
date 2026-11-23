@@ -2,6 +2,7 @@ import './QuestVerification.scss';
 
 import {
     useEffect,
+    useLayoutEffect,
     useRef,
     useState,
 } from 'react';
@@ -25,6 +26,7 @@ const QuestVerification = () => {
     const { chatId } = useParams();
 
     const fileInputRef = useRef(null);
+    const activeSubmissionRef = useRef(null);
 
     const relationshipId =
         location.state?.relationshipId;
@@ -54,6 +56,14 @@ const QuestVerification = () => {
         verificationResult,
         setVerificationResult,
     ] = useState(null);
+
+    useLayoutEffect(() => {
+        setIsSubmitting(false);
+
+        return () => {
+            activeSubmissionRef.current = null;
+        };
+    }, [location.key]);
 
     /*
      * 미리보기 Object URL 정리
@@ -113,7 +123,8 @@ const QuestVerification = () => {
         async () => {
             if (
                 !imageFile ||
-                isSubmitting
+                isSubmitting ||
+                activeSubmissionRef.current
             ) {
                 return;
             }
@@ -133,6 +144,11 @@ const QuestVerification = () => {
                 return;
             }
 
+            const submission = Symbol();
+            activeSubmissionRef.current = submission;
+            const isCurrentSubmission = () =>
+                activeSubmissionRef.current === submission;
+
             try {
                 setIsSubmitting(
                     true
@@ -144,6 +160,10 @@ const QuestVerification = () => {
                         relationshipQuestId,
                         imageFile
                     );
+
+                if (!isCurrentSubmission()) {
+                    return;
+                }
 
                 setVerificationResult(
                     result
@@ -171,6 +191,10 @@ const QuestVerification = () => {
                     '만남 인증에 실패했습니다. 다른 사진으로 다시 시도해주세요.'
                 );
             } catch (error) {
+                if (!isCurrentSubmission()) {
+                    return;
+                }
+
                 console.error(
                     '만남 인증 실패:',
                     error
@@ -260,9 +284,10 @@ const QuestVerification = () => {
                     '만남 인증에 실패했습니다.'
                 );
             } finally {
-                setIsSubmitting(
-                    false
-                );
+                if (isCurrentSubmission()) {
+                    activeSubmissionRef.current = null;
+                    setIsSubmitting(false);
+                }
             }
         };
 

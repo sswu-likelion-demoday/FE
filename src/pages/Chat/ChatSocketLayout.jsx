@@ -2,7 +2,7 @@ import {
     createContext,
     useCallback,
     useContext,
-    useEffect,
+    useLayoutEffect,
     useMemo,
     useRef,
     useState,
@@ -41,11 +41,18 @@ export const useChatSocket = () => {
 };
 
 const ChatSocketLayout = () => {
-    const navigate =
-        useNavigate();
+    const { chatId } = useParams();
 
-    const { chatId } =
-        useParams();
+    return <ChatRoomSocket key={chatId} chatId={chatId} />;
+};
+
+const ChatRoomSocket = ({ chatId }) => {
+    const navigate = useNavigate();
+    const navigateRef = useRef(navigate);
+
+    useLayoutEffect(() => {
+        navigateRef.current = navigate;
+    }, [navigate]);
 
     const clientRef =
         useRef(null);
@@ -62,15 +69,29 @@ const ChatSocketLayout = () => {
         setIsSocketConnected,
     ] = useState(false);
 
-    const [
-        latestMessage,
-        setLatestMessage,
-    ] = useState(null);
+    const latestMessageRef = useRef(null);
+    const messageListenerRef = useRef(null);
+
+    const subscribeToMessages = useCallback((listener) => {
+        messageListenerRef.current = listener;
+        if (latestMessageRef.current) {
+            listener(latestMessageRef.current);
+        }
+
+        return () => {
+            if (messageListenerRef.current === listener) {
+                messageListenerRef.current = null;
+            }
+        };
+    }, []);
 
     const [
         latestEvent,
         setLatestEvent,
     ] = useState(null);
+
+    const [latestUnlockEvent, setLatestUnlockEvent] = useState(null);
+    const [reconnectCount, setReconnectCount] = useState(0);
 
     const [
         pendingUnlockEvent,
@@ -98,12 +119,8 @@ const ChatSocketLayout = () => {
                 clientRef.current;
 
             if (client) {
-                disconnectChatSocket(
-                    client
-                );
-
-                clientRef.current =
-                    null;
+                clientRef.current = null;
+                disconnectChatSocket(client);
             }
 
             setIsSocketConnected(
@@ -154,10 +171,12 @@ const ChatSocketLayout = () => {
      * /chat/:chatId 아래 모든 화면에서
      * 동일한 연결을 유지한다.
      */
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!chatId) {
             return undefined;
         }
+
+        let hasConnected = false;
 
         const client =
             createChatSocket({
@@ -169,9 +188,12 @@ const ChatSocketLayout = () => {
                 onMessage: (
                     message
                 ) => {
-                    setLatestMessage(
-                        message
-                    );
+                    if (clientRef.current !== client) {
+                        return;
+                    }
+
+                    latestMessageRef.current = message;
+                    messageListenerRef.current?.(message);
                 },
 
                 /*
@@ -180,6 +202,10 @@ const ChatSocketLayout = () => {
                 onEvent: (
                     event
                 ) => {
+                    if (clientRef.current !== client) {
+                        return;
+                    }
+
                     console.log(
                         '채팅 이벤트:',
                         event
@@ -214,6 +240,7 @@ const ChatSocketLayout = () => {
                             unlockKey
                         );
 
+                        setLatestUnlockEvent(event);
                         setPendingUnlockEvent(
                             event
                         );
@@ -242,6 +269,10 @@ const ChatSocketLayout = () => {
                 onError: (
                     socketError
                 ) => {
+                    if (clientRef.current !== client) {
+                        return;
+                    }
+
                     console.error(
                         '채팅 WebSocket 오류:',
                         socketError
@@ -253,7 +284,7 @@ const ChatSocketLayout = () => {
                         socketError.code ===
                         'CHAT_ROOM_ACCESS_DENIED'
                     ) {
-                        navigate('/chat');
+                        navigateRef.current('/chat');
 
                         return;
                     }
@@ -282,17 +313,14 @@ const ChatSocketLayout = () => {
                 },
 
                 onConnected: () => {
-                    /*
-                     * 새로운 채팅방에 연결된 경우
-                     * 이전 방의 완료 상태 초기화.
-                     *
-                     * 현재 방이 실제 COMPLETED라면
-                     * ChatRoom 상세 조회 결과가
-                     * 다시 markRelationshipCompleted를 호출한다.
-                     */
-                    setRelationshipCompleted(
-                        false
-                    );
+                    if (clientRef.current !== client) {
+                        return;
+                    }
+
+                    if (hasConnected) {
+                        setReconnectCount((count) => count + 1);
+                    }
+                    hasConnected = true;
 
                     setIsSocketConnected(
                         true
@@ -300,6 +328,10 @@ const ChatSocketLayout = () => {
                 },
 
                 onDisconnected: () => {
+                    if (clientRef.current !== client) {
+                        return;
+                    }
+
                     setIsSocketConnected(
                         false
                     );
@@ -314,21 +346,13 @@ const ChatSocketLayout = () => {
                 clientRef.current ===
                 client
             ) {
-                clientRef.current =
-                    null;
+                clientRef.current = null;
+                disconnectChatSocket(client);
+                setIsSocketConnected(false);
             }
-
-            disconnectChatSocket(
-                client
-            );
-
-            setIsSocketConnected(
-                false
-            );
         };
     }, [
         chatId,
-        navigate,
         closeSocket,
         markRelationshipCompleted,
     ]);
@@ -377,16 +401,20 @@ const ChatSocketLayout = () => {
         useMemo(
             () => ({
                 isSocketConnected,
-                latestMessage,
+                subscribeToMessages,
                 latestEvent,
+                latestUnlockEvent,
+                reconnectCount,
                 relationshipCompleted,
                 sendMessage,
                 syncRelationshipStatus,
             }),
             [
                 isSocketConnected,
-                latestMessage,
+                subscribeToMessages,
                 latestEvent,
+                latestUnlockEvent,
+                reconnectCount,
                 relationshipCompleted,
                 sendMessage,
                 syncRelationshipStatus,

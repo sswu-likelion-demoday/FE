@@ -1,8 +1,9 @@
 import './PartnerProfile.scss';
 
 import {
-  useCallback,
   useEffect,
+  useLayoutEffect,
+  useRef,
   useState,
 } from 'react';
 
@@ -45,7 +46,8 @@ const PartnerProfile = () => {
     useParams();
 
   const {
-    latestEvent,
+    latestUnlockEvent,
+    reconnectCount,
   } = useChatSocket();
 
   const [
@@ -53,14 +55,9 @@ const PartnerProfile = () => {
     setPartnerProfile,
   ] = useState(null);
 
-  const [
-    relationshipId,
-    setRelationshipId,
-  ] = useState(
-    location.state
-      ?.relationshipId ??
-    null
-  );
+  const routeRelationshipId = location.state?.relationshipId;
+  const resolvedRelationshipIdRef = useRef(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   const [
     selectedSection,
@@ -79,115 +76,61 @@ const PartnerProfile = () => {
     setErrorMessage,
   ] = useState('');
 
-  /*
-   * relationshipId가 state에 없으면
-   * 채팅방 상세 API에서 찾는다.
-   *
-   * URL 직접 진입에도 대응.
-   */
-  const resolveRelationshipId =
-    useCallback(
-      async () => {
-        if (
-          relationshipId
-        ) {
-          return relationshipId;
+  useLayoutEffect(() => {
+    let ignore = false;
+
+    const fetchPartnerProfile = async () => {
+      if (ignore) {
+        return;
+      }
+
+      setErrorMessage('');
+
+      try {
+        let relationshipId = routeRelationshipId ?? resolvedRelationshipIdRef.current;
+        if (!relationshipId) {
+          const chatRoom = await getChatRoomDetail(chatId);
+          if (ignore) {
+            return;
+          }
+          relationshipId = chatRoom.relationshipId;
+          resolvedRelationshipIdRef.current = relationshipId;
         }
 
-        const chatRoom =
-          await getChatRoomDetail(
-            chatId
-          );
-
-        const resolvedId =
-          chatRoom.relationshipId;
-
-        setRelationshipId(
-          resolvedId
-        );
-
-        return resolvedId;
-      },
-      [
-        chatId,
-        relationshipId,
-      ]
-    );
-
-  /*
-   * 상대 프로필 조회
-   */
-  const fetchPartnerProfile =
-    useCallback(
-      async (
-        showLoading = false
-      ) => {
-        try {
-          if (showLoading) {
-            setIsLoading(true);
-          }
-
-          setErrorMessage('');
-
-          const resolvedId =
-            await resolveRelationshipId();
-
-          const data =
-            await getPartnerProfile(
-              resolvedId
-            );
-
-          setPartnerProfile(
-            data
-          );
-        } catch (error) {
-          setErrorMessage(
-            error.message ||
-            '상대 프로필을 불러오지 못했습니다.'
-          );
-        } finally {
-          if (showLoading) {
-            setIsLoading(
-              false
-            );
-          }
+        if (!relationshipId) {
+          throw new Error('관계 정보를 확인할 수 없습니다.');
         }
-      },
-      [resolveRelationshipId]
-    );
 
-  /*
-   * 최초 프로필 조회
-   */
-  useEffect(() => {
-    fetchPartnerProfile(
-      true
-    );
-  }, [
-    fetchPartnerProfile,
-  ]);
+        const data = await getPartnerProfile(relationshipId);
+        if (!ignore) {
+          setPartnerProfile(data);
+        }
+      } catch (error) {
+        if (!ignore) {
+          if (
+            error.status === 401 ||
+            error.status === 403 ||
+            error.code === 'RELATIONSHIP_ACCESS_DENIED' ||
+            error.code === 'AUTH_UNAUTHORIZED'
+          ) {
+            setPartnerProfile(null);
+          }
+          setErrorMessage(error.message || '상대 프로필을 불러오지 못했습니다.');
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
+    };
 
-  /*
-   * INFORMATION_UNLOCKED 이벤트가
-   * 들어오면 실제 프로필 API를
-   * 다시 호출한다.
-   *
-   * WebSocket의 unlockLabel이 아니라
-   * 이 API 응답이 실제 공개 정보의 기준.
-   */
-  useEffect(() => {
-    if (
-      latestEvent?.type !==
-      'INFORMATION_UNLOCKED'
-    ) {
-      return;
-    }
+    // StrictMode의 첫 setup이 정리되면 요청을 시작하지 않는다.
+    Promise.resolve().then(fetchPartnerProfile);
 
-    fetchPartnerProfile();
-  }, [
-    latestEvent,
-    fetchPartnerProfile,
-  ]);
+    return () => {
+      ignore = true;
+    };
+  }, [chatId, routeRelationshipId, latestUnlockEvent, reconnectCount, retryCount]);
 
   /*
    * 현재 API 상태
@@ -322,10 +265,7 @@ const PartnerProfile = () => {
     );
   }
 
-  if (
-    errorMessage ||
-    !partnerProfile
-  ) {
+  if (!partnerProfile) {
     return (
       <div className="page">
         <div className="partner_profile">
@@ -380,6 +320,17 @@ const PartnerProfile = () => {
         </header>
 
         <main className="partner_profile_content">
+          {errorMessage && (
+            <div role="status">
+              <p>프로필을 갱신하지 못했습니다. {errorMessage}</p>
+              <button
+                type="button"
+                onClick={() => setRetryCount((count) => count + 1)}
+              >
+                다시 시도
+              </button>
+            </div>
+          )}
           <div className="partner_profile_main">
             <div className="partner_profile_image_wrap">
               <img

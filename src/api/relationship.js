@@ -49,17 +49,23 @@ export const getPartnerProfile =
                 }
             );
 
-        const result =
-            await response.json();
+        const result = await response.json().catch((error) => {
+            if (response.ok) {
+                throw error;
+            }
+            return null;
+        });
 
         if (
             !response.ok ||
             !result.success
         ) {
-            throw createApiError(
+            const error = createApiError(
                 result,
                 '상대 프로필 조회에 실패했습니다.'
             );
+            error.status = response.status;
+            throw error;
         }
 
         return result.data;

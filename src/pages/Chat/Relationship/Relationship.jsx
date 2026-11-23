@@ -1,7 +1,7 @@
 import './Relationship.scss';
 
 import {
-    useEffect,
+    useLayoutEffect,
     useState,
 } from 'react';
 
@@ -15,6 +15,8 @@ import {
     getRelationshipDetail,
 } from '../../../api/relationship';
 
+import { getChatRoomDetail } from '../../../api/chat';
+
 import arrow_left from '../../../assets/images/Chat/arrow_left.svg';
 
 import RelationshipSummaryCard from '../components/RelationshipSummaryCard/RelationshipSummaryCard';
@@ -25,8 +27,10 @@ const Relationship = () => {
     const location = useLocation();
     const { chatId } = useParams();
 
-    const relationshipId =
-        location.state?.relationshipId;
+    const routeRelationshipId = location.state?.relationshipId;
+    const [resolvedRelationshipId, setResolvedRelationshipId] = useState(null);
+    const [resolvedPartner, setResolvedPartner] = useState(null);
+    const relationshipId = routeRelationshipId ?? resolvedRelationshipId;
 
     const [
         relationshipDetail,
@@ -43,66 +47,78 @@ const Relationship = () => {
         setErrorMessage,
     ] = useState('');
 
-    useEffect(() => {
-        const fetchRelationship =
-            async () => {
-                if (!relationshipId) {
-                    setErrorMessage(
-                        '관계 정보를 확인할 수 없습니다.'
-                    );
-                    setIsLoading(false);
+    useLayoutEffect(() => {
+        let ignore = false;
+
+        const fetchRelationship = async () => {
+            try {
+                setIsLoading(true);
+                setErrorMessage('');
+
+                const chatRoom = routeRelationshipId
+                    ? null
+                    : await getChatRoomDetail(chatId);
+                if (ignore) {
                     return;
                 }
 
-                try {
-                    setIsLoading(true);
-                    setErrorMessage('');
+                const id = routeRelationshipId ?? chatRoom?.relationshipId;
+                if (!id) {
+                    throw new Error('관계 정보를 확인할 수 없습니다.');
+                }
 
-                    const data =
-                        await getRelationshipDetail(
-                            relationshipId
-                        );
+                const data = await getRelationshipDetail(id);
+                if (ignore) {
+                    return;
+                }
 
-                    setRelationshipDetail(
-                        data
+                setResolvedRelationshipId(id);
+                setResolvedPartner(chatRoom?.partner);
+                setRelationshipDetail(data);
+            } catch (error) {
+                if (ignore) {
+                    return;
+                }
+
+                if (
+                    error.code ===
+                    'RELATIONSHIP_NOT_FOUND' ||
+                    error.code ===
+                    'RELATIONSHIP_ENDED'
+                ) {
+                    navigate(
+                        '/chat'
                     );
-                } catch (error) {
-                    if (
-                        error.code ===
-                        'RELATIONSHIP_NOT_FOUND' ||
-                        error.code ===
-                        'RELATIONSHIP_ENDED'
-                    ) {
-                        navigate(
-                            '/chat'
-                        );
-                        return;
-                    }
+                    return;
+                }
 
-                    if (
-                        error.code ===
-                        'RELATIONSHIP_ACCESS_DENIED'
-                    ) {
-                        setErrorMessage(
-                            '이 관계 정보에 접근할 수 없습니다.'
-                        );
-                        return;
-                    }
-
+                if (
+                    error.code ===
+                    'RELATIONSHIP_ACCESS_DENIED'
+                ) {
                     setErrorMessage(
-                        error.message ||
-                        '관계 진행 정보를 불러오지 못했습니다.'
+                        '이 관계 정보에 접근할 수 없습니다.'
                     );
-                } finally {
+                    return;
+                }
+
+                setErrorMessage(
+                    error.message ||
+                    '관계 진행 정보를 불러오지 못했습니다.'
+                );
+            } finally {
+                if (!ignore) {
                     setIsLoading(false);
                 }
-            };
+            }
+        };
 
         fetchRelationship();
-    }, [
-        relationshipId,
-        navigate,
-    ]);
+
+        return () => {
+            ignore = true;
+        };
+    }, [chatId, routeRelationshipId, navigate]);
 
     const relationshipStatus =
         relationshipDetail
@@ -236,7 +252,7 @@ const Relationship = () => {
 
         return (
             stage.quests ?? []
-        ).map((quest) => {
+        ).map((quest, index) => {
             const isCompleted =
                 quest.status ===
                 'COMPLETED';
@@ -265,6 +281,7 @@ const Relationship = () => {
                                 .relationshipQuestId,
                         stage:
                             stage.stage,
+                        quest: index + 1,
                     }
                     : undefined,
             };
@@ -349,6 +366,15 @@ const Relationship = () => {
 
                 <main className="relationship_content">
                     <RelationshipSummaryCard
+                        partnerNickname={
+                            location.state?.partnerNickname ?? resolvedPartner?.nickname
+                        }
+                        partnerImageUrl={
+                            location.state?.partnerImageUrl ??
+                            (resolvedPartner?.profileImageUnlocked
+                                ? resolvedPartner.profileImageUrl
+                                : undefined)
+                        }
                         stage={
                             currentStage
                         }
