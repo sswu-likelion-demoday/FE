@@ -1,97 +1,172 @@
 import './ChatList.scss';
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  useEffect,
+  useState,
+} from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import BottomNav from '../../../components/BottomNav/BottomNav';
+
+import { getChatRooms } from '../../../api/chat';
 
 import quest_orb from '../../../assets/images/Chat/quest_orb.svg';
 import profile_purple from '../../../assets/images/Chat/profile_purple.svg';
 import profile_pink from '../../../assets/images/Chat/profile_pink.svg';
 import profile_blue from '../../../assets/images/Chat/profile_blue.svg';
 
-const chatData = [
-  {
-    id: 1,
-    profileImage: profile_purple,
-    profileText: '달',
-    name: '달빛여우',
-    quest: '2단계 · 알아가는 중',
-    questStatus: 'progress',
-    message:
-      '주말엔 보통 한강에서 러닝해요! 반포 쪽이요',
-    time: '방금',
-    unread: 2,
-  },
-  {
-    id: 2,
-    profileImage: profile_pink,
-    profileText: '새',
-    name: '새벽산책',
-    quest: null,
-    questStatus: null,
-    message: '안녕하세요:)',
-    time: '오후 6:12',
-    unread: 1,
-  },
-  {
-    id: 3,
-    profileImage: profile_blue,
-    profileText: '고',
-    name: '고양이집사',
-    quest: '인연 완료',
-    questStatus: 'complete',
-    message: '다음에 그 카페 같이 가봐요',
-    time: '어제',
-    unread: 0,
-  },
+const defaultProfileImages = [
+  profile_purple,
+  profile_pink,
+  profile_blue,
 ];
+
+const formatMessageTime = (dateString) => {
+  if (!dateString) {
+    return '';
+  }
+
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const now = new Date();
+
+  const diffMilliseconds =
+    now.getTime() - date.getTime();
+
+  const diffMinutes = Math.floor(
+    diffMilliseconds / (1000 * 60)
+  );
+
+  if (diffMinutes >= 0 && diffMinutes < 1) {
+    return '방금';
+  }
+
+  const isToday =
+    now.getFullYear() === date.getFullYear() &&
+    now.getMonth() === date.getMonth() &&
+    now.getDate() === date.getDate();
+
+  if (isToday) {
+    return date.toLocaleTimeString('ko-KR', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
+
+  const yesterday = new Date(now);
+
+  yesterday.setDate(
+    yesterday.getDate() - 1
+  );
+
+  const isYesterday =
+    yesterday.getFullYear() ===
+    date.getFullYear() &&
+    yesterday.getMonth() ===
+    date.getMonth() &&
+    yesterday.getDate() ===
+    date.getDate();
+
+  if (isYesterday) {
+    return '어제';
+  }
+
+  return `${date.getMonth() + 1}/${date.getDate()}`;
+};
 
 function ChatList() {
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const blockedChatId =
-    location.state?.blockedChatId;
+  const [chatRooms, setChatRooms] =
+    useState([]);
 
-  const endedChatId =
-    location.state?.endedChatId;
+  const [totalCount, setTotalCount] =
+    useState(0);
 
-  const completedChatId =
-    location.state?.completedChatId;
+  const [activeCount, setActiveCount] =
+    useState(0);
 
-  /*
-   * 차단된 채팅은 목록에서 숨김
-   */
-  const visibleChatData =
-    chatData.filter(
-      (chat) =>
-        chat.id !== blockedChatId
-    );
+  const [isLoading, setIsLoading] =
+    useState(true);
 
-  /*
-   * 진행 중 인연 계산
-   *
-   * 관계 종료 → 제외
-   * 인연 완료 → 제외
-   * 나머지 → 진행 중
-   */
-  const activeRelationshipCount =
-    visibleChatData.filter((chat) => {
-      const isEnded =
-        chat.id === endedChatId;
+  const [errorMessage, setErrorMessage] =
+    useState('');
 
-      const isComplete =
-        chat.questStatus === 'complete' ||
-        chat.id === completedChatId;
+  useEffect(() => {
+    const fetchChatRooms = async () => {
+      try {
+        setIsLoading(true);
+        setErrorMessage('');
 
-      return (
-        !isEnded &&
-        !isComplete
+        const data =
+          await getChatRooms();
+
+        setChatRooms(
+          data.chatRooms ?? []
+        );
+
+        setTotalCount(
+          data.totalCount ?? 0
+        );
+
+        setActiveCount(
+          data.activeCount ?? 0
+        );
+      } catch (error) {
+        setErrorMessage(
+          error.message ||
+          '채팅방 목록을 불러오지 못했습니다.'
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchChatRooms();
+  }, []);
+
+  const handleChatClick = (chat) => {
+    const isComplete =
+      chat.relationshipStatus ===
+      'COMPLETED';
+
+    if (isComplete) {
+      navigate(
+        `/chat/${chat.chatRoomId}`,
+        {
+          state: {
+            relationshipComplete: true,
+            completedStage: 4,
+            currentStage: 4,
+            stage: 4,
+            quest: 4,
+            relationshipId:
+              chat.relationshipId,
+          },
+        }
       );
-    }).length;
 
-  const totalRelationshipCount =
-    visibleChatData.length;
+      return;
+    }
+
+    navigate(
+      `/chat/${chat.chatRoomId}`,
+      {
+        state: {
+          relationshipId:
+            chat.relationshipId,
+          stage:
+            chat.currentStage?.stage ??
+            1,
+        },
+      }
+    );
+  };
 
   return (
     <div className="page">
@@ -122,152 +197,158 @@ function ChatList() {
 
             <span className="list_quest_banner_badge">
               진행 중{' '}
-              {activeRelationshipCount}/
-              {totalRelationshipCount}
+              {activeCount}/
+              {totalCount}
             </span>
           </section>
 
           <h2 className="chat_list_count">
-            나의 인연{' '}
-            {visibleChatData.length}
+            나의 인연 {totalCount}
           </h2>
 
           <section className="chat_list_items">
-            {visibleChatData.map(
-              (chat) => {
-                const isEnded =
-                  chat.id ===
-                  endedChatId;
+            {isLoading && (
+              <p>
+                채팅 목록을 불러오는 중이에요.
+              </p>
+            )}
 
-                const isComplete =
-                  !isEnded &&
-                  (chat.questStatus ===
-                    'complete' ||
-                    chat.id ===
-                    completedChatId);
+            {!isLoading &&
+              errorMessage && (
+                <p>
+                  {errorMessage}
+                </p>
+              )}
 
-                const handleChatClick =
-                  () => {
-                    if (isEnded) {
-                      navigate(
-                        `/chat/${chat.id}`,
-                        {
-                          state: {
-                            relationshipEnded:
-                              true,
-                          },
-                        }
-                      );
+            {!isLoading &&
+              !errorMessage &&
+              chatRooms.length === 0 && (
+                <p>
+                  아직 진행 중인 인연이 없어요.
+                </p>
+              )}
 
-                      return;
-                    }
+            {!isLoading &&
+              !errorMessage &&
+              chatRooms.map(
+                (chat, index) => {
+                  const isComplete =
+                    chat.relationshipStatus ===
+                    'COMPLETED';
 
-                    if (isComplete) {
-                      navigate(
-                        `/chat/${chat.id}`,
-                        {
-                          state: {
-                            relationshipComplete:
-                              true,
-                            completedStage: 4,
-                            currentStage: 4,
-                            stage: 4,
-                            quest: 4,
-                          },
-                        }
-                      );
+                  const partner =
+                    chat.partner ?? {};
 
-                      return;
-                    }
+                  const hasUnlockedProfileImage =
+                    partner.profileImageUnlocked ===
+                    true &&
+                    partner.profileImageUrl;
 
-                    navigate(
-                      `/chat/${chat.id}`
-                    );
-                  };
+                  const profileImage =
+                    hasUnlockedProfileImage
+                      ? partner.profileImageUrl
+                      : defaultProfileImages[
+                      index %
+                      defaultProfileImages.length
+                      ];
 
-                return (
-                  <button
-                    type="button"
-                    className="chat_item"
-                    key={chat.id}
-                    onClick={
-                      handleChatClick
-                    }
-                  >
-                    <div className="chat_item_profile_wrap">
-                      <img
-                        src={
-                          chat.profileImage
-                        }
-                        alt={`${chat.name} 프로필`}
-                        className="chat_item_profile"
-                      />
+                  const profileText =
+                    partner.nickname?.charAt(
+                      0
+                    ) ?? '';
 
-                      <span className="chat_item_profile_text">
-                        {
-                          chat.profileText
-                        }
-                      </span>
-                    </div>
+                  const questText =
+                    isComplete
+                      ? '인연 완료'
+                      : chat.currentStage
+                        ? `${chat.currentStage.stage}단계 · ${chat.currentStage.name}`
+                        : null;
 
-                    <div className="chat_item_content">
-                      <div className="chat_item_top">
-                        <div className="chat_item_name_area">
-                          <strong className="chat_item_name">
-                            {chat.name}
-                          </strong>
+                  const questStatus =
+                    isComplete
+                      ? 'complete'
+                      : 'progress';
 
-                          {isEnded ? (
-                            <span className="chat_item_quest chat_item_quest_complete">
-                              관계 종료
-                            </span>
-                          ) : isComplete ? (
-                            <span className="chat_item_quest chat_item_quest_complete">
-                              인연 완료
-                            </span>
-                          ) : (
-                            chat.quest && (
+                  return (
+                    <button
+                      type="button"
+                      className="chat_item"
+                      key={
+                        chat.chatRoomId
+                      }
+                      onClick={() =>
+                        handleChatClick(
+                          chat
+                        )
+                      }
+                    >
+                      <div className="chat_item_profile_wrap">
+                        <img
+                          src={
+                            profileImage
+                          }
+                          alt={`${partner.nickname ?? '상대방'} 프로필`}
+                          className="chat_item_profile"
+                        />
+
+                        {!hasUnlockedProfileImage && (
+                          <span className="chat_item_profile_text">
+                            {
+                              profileText
+                            }
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="chat_item_content">
+                        <div className="chat_item_top">
+                          <div className="chat_item_name_area">
+                            <strong className="chat_item_name">
+                              {
+                                partner.nickname
+                              }
+                            </strong>
+
+                            {questText && (
                               <span
-                                className={`chat_item_quest chat_item_quest_${chat.questStatus}`}
+                                className={`chat_item_quest chat_item_quest_${questStatus}`}
                               >
                                 {
-                                  chat.quest
+                                  questText
                                 }
                               </span>
-                            )
-                          )}
+                            )}
+                          </div>
+
+                          <span className="chat_item_time">
+                            {formatMessageTime(
+                              chat.lastMessageAt
+                            )}
+                          </span>
                         </div>
 
-                        <span className="chat_item_time">
-                          {chat.time}
-                        </span>
-                      </div>
-
-                      <div className="chat_item_bottom">
-                        <p className="chat_item_message">
-                          {isEnded
-                            ? '이번 수정과의 인연은 여기서 마무리되었어요.'
-                            : isComplete
+                        <div className="chat_item_bottom">
+                          <p className="chat_item_message">
+                            {isComplete
                               ? '인연이 완성되었어요!'
-                              : chat.message}
-                        </p>
+                              : chat.lastMessage}
+                          </p>
 
-                        {!isEnded &&
-                          !isComplete &&
-                          chat.unread >
-                          0 && (
-                            <span className="chat_item_unread">
-                              {
-                                chat.unread
-                              }
-                            </span>
-                          )}
+                          {!isComplete &&
+                            chat.unreadCount >
+                            0 && (
+                              <span className="chat_item_unread">
+                                {
+                                  chat.unreadCount
+                                }
+                              </span>
+                            )}
+                        </div>
                       </div>
-                    </div>
-                  </button>
-                );
-              }
-            )}
+                    </button>
+                  );
+                }
+              )}
           </section>
         </main>
       </div>
