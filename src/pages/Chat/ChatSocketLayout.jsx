@@ -78,10 +78,80 @@ const ChatSocketLayout = () => {
     ] = useState(null);
 
     /*
+     * WebSocket 이벤트 기준
+     * 관계 완료 여부.
+     *
+     * REST 상세 재조회가 끝나기 전에도
+     * 메시지 전송을 즉시 차단하기 위해 사용.
+     */
+    const [
+        relationshipCompleted,
+        setRelationshipCompleted,
+    ] = useState(false);
+
+    /*
+     * 소켓 연결 종료
+     */
+    const closeSocket =
+        useCallback(() => {
+            const client =
+                clientRef.current;
+
+            if (client) {
+                disconnectChatSocket(
+                    client
+                );
+
+                clientRef.current =
+                    null;
+            }
+
+            setIsSocketConnected(
+                false
+            );
+        }, []);
+
+    /*
+     * 관계 완료 처리
+     *
+     * WebSocket 이벤트뿐 아니라
+     * REST 상세 조회 결과가 COMPLETED인 경우에도
+     * 동일하게 호출한다.
+     */
+    const markRelationshipCompleted =
+        useCallback(() => {
+            setRelationshipCompleted(
+                true
+            );
+
+            closeSocket();
+        }, [closeSocket]);
+
+    /*
+     * ChatRoom의 REST 조회 결과와
+     * WebSocket 상태를 동기화.
+     */
+    const syncRelationshipStatus =
+        useCallback(
+            (
+                relationshipStatus
+            ) => {
+                if (
+                    relationshipStatus ===
+                    'COMPLETED'
+                ) {
+                    markRelationshipCompleted();
+                }
+            },
+            [
+                markRelationshipCompleted,
+            ]
+        );
+
+    /*
      * WebSocket 연결
      *
-     * /chat/:chatId 아래의
-     * 모든 자식 화면에서
+     * /chat/:chatId 아래 모든 화면에서
      * 동일한 연결을 유지한다.
      */
     useEffect(() => {
@@ -94,7 +164,7 @@ const ChatSocketLayout = () => {
                 chatRoomId: chatId,
 
                 /*
-                 * TEXT / SYSTEM 메시지 수신
+                 * TEXT / SYSTEM 메시지
                  */
                 onMessage: (
                     message
@@ -105,7 +175,7 @@ const ChatSocketLayout = () => {
                 },
 
                 /*
-                 * 관계 / 퀘스트 이벤트 수신
+                 * 관계 / 퀘스트 이벤트
                  */
                 onEvent: (
                     event
@@ -120,12 +190,7 @@ const ChatSocketLayout = () => {
                     );
 
                     /*
-                     * 실제 해금 정보 자체는
-                     * WebSocket payload가 아니라
-                     * 이후 프로필 API 응답이 기준.
-                     *
-                     * 여기서는 사용자에게
-                     * 해금됐다는 사실만 알려준다.
+                     * 정보 해금 이벤트
                      */
                     if (
                         event.type ===
@@ -152,11 +217,27 @@ const ChatSocketLayout = () => {
                         setPendingUnlockEvent(
                             event
                         );
+
+                        return;
+                    }
+
+                    /*
+                     * 관계 완료 이벤트
+                     *
+                     * 상세 REST 재조회 이전에도
+                     * 즉시 메시지 전송을 막고
+                     * 더 이상 필요 없는 소켓 연결을 종료.
+                     */
+                    if (
+                        event.type ===
+                        'RELATIONSHIP_COMPLETED'
+                    ) {
+                        markRelationshipCompleted();
                     }
                 },
 
                 /*
-                 * 개인 에러 채널
+                 * 개인 WebSocket 에러
                  */
                 onError: (
                     socketError
@@ -177,17 +258,42 @@ const ChatSocketLayout = () => {
                         return;
                     }
 
+                    /*
+                     * 이미 관계가 완료된 상태에서
+                     * 전송을 시도했을 경우.
+                     *
+                     * 바로 전송 차단.
+                     */
+                    if (
+                        socketError.code ===
+                        'CHAT_ROOM_NOT_WRITABLE'
+                    ) {
+                        markRelationshipCompleted();
+
+                        return;
+                    }
+
                     if (
                         socketError.code ===
                         'AUTH_UNAUTHORIZED'
                     ) {
-                        setIsSocketConnected(
-                            false
-                        );
+                        closeSocket();
                     }
                 },
 
                 onConnected: () => {
+                    /*
+                     * 새로운 채팅방에 연결된 경우
+                     * 이전 방의 완료 상태 초기화.
+                     *
+                     * 현재 방이 실제 COMPLETED라면
+                     * ChatRoom 상세 조회 결과가
+                     * 다시 markRelationshipCompleted를 호출한다.
+                     */
+                    setRelationshipCompleted(
+                        false
+                    );
+
                     setIsSocketConnected(
                         true
                     );
@@ -204,31 +310,46 @@ const ChatSocketLayout = () => {
             client;
 
         return () => {
-            setIsSocketConnected(
-                false
-            );
+            if (
+                clientRef.current ===
+                client
+            ) {
+                clientRef.current =
+                    null;
+            }
 
             disconnectChatSocket(
                 client
             );
 
-            clientRef.current =
-                null;
+            setIsSocketConnected(
+                false
+            );
         };
     }, [
         chatId,
         navigate,
+        closeSocket,
+        markRelationshipCompleted,
     ]);
 
     /*
-     * 실제 메시지 전송
-     *
-     * useMemo에서 사용하므로
-     * useCallback으로 고정
+     * 메시지 전송
      */
     const sendMessage =
         useCallback(
             (content) => {
+                /*
+                 * RELATIONSHIP_COMPLETED 이벤트를
+                 * 이미 받았다면 REST 갱신 전이라도
+                 * 전송하지 않는다.
+                 */
+                if (
+                    relationshipCompleted
+                ) {
+                    return false;
+                }
+
                 try {
                     sendChatMessage(
                         clientRef.current,
@@ -246,25 +367,29 @@ const ChatSocketLayout = () => {
                     return false;
                 }
             },
-            [chatId]
+            [
+                chatId,
+                relationshipCompleted,
+            ]
         );
 
-    /*
-     * Context 값
-     */
     const contextValue =
         useMemo(
             () => ({
                 isSocketConnected,
                 latestMessage,
                 latestEvent,
+                relationshipCompleted,
                 sendMessage,
+                syncRelationshipStatus,
             }),
             [
                 isSocketConnected,
                 latestMessage,
                 latestEvent,
+                relationshipCompleted,
                 sendMessage,
+                syncRelationshipStatus,
             ]
         );
 

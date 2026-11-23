@@ -52,7 +52,9 @@ const ChatRoom = () => {
     isSocketConnected,
     latestMessage,
     latestEvent,
+    relationshipCompleted,
     sendMessage,
+    syncRelationshipStatus,
   } = useChatSocket();
 
   const numericChatId =
@@ -108,9 +110,6 @@ const ChatRoom = () => {
     setShowQuestCard,
   ] = useState(false);
 
-  /*
-   * 메시지 시간 표시
-   */
   const formatMessageTime = (
     dateString
   ) => {
@@ -141,9 +140,6 @@ const ChatRoom = () => {
     );
   };
 
-  /*
-   * 가장 최신 messageId 찾기
-   */
   const getLatestMessage = (
     messageList
   ) => {
@@ -177,10 +173,7 @@ const ChatRoom = () => {
   };
 
   /*
-   * 채팅방 상세만 다시 조회
-   *
-   * WebSocket 이벤트 발생 후
-   * 서버 기준 최신 상태로 갱신한다.
+   * 채팅방 상세 재조회
    */
   const refreshChatRoomDetail =
     useCallback(
@@ -193,6 +186,18 @@ const ChatRoom = () => {
 
           setChatRoomDetail(
             data
+          );
+
+          /*
+           * REST 상태를 상위 WebSocket
+           * Layout과 동기화.
+           *
+           * 이미 완료된 채팅방에
+           * 직접 들어온 경우에도
+           * 소켓 연결을 종료한다.
+           */
+          syncRelationshipStatus(
+            data.relationshipStatus
           );
 
           if (
@@ -215,12 +220,14 @@ const ChatRoom = () => {
           );
         }
       },
-      [chatId]
+      [
+        chatId,
+        syncRelationshipStatus,
+      ]
     );
 
   /*
-   * 최초 채팅방 상세 +
-   * 메시지 내역 조회
+   * 최초 상세 + 메시지 조회
    */
   useEffect(() => {
     const fetchChatRoom =
@@ -246,6 +253,15 @@ const ChatRoom = () => {
             detailData
           );
 
+          /*
+           * 이미 완료된 관계라면
+           * WebSocket도 즉시 정리.
+           */
+          syncRelationshipStatus(
+            detailData
+              .relationshipStatus
+          );
+
           const fetchedMessages =
             messageData.messages ??
             [];
@@ -264,11 +280,6 @@ const ChatRoom = () => {
             false
           );
 
-          /*
-           * 현재 받아온 메시지 중
-           * 가장 최신 메시지까지
-           * 읽음 처리
-           */
           const latest =
             getLatestMessage(
               fetchedMessages
@@ -317,14 +328,19 @@ const ChatRoom = () => {
       };
 
     fetchChatRoom();
-  }, [chatId]);
+  }, [
+    chatId,
+    syncRelationshipStatus,
+  ]);
 
   /*
-   * WebSocket으로 새 메시지를
-   * 받았을 때 화면에 추가
+   * 실시간 메시지
    */
   useEffect(() => {
-    if (!latestMessage) {
+    if (
+      !latestMessage ||
+      relationshipCompleted
+    ) {
       return;
     }
 
@@ -350,10 +366,6 @@ const ChatRoom = () => {
       }
     );
 
-    /*
-     * 현재 채팅방을 보고 있으므로
-     * 새 메시지도 바로 읽음 처리
-     */
     if (
       latestMessage.messageId
     ) {
@@ -372,10 +384,11 @@ const ChatRoom = () => {
   }, [
     latestMessage,
     chatId,
+    relationshipCompleted,
   ]);
 
   /*
-   * WebSocket 관계 / 퀘스트 이벤트 처리
+   * 실시간 관계 / 퀘스트 이벤트
    */
   useEffect(() => {
     if (!latestEvent) {
@@ -386,10 +399,6 @@ const ChatRoom = () => {
       latestEvent.type ===
       'QUEST_OPENED'
     ) {
-      /*
-       * 서버에서 다음 퀘스트가
-       * 활성화됐으므로 상세 재조회
-       */
       refreshChatRoomDetail();
 
       setShowQuestCard(
@@ -403,13 +412,6 @@ const ChatRoom = () => {
       latestEvent.type ===
       'INFORMATION_UNLOCKED'
     ) {
-      /*
-       * 해금 모달은
-       * ChatSocketLayout이 표시.
-       *
-       * ChatRoom에서는 현재 단계와
-       * 퀘스트만 최신 상태로 갱신.
-       */
       refreshChatRoomDetail();
 
       return;
@@ -420,11 +422,16 @@ const ChatRoom = () => {
       'RELATIONSHIP_COMPLETED'
     ) {
       /*
-       * 상세 조회 결과가
-       * COMPLETED가 되면
-       * 입력창이 사라지고
-       * 읽기 전용으로 전환된다.
+       * Layout에서는 이벤트를 받자마자
+       * 전송을 막고 소켓을 종료.
+       *
+       * 여기서는 REST 상세를 다시 불러
+       * 서버의 최종 상태를 화면에 반영.
        */
+      setShowQuestCard(
+        false
+      );
+
       refreshChatRoomDetail();
     }
   }, [
@@ -432,9 +439,6 @@ const ChatRoom = () => {
     refreshChatRoomDetail,
   ]);
 
-  /*
-   * 상세 API 기준 상태
-   */
   const partner =
     chatRoomDetail?.partner ??
     {};
@@ -447,21 +451,30 @@ const ChatRoom = () => {
     chatRoomDetail
       ?.relationshipStatus;
 
+  /*
+   * REST 완료 상태 또는
+   * WebSocket 완료 이벤트 중
+   * 하나라도 완료라면 즉시 완료 UI.
+   */
   const isRelationshipComplete =
     relationshipStatus ===
-    'COMPLETED';
+    'COMPLETED' ||
+    relationshipCompleted;
 
-  /*
-   * 기존 퍼블리싱 테스트용
-   */
   const isRelationshipEnded =
     location.state
       ?.relationshipEnded ===
     true;
 
+  /*
+   * API writable=true여도
+   * RELATIONSHIP_COMPLETED 이벤트를
+   * 이미 받은 경우 즉시 전송 차단.
+   */
   const writable =
     chatRoomDetail
-      ?.writable === true;
+      ?.writable === true &&
+    !relationshipCompleted;
 
   const apiCurrentStage =
     chatRoomDetail
@@ -497,10 +510,6 @@ const ChatRoom = () => {
       currentStage
     );
 
-  /*
-   * 화면 이동 경로용
-   * 로컬 퀘스트 데이터
-   */
   const localCurrentQuest =
     !isRelationshipComplete
       ? getQuest(
@@ -524,10 +533,6 @@ const ChatRoom = () => {
     ];
   };
 
-  /*
-   * relationshipData에 남아 있는
-   * /chat/1 경로를 현재 chatId로 변경
-   */
   const getCurrentQuestPath =
     () => {
       if (
@@ -551,9 +556,6 @@ const ChatRoom = () => {
         return null;
       }
 
-      /*
-       * AI 퀴즈
-       */
       if (
         apiCurrentQuest.type ===
         'AI_QUIZ'
@@ -579,9 +581,6 @@ const ChatRoom = () => {
         };
       }
 
-      /*
-       * 인증 퀘스트
-       */
       if (
         localCurrentQuest.type ===
         'VERIFICATION'
@@ -606,9 +605,6 @@ const ChatRoom = () => {
         };
       }
 
-      /*
-       * 일반 채팅 퀘스트
-       */
       return {
         label:
           '새 퀘스트가 열렸어요',
@@ -637,9 +633,6 @@ const ChatRoom = () => {
   const questCardData =
     getQuestCardData();
 
-  /*
-   * 퀘스트 카드 버튼
-   */
   const handleQuestPrimaryClick =
     () => {
       const questPath =
@@ -668,18 +661,11 @@ const ChatRoom = () => {
         return;
       }
 
-      /*
-       * 일반 채팅 퀘스트는
-       * 버튼 클릭만으로 완료하지 않는다.
-       */
       setShowQuestCard(
         false
       );
     };
 
-  /*
-   * 관계 진행도 화면
-   */
   const handleRelationshipClick =
     () => {
       navigate(
@@ -704,9 +690,6 @@ const ChatRoom = () => {
       );
     };
 
-  /*
-   * 이전 메시지 조회
-   */
   const loadPreviousMessages =
     async () => {
       if (
@@ -736,11 +719,6 @@ const ChatRoom = () => {
               data.messages ??
               [];
 
-            /*
-             * REST 요청 중
-             * 실시간 메시지가 들어왔을 경우를
-             * 대비해 중복 제거
-             */
             const existingIds =
               new Set(
                 previousMessages.map(
@@ -785,20 +763,20 @@ const ChatRoom = () => {
       }
     };
 
-  /*
-   * 실시간 메시지 전송
-   */
   const handleSendMessage = (
     content
   ) => {
+    if (
+      isRelationshipComplete
+    ) {
+      return false;
+    }
+
     return sendMessage(
       content
     );
   };
 
-  /*
-   * 채팅 메뉴
-   */
   const handleBlock = () => {
     setShowMenu(false);
 
@@ -851,9 +829,6 @@ const ChatRoom = () => {
       );
     };
 
-  /*
-   * 로딩
-   */
   if (isLoading) {
     return (
       <div className="page">
@@ -867,9 +842,6 @@ const ChatRoom = () => {
     );
   }
 
-  /*
-   * 에러
-   */
   if (errorMessage) {
     return (
       <div className="page">
@@ -1048,9 +1020,6 @@ const ChatRoom = () => {
 
             {messages.map(
               (message) => {
-                /*
-                 * 시스템 메시지
-                 */
                 if (
                   message.messageType ===
                   'SYSTEM'
@@ -1067,12 +1036,6 @@ const ChatRoom = () => {
                   );
                 }
 
-                /*
-                 * 상대 userId와 같으면
-                 * 상대 메시지.
-                 *
-                 * 다르면 내 메시지.
-                 */
                 const messageType =
                   message.senderId ===
                     partner.userId
