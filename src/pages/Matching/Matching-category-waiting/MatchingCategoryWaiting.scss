@@ -1,0 +1,23 @@
+.page.MatchingCategoryWaiting_wrap {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-bottom: 120px;
+  background-image: linear-gradient(
+    to top,
+    rgba(110, 81, 242, 0.2),
+    rgba(247, 247, 255, 0.2)
+  );
+}
+
+.MatchingCategoryWaiting_wrap .matching_header {
+  background: none;
+}
+
+// ==========================================
+
+// 타이틀 텍스트 박스 아래에서 제목 텍스트 박스 위까지 38px (헤더 안 여백 1.5px + 36.5px)
+.MatchingCategoryWaiting_wrap .category_waiting {
+  padding-top: 36.5px;
+  background: none;
+}
