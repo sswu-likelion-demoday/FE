@@ -22,7 +22,7 @@ const EditProfile = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const accessToken = sessionStorage.getItem("accessToken");
+      const accessToken = localStorage.getItem("accessToken");
 
       if (!accessToken) return;
 
@@ -70,7 +70,7 @@ const EditProfile = () => {
   const handleSave = async () => {
     if (isSaving) return;
 
-    const accessToken = sessionStorage.getItem("accessToken");
+    const accessToken = localStorage.getItem("accessToken");
 
     if (!accessToken) {
       alert("로그인이 필요합니다.");

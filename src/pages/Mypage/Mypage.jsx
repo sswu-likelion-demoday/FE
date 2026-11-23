@@ -20,7 +20,7 @@ const Mypage = () => {
 
   useEffect(() => {
     const fetchMypage = async () => {
-      const accessToken = sessionStorage.getItem("accessToken");
+      const accessToken = localStorage.getItem("accessToken");
 
       if (!accessToken) return;
 
@@ -121,7 +121,10 @@ const Mypage = () => {
         <LogoutModal
           onCancel={() => setShowLogoutModal(false)}
           onConfirm={() => {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
             setShowLogoutModal(false);
+            navigate("/login", { replace: true });
           }}
         />
       )}

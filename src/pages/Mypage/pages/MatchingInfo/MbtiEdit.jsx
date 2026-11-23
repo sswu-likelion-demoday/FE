@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { updateMatchingProfile } from "../../../../api/mypage";
 import OptionGroup from "../../../Onboarding/Preference/components/OptionGroup";
 import MatchingEditLayout from "../../components/MatchingEditLayout";
 import "./MbtiEdit.scss";
@@ -113,12 +114,56 @@ const mbtiOptions = [
 
 const MbtiEdit = () => {
   const navigate = useNavigate();
-  const [selectedValues, setSelectedValues] = useState([2, 4, 6, 7]);
+  const location = useLocation();
+
+  const initialMbti = location.state?.mbti ?? "";
+
+  const [selectedValues, setSelectedValues] = useState(() =>
+    initialMbti
+      .split("")
+      .map((letter) => "EISNTFJP".indexOf(letter) + 1)
+      .filter((id) => id > 0),
+  );
+
+  const [isSaving, setIsSaving] = useState(false);
 
   const mbti = [...selectedValues]
     .sort((a, b) => a - b)
     .map((id) => "EISNTFJP"[id - 1])
     .join("");
+
+  const isValidMbti =
+    selectedValues.length === 4 &&
+    new Set(selectedValues.map((id) => Math.ceil(id / 2))).size === 4;
+
+  const handleSave = async () => {
+    if (!isValidMbti || isSaving) return;
+
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (!accessToken) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    if (mbti === initialMbti) {
+      navigate("/mypage/matching-info");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      await updateMatchingProfile(accessToken, { mbti });
+
+      alert("MBTI가 수정되었습니다.");
+      navigate("/mypage/matching-info");
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <MatchingEditLayout
@@ -135,8 +180,8 @@ const MbtiEdit = () => {
           항목마다 하나씩 선택 <span>{mbti}</span>
         </>
       }
-      onSave={() => navigate("/mypage/matching-info")}
-      disabled={selectedValues.length !== 4}
+      onSave={handleSave}
+      disabled={!isValidMbti || isSaving}
       footerText="변경한 성향은 다음 매칭부터 반영돼요"
     >
       <OptionGroup

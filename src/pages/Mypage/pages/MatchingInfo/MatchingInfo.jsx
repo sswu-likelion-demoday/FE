@@ -13,7 +13,7 @@ const MatchingInfo = () => {
 
   useEffect(() => {
     const fetchMatchingProfile = async () => {
-      const accessToken = sessionStorage.getItem("accessToken");
+      const accessToken = localStorage.getItem("accessToken");
 
       if (!accessToken) return;
 
@@ -86,7 +86,37 @@ const MatchingInfo = () => {
               description={info.description}
               items={info.items}
               isMbti={info.isMbti}
-              onEdit={() => navigate(info.path)}
+              onEdit={() => {
+                if (info.id === "mbti") {
+                  navigate(info.path, {
+                    state: { mbti: matchingData?.mbti },
+                  });
+                } else if (info.id === "category") {
+                  navigate(info.path, {
+                    state: {
+                      interestIds: matchingData?.interests?.map(
+                        (item) => item.id,
+                      ),
+                    },
+                  });
+                } else if (info.id === "hobby") {
+                  navigate(info.path, {
+                    state: {
+                      hobbyIds: matchingData?.hobbies?.map((item) => item.id),
+                    },
+                  });
+                } else if (info.id === "friend") {
+                  navigate(info.path, {
+                    state: {
+                      friendTypeIds: matchingData?.friendTypes?.map(
+                        (item) => item.id,
+                      ),
+                    },
+                  });
+                } else {
+                  navigate(info.path);
+                }
+              }}
             />
           ))}
         </div>

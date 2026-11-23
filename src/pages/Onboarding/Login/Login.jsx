@@ -20,8 +20,8 @@ const Login = () => {
 
       const data = await login(studentId.trim(), password);
 
-      sessionStorage.setItem("accessToken", data.accessToken);
-      sessionStorage.setItem("refreshToken", data.refreshToken);
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
 
       if (data.onboardingCompleted) {
         navigate("/mypage", { replace: true });

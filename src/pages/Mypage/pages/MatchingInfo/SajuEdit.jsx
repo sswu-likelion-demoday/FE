@@ -1,16 +1,62 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { updateSajuSettings } from "../../../../api/mypage";
 import MypageHeader from "../../components/MypageHeader";
 import BottomButton from "../../../Onboarding/Preference/components/BottomButton";
 import "./SajuEdit.scss";
 
 const SajuEdit = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const saju = location.state?.saju;
 
-  const [isAllowed, setIsAllowed] = useState(true);
-  const [calendarType, setCalendarType] = useState("양력");
-  const [birthDate, setBirthDate] = useState("040805");
-  const [birthTime, setBirthTime] = useState("12:00");
+  const [isAllowed, setIsAllowed] = useState(saju?.enabled ?? false);
+  const [calendarType, setCalendarType] = useState(
+    saju?.calendarType ?? "SOLAR",
+  );
+  const [birthDate, setBirthDate] = useState(saju?.birthDate ?? "");
+  const [birthTime, setBirthTime] = useState(saju?.birthTime ?? "");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (isSaving) return;
+
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (!accessToken) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    if (isAllowed && !birthDate) {
+      alert("생년월일을 입력해 주세요.");
+      return;
+    }
+
+    const sajuData = isAllowed
+      ? {
+          enabled: true,
+          birthDate,
+          calendarType,
+          ...(birthTime && { birthTime }),
+        }
+      : {
+          enabled: false,
+        };
+
+    try {
+      setIsSaving(true);
+
+      await updateSajuSettings(accessToken, sajuData);
+
+      alert("사주 매칭 설정이 저장되었습니다.");
+      navigate("/mypage/matching-info");
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="page SajuEdit_wrap">
@@ -20,7 +66,6 @@ const SajuEdit = () => {
           onBack={() => navigate("/mypage/matching-info")}
         />
       </div>
-
       <div className="sajuedit_main">
         <div className="sajuedit_top">
           <h2>
@@ -47,15 +92,18 @@ const SajuEdit = () => {
           <div className="sajuedit_birth_top">
             <label htmlFor="saju-birth-date">생년월일</label>
             <div className="sajuedit_calendar">
-              {["양력", "음력"].map((type) => (
+              {[
+                { label: "양력", value: "SOLAR" },
+                { label: "음력", value: "LUNAR" },
+              ].map((type) => (
                 <button
-                  key={type}
+                  key={type.value}
                   type="button"
-                  className={calendarType === type ? "selected" : ""}
-                  aria-pressed={calendarType === type}
-                  onClick={() => setCalendarType(type)}
+                  className={calendarType === type.value ? "selected" : ""}
+                  aria-pressed={calendarType === type.value}
+                  onClick={() => setCalendarType(type.value)}
                 >
-                  {type}
+                  {type.label}
                 </button>
               ))}
             </div>
@@ -63,12 +111,9 @@ const SajuEdit = () => {
 
           <input
             id="saju-birth-date"
-            type="text"
-            inputMode="numeric"
-            maxLength={6}
-            placeholder="생년월일 6자리"
+            type="date"
             value={birthDate}
-            onChange={(e) => setBirthDate(e.target.value.replace(/\D/g, ""))}
+            onChange={(e) => setBirthDate(e.target.value)}
           />
         </div>
 
@@ -76,18 +121,16 @@ const SajuEdit = () => {
           <label htmlFor="saju-birth-time">태어난 시간</label>
           <input
             id="saju-birth-time"
-            type="text"
-            placeholder="12:00"
+            type="time"
             value={birthTime}
             onChange={(e) => setBirthTime(e.target.value)}
           />
           <p>태어난 시간을 모르면 비워두셔도 돼요</p>
         </div>
       </div>
-
       <div className="sajuedit_bottom">
-        <BottomButton onClick={() => navigate("/mypage/matching-info")}>
-          저장하기
+        <BottomButton onClick={handleSave}>
+          {isSaving ? "저장 중" : "저장하기"}
         </BottomButton>
         <p>사주 정보는 사주 매칭에만 사용돼요</p>
       </div>

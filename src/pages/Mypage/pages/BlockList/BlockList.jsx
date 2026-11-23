@@ -18,7 +18,7 @@ const BlockList = () => {
 
   useEffect(() => {
     const fetchBlockedUsers = async () => {
-      const accessToken = sessionStorage.getItem("accessToken");
+      const accessToken = localStorage.getItem("accessToken");
 
       if (!accessToken) return;
 
@@ -43,7 +43,7 @@ const BlockList = () => {
   const handleUnblock = async () => {
     if (!selectedUser || isUnblocking) return;
 
-    const accessToken = sessionStorage.getItem("accessToken");
+    const accessToken = localStorage.getItem("accessToken");
 
     if (!accessToken) {
       alert("로그인이 필요합니다.");
