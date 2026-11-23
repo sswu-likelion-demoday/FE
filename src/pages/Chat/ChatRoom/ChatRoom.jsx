@@ -10,6 +10,7 @@ import {
 import {
   getChatRoomDetail,
   getChatMessages,
+  markChatRoomAsRead,
 } from '../../../api/chat';
 
 import ChatHeader from '../components/ChatHeader/ChatHeader';
@@ -126,6 +127,39 @@ const ChatRoom = () => {
   };
 
   /*
+   * 받아온 메시지 중
+   * 가장 최신 messageId 조회
+   */
+  const getLatestMessage = (
+    messageList
+  ) => {
+    if (
+      !messageList ||
+      messageList.length === 0
+    ) {
+      return null;
+    }
+
+    return messageList.reduce(
+      (latest, current) => {
+        if (!latest) {
+          return current;
+        }
+
+        return Number(
+          current.messageId
+        ) >
+          Number(
+            latest.messageId
+          )
+          ? current
+          : latest;
+      },
+      null
+    );
+  };
+
+  /*
    * 채팅방 상세 + 최초 메시지 조회
    */
   useEffect(() => {
@@ -151,9 +185,12 @@ const ChatRoom = () => {
             detailData
           );
 
-          setMessages(
+          const fetchedMessages =
             messageData.messages ??
-            []
+            [];
+
+          setMessages(
+            fetchedMessages
           );
 
           setNextCursor(
@@ -166,14 +203,42 @@ const ChatRoom = () => {
             false
           );
 
+          /*
+           * 채팅방에 들어온 시점에
+           * 현재 가장 최신 메시지까지
+           * 읽음 처리
+           */
+          const latestMessage =
+            getLatestMessage(
+              fetchedMessages
+            );
+
+          if (latestMessage) {
+            try {
+              await markChatRoomAsRead(
+                chatId,
+                latestMessage.messageId
+              );
+            } catch (readError) {
+              console.error(
+                '메시지 읽음 처리 실패:',
+                readError
+              );
+            }
+          }
+
           if (
             detailData.relationshipStatus ===
             'ACTIVE' &&
             detailData.currentQuest
           ) {
-            setShowQuestCard(true);
+            setShowQuestCard(
+              true
+            );
           } else {
-            setShowQuestCard(false);
+            setShowQuestCard(
+              false
+            );
           }
         } catch (error) {
           setErrorMessage(
@@ -190,9 +255,6 @@ const ChatRoom = () => {
 
   /*
    * 이전 메시지 더 불러오기
-   *
-   * 추후 스크롤 이벤트에 연결 가능.
-   * 현재는 함수만 준비.
    */
   const loadPreviousMessages =
     async () => {
@@ -261,12 +323,7 @@ const ChatRoom = () => {
     'COMPLETED';
 
   /*
-   * ENDED 관계는 상세 조회 API에서
-   * 오류로 처리되므로 일반적으로
-   * 여기까지 들어오지 않음.
-   *
-   * 기존 화면 이동 state는
-   * 퍼블리싱 테스트 호환용으로만 유지.
+   * 기존 퍼블리싱 테스트 호환용
    */
   const isRelationshipEnded =
     location.state
@@ -286,9 +343,6 @@ const ChatRoom = () => {
   const apiCurrentQuest =
     chatRoomDetail?.currentQuest;
 
-  /*
-   * 현재 단계 / 퀘스트
-   */
   const currentStage =
     apiCurrentStage?.stage ??
     (isRelationshipComplete
@@ -311,10 +365,6 @@ const ChatRoom = () => {
       currentStage
     );
 
-  /*
-   * 프론트의 relationshipData는
-   * 화면 이동 경로와 가이드 표시용.
-   */
   const localCurrentQuest =
     !isRelationshipComplete
       ? getQuest(
@@ -443,10 +493,6 @@ const ChatRoom = () => {
         return;
       }
 
-      /*
-       * 일반 채팅 퀘스트는
-       * 버튼 클릭으로 완료시키지 않음.
-       */
       setShowQuestCard(false);
     };
 
@@ -471,6 +517,7 @@ const ChatRoom = () => {
 
   const handleBlock = () => {
     setShowMenu(false);
+
     setModalType(
       'blockConfirm'
     );
@@ -478,6 +525,7 @@ const ChatRoom = () => {
 
   const handleLeave = () => {
     setShowMenu(false);
+
     setModalType(
       'leaveConfirm'
     );
@@ -485,9 +533,6 @@ const ChatRoom = () => {
 
   const handleBlockConfirm =
     () => {
-      /*
-       * 차단 API는 이후 별도 연동.
-       */
       setModalType(
         'blockDone'
       );
@@ -702,11 +747,6 @@ const ChatRoom = () => {
 
             {messages.map(
               (message) => {
-                /*
-                 * SYSTEM 메시지는
-                 * 일반 채팅 말풍선이 아니라
-                 * 시스템 안내 UI로 표시.
-                 */
                 if (
                   message.messageType ===
                   'SYSTEM'
@@ -723,11 +763,6 @@ const ChatRoom = () => {
                   );
                 }
 
-                /*
-                 * 상대 memberId와 senderId가
-                 * 같으면 상대 메시지.
-                 * 아니면 내 메시지.
-                 */
                 const messageType =
                   message.senderId ===
                     partner.memberId
