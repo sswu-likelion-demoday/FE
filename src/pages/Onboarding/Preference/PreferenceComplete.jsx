@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./PreferenceComplete.scss";
 import BottomButton from "./components/BottomButton";
 import logo_word_white from "../../../assets/images/Onboarding/logo_word_white.svg";
@@ -6,6 +6,7 @@ import PreferenceComplete_star from "../../../assets/images/Onboarding/Preferenc
 
 const PreferenceComplete = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <div className="page PreferenceComplete_wrap">
@@ -25,7 +26,13 @@ const PreferenceComplete = () => {
         </span>
       </div>
       <div className="preferencecomplete_bot">
-        <BottomButton onClick={() => navigate("/signup/saju-setting")}>
+        <BottomButton
+          onClick={() =>
+            navigate("/signup/saju-setting", {
+              state: location.state,
+            })
+          }
+        >
           설정하기
         </BottomButton>
       </div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import OptionGroup from "../components/OptionGroup";
 import ProgressBar from "../components/ProgressBar";
 import BottomButton from "../components/BottomButton";
@@ -8,8 +8,10 @@ import prev_btn from "../../../../assets/images/Onboarding/prev_btn.svg";
 
 const Preference03 = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [selectedValues, setSelectedValues] = useState([]);
+  const canGoNext = selectedValues.length >= 3 && selectedValues.length <= 5;
 
   const options = [
     { id: 1, label: "예술전시" },
@@ -58,7 +60,19 @@ const Preference03 = () => {
         />
       </div>
       <div className="preference03_bot">
-        <BottomButton onClick={() => navigate("/signup/preference04")}>
+        <BottomButton
+          disabled={!canGoNext}
+          onClick={() => {
+            if (!canGoNext) return;
+
+            navigate("/signup/preference04", {
+              state: {
+                ...location.state,
+                interestOptionIds: selectedValues,
+              },
+            });
+          }}
+        >
           다음
         </BottomButton>
       </div>

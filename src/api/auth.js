@@ -5,11 +5,11 @@ export const checkStudentNumber = async (studentNumber) => {
     `${BASE_URL}/auth/student-numbers/check?studentNumber=${encodeURIComponent(studentNumber)}`,
   );
 
-  if (!response.ok) {
-    throw new Error("학번 중복 확인에 실패했습니다.");
-  }
-
   const result = await response.json();
+
+  if (!response.ok || !result.success) {
+    throw new Error(result.message || "학번 중복 확인에 실패했습니다.");
+  }
 
   return result.data.available;
 };
@@ -89,6 +89,28 @@ export const login = async (studentNumber, password) => {
 
   if (!response.ok || !result.success) {
     throw new Error(result.message || "로그인에 실패했습니다.");
+  }
+
+  return result.data;
+};
+
+export const resetPassword = async (email, studentNumber, newPassword) => {
+  const response = await fetch(`${BASE_URL}/auth/password/reset`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      studentNumber,
+      newPassword,
+    }),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok || !result.success) {
+    throw new Error(result.message || "비밀번호 재설정에 실패했습니다.");
   }
 
   return result.data;
