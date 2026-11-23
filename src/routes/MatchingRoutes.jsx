@@ -7,6 +7,11 @@ import MatchingStart from "../pages/Matching/Matching-start/MatchingStart";
 import MatchingFound from "../pages/Matching/Matching-found/MatchingFound";
 import MatchingSaju from "../pages/Matching/Matching-saju/MatchingSaju";
 import MatchingSajuResult from "../pages/Matching/Matching-saju-result/MatchingSajuResult";
+import MatchingCategory from "../pages/Matching/Matching-category/MatchingCategory";
+import MatchingCategoryForm from "../pages/Matching/Matching-category-form/MatchingCategoryForm";
+import MatchingCategoryWaiting from "../pages/Matching/Matching-category-waiting/MatchingCategoryWaiting";
+import MatchingCategoryFound from "../pages/Matching/Matching-category-found/MatchingCategoryFound";
+import MatchingCategoryResult from "../pages/Matching/Matching-category-result/MatchingCategoryResult";
 
 const MatchingRoutes = (
   <>
@@ -18,6 +23,11 @@ const MatchingRoutes = (
     <Route path="/matching/found" element={<MatchingFound />} />
     <Route path="/matching/saju" element={<MatchingSaju />} />
     <Route path="/matching/saju/result" element={<MatchingSajuResult />} />
+    <Route path="/matching/category" element={<MatchingCategory />} />
+    <Route path="/matching/category/form" element={<MatchingCategoryForm />} />
+    <Route path="/matching/category/waiting" element={<MatchingCategoryWaiting />} />
+    <Route path="/matching/category/found" element={<MatchingCategoryFound />} />
+    <Route path="/matching/category/result" element={<MatchingCategoryResult />} />
   </>
 );
 

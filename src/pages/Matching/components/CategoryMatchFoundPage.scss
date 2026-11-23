@@ -1,0 +1,46 @@
+.category_found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 38px 20px 66px;
+  background-color: var(--white);
+  background-image: linear-gradient(
+    to top,
+    rgba(110, 81, 242, 0.2),
+    rgba(247, 247, 255, 0.2)
+  );
+  text-align: center;
+
+  h2 { font-size: 22px; font-weight: 500; line-height: 1.5; }
+  // 자동매칭 화면과 동일하게 그림자 여백을 제외한 원을 기준으로 배치한다.
+  &_artwork {
+    position: relative;
+    width: 220px;
+    max-width: 100%;
+    height: 220px;
+    margin-top: 38px;
+  }
+  &_image {
+    position: absolute;
+    top: -51.173px;
+    left: -51.172px;
+    width: 323px;
+    max-width: none;
+  }
+  &_description { margin-top: 32px; font-size: 22px; font-weight: 500; line-height: 1.5; }
+  &_notice { margin-top: 49px; color: var(--main); font-size: 17px; font-weight: 400; line-height: 1.5; }
+  &_bottom {
+    display: flex;
+    width: 353px;
+    max-width: 100%;
+    height: 50px;
+    margin-top: 16px;
+    .bottom_btn {
+      width: 100%;
+      padding: 12px;
+      color: var(--white);
+      font-weight: 500;
+      &:focus-visible { outline: 2px solid var(--main); outline-offset: 4px; }
+    }
+  }
+}

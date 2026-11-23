@@ -1,0 +1,22 @@
+.page.MatchingCategoryForm_wrap {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-bottom: 120px;
+}
+
+// ==========================================
+
+// 타이틀 텍스트 박스 아래에서 희망 조건까지 32px (헤더 안 여백 1.5px + 30.5px)
+// 폼 전체를 가장 넓은 요소(매칭 신청 버튼 353px) 폭으로 묶어서 가운데 정렬
+.MatchingCategoryForm_wrap .category_form {
+  width: min(353px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 30.5px 0 40px;
+}
+
+// 조건이 전부 맞지 않아도… 글자와 토글 사이 간격 54px 고정
+.MatchingCategoryForm_wrap .category_form_partial {
+  justify-content: flex-start;
+  gap: 54px;
+}
