@@ -114,3 +114,61 @@ export const submitAiQuizAnswer =
 
         return result.data;
     };
+
+/*
+* 만남 인증 제출
+*
+* POST
+* /relationships/{relationshipId}
+* /quests/{relationshipQuestId}
+* /meeting-verification
+*
+* multipart/form-data
+*/
+export const submitMeetingVerification =
+    async (
+        relationshipId,
+        relationshipQuestId,
+        imageFile
+    ) => {
+        const accessToken =
+            getAccessToken();
+
+        const formData =
+            new FormData();
+
+        formData.append(
+            'image',
+            imageFile
+        );
+
+        const response =
+            await fetch(
+                `${BASE_URL}/relationships/${relationshipId}/quests/${relationshipQuestId}/meeting-verification`,
+                {
+                    method: 'POST',
+
+                    headers: {
+                        Authorization:
+                            `Bearer ${accessToken}`,
+                    },
+
+                    body: formData,
+                }
+            );
+
+        const result =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !result.success
+        ) {
+            throw createApiError(
+                result,
+                '만남 인증에 실패했습니다.'
+            );
+        }
+
+        return result.data;
+    };

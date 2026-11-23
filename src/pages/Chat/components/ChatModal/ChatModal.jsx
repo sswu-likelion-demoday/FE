@@ -5,10 +5,20 @@ import quest_true from '../../../../assets/images/Chat/quest_true.svg';
 import eye from '../../../../assets/images/Chat/eye.svg';
 import gem from '../../../../assets/images/Chat/gem.svg';
 
+const OPTION_LETTERS = {
+    1: 'A',
+    2: 'B',
+    3: 'C',
+    4: 'D',
+};
+
 const ChatModal = ({
     type,
     onClose,
     onConfirm,
+    correctAnswer,
+    reward,
+    partnerParticipationStatus,
 }) => {
     const isCorrect =
         type === 'correct';
@@ -17,16 +27,20 @@ const ChatModal = ({
         type === 'wrong';
 
     const isVerification =
-        type === 'verification';
+        type ===
+        'verification';
 
     const isBlockConfirm =
-        type === 'blockConfirm';
+        type ===
+        'blockConfirm';
 
     const isBlockDone =
-        type === 'blockDone';
+        type ===
+        'blockDone';
 
     const isLeaveConfirm =
-        type === 'leaveConfirm';
+        type ===
+        'leaveConfirm';
 
     if (isBlockConfirm) {
         return (
@@ -48,7 +62,9 @@ const ChatModal = ({
                         <button
                             type="button"
                             className="chat_modal_danger"
-                            onClick={onConfirm}
+                            onClick={
+                                onConfirm
+                            }
                         >
                             차단하기
                         </button>
@@ -100,7 +116,9 @@ const ChatModal = ({
                         <button
                             type="button"
                             className="chat_modal_danger"
-                            onClick={onConfirm}
+                            onClick={
+                                onConfirm
+                            }
                         >
                             종료
                         </button>
@@ -136,35 +154,57 @@ const ChatModal = ({
                             : '아쉬워요, 오답이에요!'}
                 </h2>
 
-                {isCorrect && (
-                    <div className="chat_modal_reward">
-                        <img
-                            src={gem}
-                            alt=""
-                        />
+                {isCorrect &&
+                    reward > 0 && (
+                        <div className="chat_modal_reward">
+                            <img
+                                src={gem}
+                                alt=""
+                            />
 
-                        <span>
-                            +5 수정구
-                        </span>
-                    </div>
-                )}
+                            <span>
+                                +{reward} 수정구
+                            </span>
+                        </div>
+                    )}
 
-                {isWrong && (
-                    <div className="chat_modal_answer">
-                        <img
-                            src={eye}
-                            alt=""
-                        />
+                {isWrong &&
+                    correctAnswer && (
+                        <div className="chat_modal_answer">
+                            <img
+                                src={eye}
+                                alt=""
+                            />
 
-                        <span>
-                            정답은{' '}
-                            <strong>
-                                B. 파스타
-                            </strong>
-                            였어요.
-                        </span>
-                    </div>
-                )}
+                            <span>
+                                정답은{' '}
+                                <strong>
+                                    {OPTION_LETTERS[
+                                        correctAnswer
+                                            .optionId
+                                    ] ??
+                                        correctAnswer
+                                            .optionId}
+                                    .{' '}
+                                    {
+                                        correctAnswer
+                                            .content
+                                    }
+                                </strong>
+                                였어요.
+                            </span>
+                        </div>
+                    )}
+
+                {!isVerification &&
+                    partnerParticipationStatus ===
+                    'NOT_SUBMITTED' && (
+                        <p>
+                            상대방도 퀴즈를
+                            완료하면 다음 단계로
+                            함께 넘어가요.
+                        </p>
+                    )}
 
                 <button
                     type="button"
