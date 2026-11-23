@@ -19,6 +19,11 @@ import {
 } from '../../../api/chat';
 
 import {
+  blockUser,
+  endRelationship,
+} from '../../../api/relationship';
+
+import {
   useChatSocket,
 } from '../ChatSocketLayout';
 
@@ -88,6 +93,11 @@ const ChatRoom = () => {
   const [
     isMessagesLoading,
     setIsMessagesLoading,
+  ] = useState(false);
+
+  const [
+    isActionLoading,
+    setIsActionLoading,
   ] = useState(false);
 
   const [
@@ -172,9 +182,6 @@ const ChatRoom = () => {
     );
   };
 
-  /*
-   * 채팅방 상세 재조회
-   */
   const refreshChatRoomDetail =
     useCallback(
       async () => {
@@ -188,14 +195,6 @@ const ChatRoom = () => {
             data
           );
 
-          /*
-           * REST 상태를 상위 WebSocket
-           * Layout과 동기화.
-           *
-           * 이미 완료된 채팅방에
-           * 직접 들어온 경우에도
-           * 소켓 연결을 종료한다.
-           */
           syncRelationshipStatus(
             data.relationshipStatus
           );
@@ -253,10 +252,6 @@ const ChatRoom = () => {
             detailData
           );
 
-          /*
-           * 이미 완료된 관계라면
-           * WebSocket도 즉시 정리.
-           */
           syncRelationshipStatus(
             detailData
               .relationshipStatus
@@ -388,7 +383,7 @@ const ChatRoom = () => {
   ]);
 
   /*
-   * 실시간 관계 / 퀘스트 이벤트
+   * WebSocket 이벤트
    */
   useEffect(() => {
     if (!latestEvent) {
@@ -421,13 +416,6 @@ const ChatRoom = () => {
       latestEvent.type ===
       'RELATIONSHIP_COMPLETED'
     ) {
-      /*
-       * Layout에서는 이벤트를 받자마자
-       * 전송을 막고 소켓을 종료.
-       *
-       * 여기서는 REST 상세를 다시 불러
-       * 서버의 최종 상태를 화면에 반영.
-       */
       setShowQuestCard(
         false
       );
@@ -451,26 +439,21 @@ const ChatRoom = () => {
     chatRoomDetail
       ?.relationshipStatus;
 
-  /*
-   * REST 완료 상태 또는
-   * WebSocket 완료 이벤트 중
-   * 하나라도 완료라면 즉시 완료 UI.
-   */
   const isRelationshipComplete =
     relationshipStatus ===
     'COMPLETED' ||
     relationshipCompleted;
 
+  /*
+   * ENDED는 관계 종료 후
+   * 목록으로 이동하므로
+   * 기존 퍼블리싱 state만 유지.
+   */
   const isRelationshipEnded =
     location.state
       ?.relationshipEnded ===
     true;
 
-  /*
-   * API writable=true여도
-   * RELATIONSHIP_COMPLETED 이벤트를
-   * 이미 받은 경우 즉시 전송 차단.
-   */
   const writable =
     chatRoomDetail
       ?.writable === true &&
@@ -690,6 +673,9 @@ const ChatRoom = () => {
       );
     };
 
+  /*
+   * 이전 메시지
+   */
   const loadPreviousMessages =
     async () => {
       if (
@@ -777,6 +763,9 @@ const ChatRoom = () => {
     );
   };
 
+  /*
+   * 차단 확인 모달 열기
+   */
   const handleBlock = () => {
     setShowMenu(false);
 
@@ -785,6 +774,9 @@ const ChatRoom = () => {
     );
   };
 
+  /*
+   * 관계 종료 확인 모달 열기
+   */
   const handleLeave = () => {
     setShowMenu(false);
 
@@ -793,13 +785,78 @@ const ChatRoom = () => {
     );
   };
 
+  /*
+   * 실제 사용자 차단 API
+   */
   const handleBlockConfirm =
-    () => {
-      setModalType(
-        'blockDone'
-      );
+    async () => {
+      if (
+        !partner.userId ||
+        isActionLoading
+      ) {
+        return;
+      }
+
+      try {
+        setIsActionLoading(
+          true
+        );
+
+        await blockUser(
+          partner.userId
+        );
+
+        /*
+         * 성공 후 기존 완료 모달 사용
+         */
+        setModalType(
+          'blockDone'
+        );
+      } catch (error) {
+        console.error(
+          '사용자 차단 실패:',
+          error
+        );
+
+        /*
+         * 존재하지 않는 상대라면
+         * 더 이상 현재 채팅을 유지할
+         * 이유가 없으므로 목록 이동
+         */
+        if (
+          error.code ===
+          'USER_NOT_FOUND'
+        ) {
+          navigate('/chat');
+
+          return;
+        }
+
+        if (
+          error.code ===
+          'CANNOT_BLOCK_SELF'
+        ) {
+          window.alert(
+            '자기 자신은 차단할 수 없습니다.'
+          );
+
+          return;
+        }
+
+        window.alert(
+          error.message ||
+          '사용자 차단에 실패했습니다.'
+        );
+      } finally {
+        setIsActionLoading(
+          false
+        );
+      }
     };
 
+  /*
+   * 차단 완료 모달 닫기
+   */
   const handleBlockDone = () => {
     setModalType(null);
 
@@ -814,19 +871,100 @@ const ChatRoom = () => {
     );
   };
 
+  /*
+   * 실제 관계 종료 API
+   */
   const handleLeaveConfirm =
-    () => {
-      setModalType(null);
+    async () => {
+      if (
+        !relationshipId ||
+        isActionLoading
+      ) {
+        return;
+      }
 
-      navigate(
-        '/chat',
-        {
-          state: {
-            endedChatId:
-              numericChatId,
-          },
+      try {
+        setIsActionLoading(
+          true
+        );
+
+        await endRelationship(
+          relationshipId
+        );
+
+        /*
+         * 관계 종료 후에는
+         * 채팅 목록으로 이동
+         */
+        setModalType(null);
+
+        navigate(
+          '/chat',
+          {
+            state: {
+              endedChatId:
+                numericChatId,
+            },
+          }
+        );
+      } catch (error) {
+        console.error(
+          '관계 종료 실패:',
+          error
+        );
+
+        if (
+          error.code ===
+          'RELATIONSHIP_NOT_FOUND' ||
+          error.code ===
+          'RELATIONSHIP_ALREADY_ENDED'
+        ) {
+          navigate('/chat');
+
+          return;
         }
-      );
+
+        if (
+          error.code ===
+          'RELATIONSHIP_ACCESS_DENIED'
+        ) {
+          window.alert(
+            '이 관계에 접근할 수 없습니다.'
+          );
+
+          navigate('/chat');
+
+          return;
+        }
+
+        if (
+          error.code ===
+          'RELATIONSHIP_ALREADY_COMPLETED'
+        ) {
+          /*
+           * 이미 완성된 관계는
+           * 중도 종료할 수 없음.
+           */
+          setModalType(null);
+
+          window.alert(
+            '이미 완료된 관계는 종료할 수 없습니다.'
+          );
+
+          refreshChatRoomDetail();
+
+          return;
+        }
+
+        window.alert(
+          error.message ||
+          '관계 종료에 실패했습니다.'
+        );
+      } finally {
+        setIsActionLoading(
+          false
+        );
+      }
     };
 
   if (isLoading) {
@@ -1174,11 +1312,15 @@ const ChatRoom = () => {
           'blockConfirm' && (
             <ChatModal
               type="blockConfirm"
-              onClose={() =>
-                setModalType(
-                  null
-                )
-              }
+              onClose={() => {
+                if (
+                  !isActionLoading
+                ) {
+                  setModalType(
+                    null
+                  );
+                }
+              }}
               onConfirm={
                 handleBlockConfirm
               }
@@ -1199,11 +1341,15 @@ const ChatRoom = () => {
           'leaveConfirm' && (
             <ChatModal
               type="leaveConfirm"
-              onClose={() =>
-                setModalType(
-                  null
-                )
-              }
+              onClose={() => {
+                if (
+                  !isActionLoading
+                ) {
+                  setModalType(
+                    null
+                  );
+                }
+              }}
               onConfirm={
                 handleLeaveConfirm
               }

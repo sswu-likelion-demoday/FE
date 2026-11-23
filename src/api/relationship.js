@@ -16,6 +16,27 @@ const getAuthHeaders = () => {
     };
 };
 
+const createApiError = (
+    result,
+    fallbackMessage
+) => {
+    const error = new Error(
+        result?.message ||
+        fallbackMessage
+    );
+
+    error.code =
+        result?.code;
+
+    return error;
+};
+
+/*
+ * 상대 프로필 조회
+ *
+ * GET
+ * /relationships/{relationshipId}/partner-profile
+ */
 export const getPartnerProfile =
     async (relationshipId) => {
         const response =
@@ -35,38 +56,106 @@ export const getPartnerProfile =
             !response.ok ||
             !result.success
         ) {
-            if (
-                result.code ===
-                'RELATIONSHIP_NOT_FOUND'
-            ) {
-                throw new Error(
-                    '존재하지 않는 관계입니다.'
-                );
-            }
-
-            if (
-                result.code ===
-                'RELATIONSHIP_ACCESS_DENIED'
-            ) {
-                throw new Error(
-                    '상대 프로필에 접근할 수 없습니다.'
-                );
-            }
-
-            if (
-                result.code ===
-                'RELATIONSHIP_ENDED'
-            ) {
-                throw new Error(
-                    '종료된 관계입니다.'
-                );
-            }
-
-            throw new Error(
-                result.message ||
+            throw createApiError(
+                result,
                 '상대 프로필 조회에 실패했습니다.'
             );
         }
 
         return result.data;
+    };
+
+/*
+ * 관계 종료
+ *
+ * POST
+ * /relationships/{relationshipId}/end
+ */
+export const endRelationship =
+    async (relationshipId) => {
+        const response =
+            await fetch(
+                `${BASE_URL}/relationships/${relationshipId}/end`,
+                {
+                    method: 'POST',
+                    headers:
+                        getAuthHeaders(),
+                }
+            );
+
+        const result =
+            await response.json();
+
+        /*
+         * 이미 종료된 관계라면
+         * 프론트에서는 종료된 상태로
+         * 처리해도 된다.
+         */
+        if (
+            result.code ===
+            'RELATIONSHIP_ALREADY_ENDED'
+        ) {
+            return {
+                relationshipId,
+                relationshipStatus:
+                    'ENDED',
+            };
+        }
+
+        if (
+            !response.ok ||
+            !result.success
+        ) {
+            throw createApiError(
+                result,
+                '관계 종료에 실패했습니다.'
+            );
+        }
+
+        return result.data;
+    };
+
+/*
+ * 사용자 차단
+ *
+ * POST
+ * /users/{userId}/block
+ */
+export const blockUser =
+    async (userId) => {
+        const response =
+            await fetch(
+                `${BASE_URL}/users/${userId}/block`,
+                {
+                    method: 'POST',
+                    headers:
+                        getAuthHeaders(),
+                }
+            );
+
+        const result =
+            await response.json();
+
+        /*
+         * 이미 차단한 사용자도
+         * 프론트에서는 차단 완료 상태로 처리
+         */
+        if (
+            result.code ===
+            'USER_ALREADY_BLOCKED'
+        ) {
+            return true;
+        }
+
+        if (
+            !response.ok ||
+            !result.success
+        ) {
+            throw createApiError(
+                result,
+                '사용자 차단에 실패했습니다.'
+            );
+        }
+
+        return true;
     };
