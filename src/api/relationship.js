@@ -159,3 +159,37 @@ export const blockUser =
 
         return true;
     };
+
+/*
+* 관계 단계 및 퀘스트 조회
+*
+* GET
+* /relationships/{relationshipId}
+*/
+export const getRelationshipDetail =
+    async (relationshipId) => {
+        const response =
+            await fetch(
+                `${BASE_URL}/relationships/${relationshipId}`,
+                {
+                    method: 'GET',
+                    headers:
+                        getAuthHeaders(),
+                }
+            );
+
+        const result =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !result.success
+        ) {
+            throw createApiError(
+                result,
+                '관계 진행 정보 조회에 실패했습니다.'
+            );
+        }
+
+        return result.data;
+    };
