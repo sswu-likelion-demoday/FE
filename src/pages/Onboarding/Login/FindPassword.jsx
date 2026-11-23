@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { sendVerificationEmail, verifyEmail } from "../../../api/auth";
 
 import "./FindPassword.scss";
 
@@ -11,6 +12,31 @@ const FindPassword = () => {
   const [studentId, setStudentId] = useState("");
   const [email, setEmail] = useState("");
   const [authCode, setAuthCode] = useState("");
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+
+  const handleSendEmail = async () => {
+    if (!email.trim()) return;
+
+    try {
+      await sendVerificationEmail(email.trim());
+      alert("인증번호가 발송되었습니다.");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const handleVerifyEmail = async () => {
+    if (!email.trim() || !authCode.trim()) return;
+
+    try {
+      await verifyEmail(email.trim(), authCode.trim());
+      setIsEmailVerified(true);
+      alert("이메일 인증이 완료되었습니다.");
+    } catch (error) {
+      setIsEmailVerified(false);
+      alert(error.message);
+    }
+  };
 
   return (
     <div className="page FindPassword_wrap">
@@ -37,9 +63,18 @@ const FindPassword = () => {
             <input
               type="text"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setIsEmailVerified(false);
+              }}
             />
-            <button className={email.trim() ? "active" : ""}>전송</button>
+            <button
+              className={email.trim() ? "active" : ""}
+              onClick={handleSendEmail}
+              disabled={!email.trim()}
+            >
+              전송
+            </button>
           </div>
 
           <div className="findpw_m_2_txt">
@@ -52,9 +87,16 @@ const FindPassword = () => {
               type="text"
               placeholder="인증번호 입력"
               value={authCode}
-              onChange={(e) => setAuthCode(e.target.value)}
+              onChange={(e) => {
+                setAuthCode(e.target.value);
+                setIsEmailVerified(false);
+              }}
             />
-            <button className={authCode.trim() ? "active" : ""}>
+            <button
+              className={authCode.trim() ? "active" : ""}
+              onClick={handleVerifyEmail}
+              disabled={!authCode.trim() || isEmailVerified}
+            >
               인증완료
             </button>
           </div>
@@ -64,9 +106,17 @@ const FindPassword = () => {
       <div className="findpassword_bot">
         <button
           className={`findpassword_bot_btn ${
-            studentId.trim() && email.trim() && authCode.trim() ? "active" : ""
+            studentId.trim() && isEmailVerified ? "active" : ""
           }`}
-          onClick={() => navigate("/login/reset-password")}
+          disabled={!studentId.trim() || !isEmailVerified}
+          onClick={() =>
+            navigate("/login/reset-password", {
+              state: {
+                studentNumber: studentId.trim(),
+                email: email.trim(),
+              },
+            })
+          }
         >
           확인
         </button>

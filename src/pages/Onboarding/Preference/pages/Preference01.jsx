@@ -22,6 +22,19 @@ const Preference01 = () => {
     { id: 8, label: "상황에 따라 유연하게\n정하는 게 편해요" },
   ];
 
+  const mbtiMap = {
+    1: "E",
+    2: "I",
+    3: "S",
+    4: "N",
+    5: "T",
+    6: "F",
+    7: "J",
+    8: "P",
+  };
+
+  const canGoNext = selectedValues.length === 4;
+
   return (
     <div className="page Preference01_wrap">
       <div className="preference01_top">
@@ -40,14 +53,30 @@ const Preference01 = () => {
         </div>
       </div>
       <div className="preference01_main">
-        <p className={`mbti_e ${selectedValues.includes(1) ? "active" : ""}`}>E</p>
-        <p className={`mbti_i ${selectedValues.includes(2) ? "active" : ""}`}>I</p>
-        <p className={`mbti_s ${selectedValues.includes(3) ? "active" : ""}`}>S</p>
-        <p className={`mbti_n ${selectedValues.includes(4) ? "active" : ""}`}>N</p>
-        <p className={`mbti_t ${selectedValues.includes(5) ? "active" : ""}`}>T</p>
-        <p className={`mbti_f ${selectedValues.includes(6) ? "active" : ""}`}>F</p>
-        <p className={`mbti_j ${selectedValues.includes(7) ? "active" : ""}`}>J</p>
-        <p className={`mbti_p ${selectedValues.includes(8) ? "active" : ""}`}>P</p>
+        <p className={`mbti_e ${selectedValues.includes(1) ? "active" : ""}`}>
+          E
+        </p>
+        <p className={`mbti_i ${selectedValues.includes(2) ? "active" : ""}`}>
+          I
+        </p>
+        <p className={`mbti_s ${selectedValues.includes(3) ? "active" : ""}`}>
+          S
+        </p>
+        <p className={`mbti_n ${selectedValues.includes(4) ? "active" : ""}`}>
+          N
+        </p>
+        <p className={`mbti_t ${selectedValues.includes(5) ? "active" : ""}`}>
+          T
+        </p>
+        <p className={`mbti_f ${selectedValues.includes(6) ? "active" : ""}`}>
+          F
+        </p>
+        <p className={`mbti_j ${selectedValues.includes(7) ? "active" : ""}`}>
+          J
+        </p>
+        <p className={`mbti_p ${selectedValues.includes(8) ? "active" : ""}`}>
+          P
+        </p>
         <OptionGroup
           options={options}
           columns={2}
@@ -57,7 +86,21 @@ const Preference01 = () => {
         />
       </div>
       <div className="preference01_bot">
-        <BottomButton onClick={() => navigate("/signup/preference02")}>
+        <BottomButton
+          disabled={!canGoNext}
+          onClick={() => {
+            if (!canGoNext) return;
+
+            const mbti = [...selectedValues]
+              .sort((a, b) => a - b)
+              .map((id) => mbtiMap[id])
+              .join("");
+
+            navigate("/signup/preference02", {
+              state: { mbti },
+            });
+          }}
+        >
           다음
         </BottomButton>
       </div>

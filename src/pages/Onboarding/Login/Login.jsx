@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { login } from "../../../api/auth";
 import "./Login.scss";
-
 import prev_btn from "../../../assets/images/Onboarding/prev_btn.svg";
 import logo_word_purple from "../../../assets/images/Onboarding/logo_word_purple.svg";
 
@@ -10,6 +10,30 @@ const Login = () => {
 
   const [studentId, setStudentId] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleLogin = async () => {
+    if (!studentId.trim() || !password || isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+
+      const data = await login(studentId.trim(), password);
+
+      sessionStorage.setItem("accessToken", data.accessToken);
+      sessionStorage.setItem("refreshToken", data.refreshToken);
+
+      if (data.onboardingCompleted) {
+        navigate("/mypage", { replace: true });
+      } else {
+        navigate("/signup/preference-intro", { replace: true });
+      }
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="page Login_wrap">
@@ -35,7 +59,7 @@ const Login = () => {
         <div className="l_m_2">
           <p>비밀번호</p>
           <input
-            type="text"
+            type="password"
             className="l_m_input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -47,7 +71,8 @@ const Login = () => {
           className={`login_btn ${
             studentId.trim() && password.trim() ? "active" : ""
           }`}
-          onClick={() => navigate("/signup/preference-intro")}
+          onClick={handleLogin}
+          disabled={!studentId.trim() || !password.trim() || isSubmitting}
         >
           로그인
         </button>

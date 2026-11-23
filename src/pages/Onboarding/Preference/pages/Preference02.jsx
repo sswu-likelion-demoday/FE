@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import OptionGroup from "../components/OptionGroup";
 import ProgressBar from "../components/ProgressBar";
 import BottomButton from "../components/BottomButton";
@@ -8,6 +8,7 @@ import prev_btn from "../../../../assets/images/Onboarding/prev_btn.svg";
 
 const Preference02 = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [selectedValues, setSelectedValues] = useState([]);
 
@@ -49,7 +50,16 @@ const Preference02 = () => {
         />
       </div>
       <div className="preference02_bot">
-        <BottomButton onClick={() => navigate("/signup/preference03")}>
+        <BottomButton
+          onClick={() =>
+            navigate("/signup/preference03", {
+              state: {
+                ...location.state,
+                socialStyleSelectionIds: selectedValues,
+              },
+            })
+          }
+        >
           다음
         </BottomButton>
       </div>
