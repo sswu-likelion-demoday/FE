@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Matchinghome.scss";
+import { getMatchingHome } from "../../../api/matching";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import MatchingButton from "../components/MatchingButton";
 import MatchingCard from "../components/MatchingCard";
@@ -8,9 +10,18 @@ import logo_matching from "../../../assets/images/Matching/logo_symbol_matching.
 const Matchinghome = () => {
   const navigate = useNavigate();
 
+  // 관계 슬롯 { used, available, total } - 매칭 홈 조회 API
+  const [slots, setSlots] = useState(null);
+
+  useEffect(() => {
+    getMatchingHome()
+      .then((data) => setSlots(data.relationshipSlots))
+      .catch((err) => console.error(err));
+  }, []);
+
   // 0이면 꽉 찬 화면, 1 이상이면 빈 수정이 있는 화면
-  const emptySlotCount = 1;
-  const isFull = emptySlotCount === 0;
+  const emptySlotCount = slots?.available ?? 0;
+  const isFull = slots !== null && emptySlotCount === 0;
 
   // 사주 매칭 허용 여부 (확인용 임시 값)
   const isSajuAllowed = false;
