@@ -1,5 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  checkStudentNumber,
+  sendVerificationEmail,
+  verifyEmail,
+} from "../../../api/auth";
 import "./SignupStep01.scss";
 
 import prev_btn from "../../../assets/images/Onboarding/prev_btn.svg";
@@ -14,6 +19,78 @@ const SignupStep01 = () => {
   const [email, setEmail] = useState("");
   const [authCode, setAuthCode] = useState("");
 
+  const [isChecking, setIsChecking] = useState(false);
+  const [checkedStudentId, setCheckedStudentId] = useState(null);
+  const [isSending, setIsSending] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState(null);
+
+  const isEmailValid =
+    studentId.trim() !== "" &&
+    email.trim().toLowerCase() === `${studentId.trim()}@sungshin.ac.kr`;
+
+  const canGoNext = Boolean(
+    studentId.trim() &&
+    checkedStudentId === studentId.trim() &&
+    isEmailValid &&
+    verifiedEmail === email.trim(),
+  );
+
+  const handleCheckStudentId = async () => {
+    if (!studentId.trim() || isChecking) return;
+
+    setIsChecking(true);
+
+    try {
+      const available = await checkStudentNumber(studentId.trim());
+
+      if (available) {
+        setCheckedStudentId(studentId.trim());
+        alert("사용 가능한 학번입니다.");
+      } else {
+        setCheckedStudentId(null);
+        alert("이미 사용 중인 학번입니다.");
+      }
+    } catch (error) {
+      alert(error.message || "학번 중복 확인에 실패했습니다.");
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
+  const handleSendEmail = async () => {
+    if (!isEmailValid || isSending) return;
+
+    setIsSending(true);
+
+    try {
+      await sendVerificationEmail(email.trim());
+      setVerifiedEmail(null);
+      alert("인증번호가 발송되었습니다.");
+    } catch (error) {
+      alert(error.message || "인증번호 발송에 실패했습니다.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleVerifyEmail = async () => {
+    if (!email.trim() || !authCode.trim() || isVerifying) return;
+
+    setIsVerifying(true);
+
+    try {
+      await verifyEmail(email.trim(), authCode.trim());
+      setVerifiedEmail(email.trim());
+      alert("이메일 인증이 완료되었습니다.");
+    } catch (error) {
+      setVerifiedEmail(null);
+      alert(error.message || "이메일 인증에 실패했습니다.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   return (
     <div className="page Signupstep01_wrap">
       <div className="signupstep01_top">
@@ -27,10 +104,17 @@ const SignupStep01 = () => {
             <input
               type="text"
               value={studentId}
-              onChange={(e) => setStudentId(e.target.value)}
+              onChange={(e) => {
+                setStudentId(e.target.value);
+                setCheckedStudentId(null);
+              }}
             />
-            <button className={studentId.trim() ? "active" : ""}>
-              중복확인
+            <button
+              className={studentId.trim() && !isChecking ? "active" : ""}
+              onClick={handleCheckStudentId}
+              disabled={!studentId.trim() || isChecking}
+            >
+              {isChecking ? "확인 중" : "중복확인"}
             </button>
           </div>
         </div>
@@ -41,13 +125,22 @@ const SignupStep01 = () => {
             <input
               type="text"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setVerifiedEmail(null);
+              }}
             />
-            <button className={email.trim() ? "active" : ""}>전송</button>
+            <button
+              className={isEmailValid && !isSending ? "active" : ""}
+              onClick={handleSendEmail}
+              disabled={!isEmailValid || isSending}
+            >
+              {isSending ? "전송 중" : "전송"}
+            </button>
           </div>
           <div className="s01_m_2_txt">
             <p>인증번호가 발송되지 않았나요?</p>
-            <span>다시 시도</span>
+            <span onClick={handleSendEmail}>다시 시도</span>
           </div>
           <div className="s01_m_2_box">
             <input
@@ -56,8 +149,12 @@ const SignupStep01 = () => {
               value={authCode}
               onChange={(e) => setAuthCode(e.target.value)}
             />
-            <button className={authCode.trim() ? "active" : ""}>
-              인증완료
+            <button
+              className={authCode.trim() && !isVerifying ? "active" : ""}
+              onClick={handleVerifyEmail}
+              disabled={!authCode.trim() || isVerifying}
+            >
+              {isVerifying ? "확인 중" : "인증완료"}
             </button>
           </div>
         </div>
@@ -69,10 +166,26 @@ const SignupStep01 = () => {
       </div>
       <div className="signupstep01_bot">
         <button
-          className={`signupstep01_bot_btn ${
-            studentId.trim() && email.trim() && authCode.trim() ? "active" : ""
-          }`}
-          onClick={() => navigate("/signup/basic-info")}
+          className={`signupstep01_bot_btn ${canGoNext ? "active" : ""}`}
+          disabled={!canGoNext}
+          onClick={() => {
+            if (!studentId.trim() || checkedStudentId !== studentId.trim()) {
+              alert("학번 중복확인을 완료해주세요.");
+              return;
+            }
+
+            if (!email.trim() || verifiedEmail !== email.trim()) {
+              alert("이메일 인증을 완료해주세요.");
+              return;
+            }
+
+            navigate("/signup/basic-info", {
+              state: {
+                studentNumber: studentId.trim(),
+                email: email.trim(),
+              },
+            });
+          }}
         >
           다음
         </button>

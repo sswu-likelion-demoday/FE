@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import OptionGroup from "../components/OptionGroup";
 import ProgressBar from "../components/ProgressBar";
 import BottomButton from "../components/BottomButton";
@@ -8,8 +8,11 @@ import prev_btn from "../../../../assets/images/Onboarding/prev_btn.svg";
 
 const Preference01 = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [selectedValues, setSelectedValues] = useState([]);
+  const [selectedValues, setSelectedValues] = useState(
+    location.state?.mbtiSelectionIds ?? [],
+  );
 
   const options = [
     { id: 1, label: "사람들과 함께하며\n에너지를 얻어요" },
@@ -21,6 +24,19 @@ const Preference01 = () => {
     { id: 7, label: "미리 계획하고\n정해두는 게 편해요" },
     { id: 8, label: "상황에 따라 유연하게\n정하는 게 편해요" },
   ];
+
+  const mbtiMap = {
+    1: "E",
+    2: "I",
+    3: "S",
+    4: "N",
+    5: "T",
+    6: "F",
+    7: "J",
+    8: "P",
+  };
+
+  const canGoNext = selectedValues.length === 4;
 
   return (
     <div className="page Preference01_wrap">
@@ -40,14 +56,30 @@ const Preference01 = () => {
         </div>
       </div>
       <div className="preference01_main">
-        <p className={`mbti_e ${selectedValues.includes(1) ? "active" : ""}`}>E</p>
-        <p className={`mbti_i ${selectedValues.includes(2) ? "active" : ""}`}>I</p>
-        <p className={`mbti_s ${selectedValues.includes(3) ? "active" : ""}`}>S</p>
-        <p className={`mbti_n ${selectedValues.includes(4) ? "active" : ""}`}>N</p>
-        <p className={`mbti_t ${selectedValues.includes(5) ? "active" : ""}`}>T</p>
-        <p className={`mbti_f ${selectedValues.includes(6) ? "active" : ""}`}>F</p>
-        <p className={`mbti_j ${selectedValues.includes(7) ? "active" : ""}`}>J</p>
-        <p className={`mbti_p ${selectedValues.includes(8) ? "active" : ""}`}>P</p>
+        <p className={`mbti_e ${selectedValues.includes(1) ? "active" : ""}`}>
+          E
+        </p>
+        <p className={`mbti_i ${selectedValues.includes(2) ? "active" : ""}`}>
+          I
+        </p>
+        <p className={`mbti_s ${selectedValues.includes(3) ? "active" : ""}`}>
+          S
+        </p>
+        <p className={`mbti_n ${selectedValues.includes(4) ? "active" : ""}`}>
+          N
+        </p>
+        <p className={`mbti_t ${selectedValues.includes(5) ? "active" : ""}`}>
+          T
+        </p>
+        <p className={`mbti_f ${selectedValues.includes(6) ? "active" : ""}`}>
+          F
+        </p>
+        <p className={`mbti_j ${selectedValues.includes(7) ? "active" : ""}`}>
+          J
+        </p>
+        <p className={`mbti_p ${selectedValues.includes(8) ? "active" : ""}`}>
+          P
+        </p>
         <OptionGroup
           options={options}
           columns={2}
@@ -57,7 +89,25 @@ const Preference01 = () => {
         />
       </div>
       <div className="preference01_bot">
-        <BottomButton onClick={() => navigate("/signup/preference02")}>
+        <BottomButton
+          disabled={!canGoNext}
+          onClick={() => {
+            if (!canGoNext) return;
+
+            const mbti = [...selectedValues]
+              .sort((a, b) => a - b)
+              .map((id) => mbtiMap[id])
+              .join("");
+
+            navigate("/signup/preference02", {
+              state: {
+                ...location.state,
+                mbti,
+                mbtiSelectionIds: selectedValues,
+              },
+            });
+          }}
+        >
           다음
         </BottomButton>
       </div>

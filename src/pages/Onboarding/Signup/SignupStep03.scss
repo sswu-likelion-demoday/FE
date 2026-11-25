@@ -100,8 +100,12 @@
   color: #6d6d6d;
 }
 
-.s03_m_3_box p.active{
+.s03_m_3_box p.active {
   color: var(--main);
+}
+
+.s03_m_3_box p.error {
+  color: #d6336c;
 }
 
 // =====================================
@@ -138,6 +142,6 @@
   font-size: 22px;
 }
 
-.signupstep03_bot_btn.active{
+.signupstep03_bot_btn.active {
   background-color: var(--main);
 }
