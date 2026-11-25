@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MatchingStart.scss";
-import { getMatchingStatus } from "../../../api/matching";
+import { getMatchingStatus, postNormalMatching } from "../../../api/matching";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import MatchingHeader from "../components/MatchingHeader";
 import BottomButton from "../../Onboarding/Preference/components/BottomButton";
@@ -28,6 +28,22 @@ const MatchingStart = () => {
   const isZero = actionType === "CURRENCY" || actionType === "INSUFFICIENT_CURRENCY";
   const hasCrystal = actionType === "CURRENCY";
 
+  // 일반 매칭 실행 - 추천 결과를 매칭 발견 화면으로 넘김
+  const [isMatching, setIsMatching] = useState(false);
+
+  const handleMatch = async () => {
+    if (isMatching) return;
+    setIsMatching(true);
+    try {
+      const recommendation = await postNormalMatching();
+      navigate("/matching/found", { state: { recommendation } });
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setIsMatching(false);
+    }
+  };
+
   let message = "수정구를 모두 소진했어요";
   if (hasCrystal) {
     message = `수정구 ${matchingCost}개를 이용하여 한번 더 매칭할 수 있어요`;
@@ -53,12 +69,12 @@ const MatchingStart = () => {
       </div>
       <div className={isZero ? "matchingstart_bot zero" : "matchingstart_bot"}>
         {!isZero && (
-          <BottomButton onClick={() => navigate("/matching/found")}>
+          <BottomButton onClick={handleMatch}>
             매칭 시작
           </BottomButton>
         )}
         {isZero && hasCrystal && (
-          <BottomButton onClick={() => navigate("/matching/found")}>
+          <BottomButton onClick={handleMatch}>
             한번 더 매칭
             <img src={crystal_orb} alt="" className="ms_b_orb" />
             -{matchingCost}
