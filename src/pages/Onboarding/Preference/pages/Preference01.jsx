@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import OptionGroup from "../components/OptionGroup";
 import ProgressBar from "../components/ProgressBar";
 import BottomButton from "../components/BottomButton";
@@ -8,8 +8,11 @@ import prev_btn from "../../../../assets/images/Onboarding/prev_btn.svg";
 
 const Preference01 = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [selectedValues, setSelectedValues] = useState([]);
+  const [selectedValues, setSelectedValues] = useState(
+    location.state?.mbtiSelectionIds ?? [],
+  );
 
   const options = [
     { id: 1, label: "사람들과 함께하며\n에너지를 얻어요" },
@@ -97,7 +100,11 @@ const Preference01 = () => {
               .join("");
 
             navigate("/signup/preference02", {
-              state: { mbti },
+              state: {
+                ...location.state,
+                mbti,
+                mbtiSelectionIds: selectedValues,
+              },
             });
           }}
         >

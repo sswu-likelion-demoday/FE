@@ -10,7 +10,9 @@ const Preference02 = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [selectedValues, setSelectedValues] = useState([]);
+  const [selectedValues, setSelectedValues] = useState(
+    location.state?.socialStyleSelectionIds ?? [],
+  );
 
   const options = [
     { id: 1, label: "먼저 다가가서 말을 거는 편이에요" },
@@ -27,7 +29,14 @@ const Preference02 = () => {
         <img
           src={prev_btn}
           alt=""
-          onClick={() => navigate("/signup/preference01")}
+          onClick={() =>
+            navigate("/signup/preference01", {
+              state: {
+                ...location.state,
+                socialStyleSelectionIds: selectedValues,
+              },
+            })
+          }
         />
         <ProgressBar currentStep={2} />
         <div className="p02_t_txt">

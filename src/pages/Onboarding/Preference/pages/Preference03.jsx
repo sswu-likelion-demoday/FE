@@ -10,7 +10,9 @@ const Preference03 = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [selectedValues, setSelectedValues] = useState([]);
+  const [selectedValues, setSelectedValues] = useState(
+    location.state?.interestOptionIds ?? [],
+  );
   const canGoNext = selectedValues.length >= 3 && selectedValues.length <= 5;
 
   const options = [
@@ -37,7 +39,14 @@ const Preference03 = () => {
         <img
           src={prev_btn}
           alt=""
-          onClick={() => navigate("/signup/preference02")}
+          onClick={() =>
+            navigate("/signup/preference02", {
+              state: {
+                ...location.state,
+                interestOptionIds: selectedValues,
+              },
+            })
+          }
         />
         <ProgressBar currentStep={3} />
         <div className="p03_t_txt">
