@@ -3,6 +3,8 @@ import profile_purple from '../../../../assets/images/Chat/profile_purple.svg';
 import profile_me from '../../../../assets/images/Chat/profile_me.svg';
 
 const RelationshipSummaryCard = ({
+    partnerNickname,
+    partnerImageUrl,
     stage,
     stageName,
     completedQuest,
@@ -18,14 +20,20 @@ const RelationshipSummaryCard = ({
                     </div>
 
                     <div className="relationship_summary_profile relationship_summary_profile_partner">
-                        <img src={profile_purple} alt="달빛여우 프로필" />
-                        <span>달</span>
+                        <img
+                            src={partnerImageUrl || profile_purple}
+                            alt=""
+                            style={{ borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                        {!partnerImageUrl && (
+                            <span>{Array.from(partnerNickname || '상대방')[0]}</span>
+                        )}
                     </div>
                 </div>
 
                 <div className="relationship_summary_info">
                     <span className="relationship_summary_relation">
-                        달빛여우님과 나
+                        {partnerNickname ? `${partnerNickname}님과 나` : '상대방과 나'}
                     </span>
 
                     <strong className="relationship_summary_stage">

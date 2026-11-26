@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./MatchingRequest.scss";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import MatchingHeader from "../components/MatchingHeader";
@@ -41,6 +41,7 @@ const sentData = [
     name: "밤양갱",
     expire: "수락 완료",
     accepted: true,
+    chatId: 1,
     studentId: "24",
     description: "사주 궁합이 85점 이상이에요",
   },
@@ -58,7 +59,10 @@ const sentData = [
 
 const MatchingRequest = () => {
   const navigate = useNavigate();
-  const [tab, setTab] = useState("received");
+  const location = useLocation();
+
+  // 채팅 요청 후 넘어오면 '보낸 요청' 탭부터 보여줌
+  const [tab, setTab] = useState(location.state?.tab ?? "received");
 
   // 0이면 꽉 찬 화면, 1 이상이면 빈 수정이 있는 화면
   const emptySlotCount = 1;
@@ -153,7 +157,11 @@ const MatchingRequest = () => {
                     <img src={name_arrow} alt="" className="mr_m_arrow" />
                   </p>
                   {item.accepted && (
-                    <button type="button" className="mr_m_chat">
+                    <button
+                      type="button"
+                      className="mr_m_chat"
+                      onClick={() => navigate(`/chat/${item.chatId}`)}
+                    >
                       채팅 시작
                     </button>
                   )}

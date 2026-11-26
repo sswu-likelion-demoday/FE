@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./SujeongMap.scss";
 import BottomNav from "../../components/BottomNav/BottomNav";
 import MatchingHeader from "../Matching/components/MatchingHeader";
@@ -60,6 +61,8 @@ const orbData = [
 ];
 
 const SujeongMap = () => {
+  const navigate = useNavigate();
+
   // 지도 확대 비율과 이동 위치
   const [scale, setScale] = useState(1);
   const [moveX, setMoveX] = useState(0);
@@ -185,7 +188,14 @@ const SujeongMap = () => {
             <div className="sm_m_card_top">
               <img src={matching_mascot} alt="" className="sm_m_card_profile" />
               <p className="sm_m_card_name">{selected.name}</p>
-              <img src={header_back} alt="" className="sm_m_card_arrow" />
+              {/* 화살표 누르면 이 수정과의 채팅방으로 이동 (임시: 수정 id를 채팅방 id로 사용) */}
+              <img
+                src={header_back}
+                alt=""
+                className="sm_m_card_arrow"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => navigate(`/chat/${selected.id}`)}
+              />
             </div>
             <div className="sm_m_card_stage">
               <span>{selected.stage}단계</span>

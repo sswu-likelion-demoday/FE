@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import OptionGroup from "../components/OptionGroup";
 import ProgressBar from "../components/ProgressBar";
 import BottomButton from "../components/BottomButton";
@@ -8,8 +8,12 @@ import prev_btn from "../../../../assets/images/Onboarding/prev_btn.svg";
 
 const Preference04 = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [selectedValues, setSelectedValues] = useState([]);
+  const [selectedValues, setSelectedValues] = useState(
+    location.state?.hobbyOptionIds ?? [],
+  );
+  const canGoNext = selectedValues.length >= 3 && selectedValues.length <= 5;
 
   const options = [
     { id: 1, label: "카페탐방" },
@@ -35,7 +39,14 @@ const Preference04 = () => {
         <img
           src={prev_btn}
           alt=""
-          onClick={() => navigate("/signup/preference03")}
+          onClick={() =>
+            navigate("/signup/preference03", {
+              state: {
+                ...location.state,
+                hobbyOptionIds: selectedValues,
+              },
+            })
+          }
         />
         <ProgressBar currentStep={4} />
         <div className="p04_t_txt">
@@ -58,7 +69,19 @@ const Preference04 = () => {
         />
       </div>
       <div className="preference04_bot">
-        <BottomButton onClick={() => navigate("/signup/preference05")}>
+        <BottomButton
+          disabled={!canGoNext}
+          onClick={() => {
+            if (!canGoNext) return;
+
+            navigate("/signup/preference05", {
+              state: {
+                ...location.state,
+                hobbyOptionIds: selectedValues,
+              },
+            });
+          }}
+        >
           다음
         </BottomButton>
       </div>

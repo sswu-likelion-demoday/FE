@@ -45,7 +45,15 @@ const MatchingProfile = () => {
 
   return (
     <div className="page MatchingProfile_wrap">
-      <MatchingHeader title="프로필" showBack={!isFound} />
+      <MatchingHeader
+        title="프로필"
+        showBack={!isFound}
+        onBack={
+          isSent
+            ? () => navigate("/matching/request", { state: { tab: "sent" } })
+            : undefined
+        }
+      />
       <div className={isFound ? "matchingprofile_main found" : "matchingprofile_main"}>
         <ProfileCard
           title={title}
@@ -65,8 +73,27 @@ const MatchingProfile = () => {
       )}
       {isFound && (
         <div className="matchingprofile_bot found">
-          <BottomButton>채팅 요청하기</BottomButton>
-          <p className="mp_b_link">다른 사람을 더 찾아볼래요</p>
+          {/* 채팅 요청 후 같은 프로필을 '수락 대기 중' 화면으로 보여줌 */}
+          <BottomButton
+            onClick={() =>
+              navigate("/matching/request/profile", {
+                state: { ...profile, type: "sent" },
+                replace: true,
+              })
+            }
+          >
+            채팅 요청하기
+          </BottomButton>
+          <p
+            className="mp_b_link"
+            onClick={() =>
+              navigate(
+                profile.saju ? "/matching/saju/result" : "/matching/start",
+              )
+            }
+          >
+            다른 사람을 더 찾아볼래요
+          </p>
         </div>
       )}
       {isReceived && (
