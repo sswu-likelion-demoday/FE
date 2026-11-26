@@ -24,7 +24,7 @@ const Login = () => {
       sessionStorage.setItem("refreshToken", data.refreshToken);
 
       if (data.onboardingCompleted) {
-        navigate("/mypage", { replace: true });
+        navigate("/matching", { replace: true });
       } else {
         navigate("/signup/preference-intro", { replace: true });
       }
