@@ -24,6 +24,8 @@ const Preference05 = () => {
     { id: 7, label: "오래 편하게 지낼 수 있는 친구" },
   ];
 
+  const canGoNext = selectedValues.length >= 1 && selectedValues.length <= 3;
+
   return (
     <div className="page Preference05_wrap">
       <div className="preference05_top">
@@ -61,14 +63,17 @@ const Preference05 = () => {
       </div>
       <div className="preference05_bot">
         <BottomButton
-          onClick={() =>
+          disabled={!canGoNext}
+          onClick={() => {
+            if (!canGoNext) return;
+
             navigate("/signup/preference-complete", {
               state: {
                 ...location.state,
                 friendTypeIds: selectedValues,
               },
-            })
-          }
+            });
+          }}
         >
           완료
         </BottomButton>
