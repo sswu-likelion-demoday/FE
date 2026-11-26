@@ -22,6 +22,7 @@ const Login = () => {
 
       sessionStorage.setItem("accessToken", data.accessToken);
       sessionStorage.setItem("refreshToken", data.refreshToken);
+      sessionStorage.setItem("nickname", data.nickname);
 
       if (data.onboardingCompleted) {
         navigate("/matching", { replace: true });
