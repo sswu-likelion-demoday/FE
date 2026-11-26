@@ -1,15 +1,17 @@
 import { BASE_URL } from "./config";
 
 // 공통 요청: 성공하면 응답의 data만 돌려줌
-const request = async (method, path) => {
-  const token = localStorage.getItem("accessToken");
+const request = async (method, path, data) => {
+  const token = sessionStorage.getItem("accessToken");
 
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
+    ...(method === "GET" && { cache: "no-store" }),
     headers: {
       "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),
     },
+    ...(data !== undefined && { body: JSON.stringify(data) }),
   });
 
   const body = await res.json();
@@ -20,7 +22,7 @@ const request = async (method, path) => {
 };
 
 const get = (path) => request("GET", path);
-const post = (path) => request("POST", path);
+const post = (path, data) => request("POST", path, data);
 
 // 매칭 홈 조회: { relationshipSlots: { used, available, total } }
 export const getMatchingHome = () => get("/matching/home");
@@ -34,3 +36,16 @@ export const getMatchingStatus = () => get("/matching/status");
 // { recommendationId, matchingType, matchingScore,
 //   candidate: { userId, nickname, admissionYear, profileImageUrl, introduction } }
 export const postNormalMatching = () => post("/matching/recommendations");
+
+// 추천 자체는 슬롯을 차감하지 않으며, 채팅 요청 수락 후 관계가 생성되면 차감됨
+export const createMatchRequest = (recommendationId) =>
+  post("/match-requests", { recommendationId });
+export const getMatchRequests = () => get("/match-requests");
+export const getMatchRequestDetail = (requestId) =>
+  get(`/match-requests/${encodeURIComponent(requestId)}`);
+export const acceptMatchRequest = (requestId) =>
+  post(`/match-requests/${requestId}/accept`);
+export const rejectMatchRequest = (requestId) =>
+  request("PATCH", `/match-requests/${requestId}/reject`);
+export const cancelMatchRequest = (requestId) =>
+  request("DELETE", `/match-requests/${encodeURIComponent(requestId)}`);

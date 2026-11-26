@@ -1,6 +1,6 @@
 import MatchingButton from "./MatchingButton";
 
-const RequestButtons = ({ className, onAccept, onReject }) => {
+const RequestButtons = ({ className, onAccept, onReject, disabled = false }) => {
   return (
     <div className={className}>
       <MatchingButton
@@ -8,6 +8,7 @@ const RequestButtons = ({ className, onAccept, onReject }) => {
         size="medium"
         icon="check"
         label="수락"
+        disabled={disabled}
         onClick={onAccept}
       />
       <MatchingButton
@@ -15,6 +16,7 @@ const RequestButtons = ({ className, onAccept, onReject }) => {
         size="medium"
         icon="close"
         label="거절"
+        disabled={disabled}
         onClick={onReject}
       />
     </div>

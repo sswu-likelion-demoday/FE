@@ -36,6 +36,15 @@
     margin-top: 24px;
   }
 
+  &_image.uploaded {
+    width: 180px;
+    height: 180px;
+    margin-top: 20px;
+    margin-bottom: 0;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
   &_name {
     margin: 0;
     font-size: 22px;
@@ -55,6 +64,13 @@
     font-size: 17px;
     font-weight: 500;
     color: var(--text);
+  }
+
+  &_score {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--main);
   }
 
   &_message {

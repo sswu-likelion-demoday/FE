@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { acceptMatchRequest, getMatchRequests, rejectMatchRequest } from "../../../api/matching";
+import { getVisibleMatchRequests } from "../data/requestData";
 import "./MatchingRequest.scss";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import MatchingHeader from "../components/MatchingHeader";
@@ -8,54 +10,27 @@ import matching_mascot from "../../../assets/images/Matching/matching_mascot.svg
 import no_matching from "../../../assets/images/Matching/no_matching.svg";
 import name_arrow from "../../../assets/images/Matching/name_arrow.svg";
 import profile_purple from "../../../assets/images/Chat/profile_purple.svg";
-import profile_pink from "../../../assets/images/Chat/profile_pink.svg";
 
-const receivedData = [
-  {
-    id: 1,
+const toProfile = (item, received, now) => {
+  const days = item.expiresAt
+    ? Math.max(0, Math.ceil((Date.parse(item.expiresAt) - now) / 86400000))
+    : null;
+  const accepted = item.status === "ACCEPTED";
+  return {
+    id: item.requestId,
+    requestId: item.requestId,
+    userId: item.user.userId,
+    name: item.user.nickname,
     profileImage: profile_purple,
-    profileText: "달",
-    name: "달빛여우",
-    expire: "만료 2일전",
-    studentId: "23",
-    description: "사주 궁합이 80점 이상이에요",
-    expireText: "2일 후에 만료돼요",
-  },
-  {
-    id: 2,
-    profileImage: profile_pink,
-    profileText: "고",
-    name: "고양이 집사",
-    expire: "만료 3일전",
-    studentId: "22",
-    description: "사주 궁합이 75점 이상이에요",
-    expireText: "3일 후에 만료돼요",
-  },
-];
-
-const sentData = [
-  {
-    id: 3,
-    profileImage: profile_purple,
-    profileText: "밤",
-    name: "밤양갱",
-    expire: "수락 완료",
-    accepted: true,
-    chatId: 1,
-    studentId: "24",
-    description: "사주 궁합이 85점 이상이에요",
-  },
-  {
-    id: 4,
-    profileImage: profile_purple,
-    profileText: "새",
-    name: "새벽산책",
-    expire: "수락 대기 중",
-    accepted: false,
-    studentId: "22",
-    description: "사주 궁합이 80점 이상이에요",
-  },
-];
+    profileText: Array.from(item.user.nickname || "")[0],
+    accepted,
+    chatId: item.chatRoomId,
+    expire: received ? `만료 ${days}일전` : accepted ? "수락 완료" : "수락 대기 중",
+    expireText: days === null ? "" : `${days}일 후에 만료돼요`,
+    studentId: "",
+    description: "",
+  };
+};
 
 const MatchingRequest = () => {
   const navigate = useNavigate();
@@ -63,14 +38,93 @@ const MatchingRequest = () => {
 
   // 채팅 요청 후 넘어오면 '보낸 요청' 탭부터 보여줌
   const [tab, setTab] = useState(location.state?.tab ?? "received");
+  const [data, setData] = useState(null);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [now, setNow] = useState(Date.now);
+  const submitting = useRef(false);
+  const loadVersion = useRef(0);
 
-  // 0이면 꽉 찬 화면, 1 이상이면 빈 수정이 있는 화면
-  const emptySlotCount = 1;
-  const filledCount = 3 - emptySlotCount;
+  useEffect(() => {
+    let active = true;
+    const loadRequests = async () => {
+      if (submitting.current) return;
+      const version = ++loadVersion.current;
+      setNow(Date.now());
+      try {
+        const result = await getMatchRequests();
+        if (active && version === loadVersion.current) {
+          setData(result);
+          setNow(Date.now());
+          setError("");
+        }
+      } catch (err) {
+        if (active && version === loadVersion.current) setError(err.message);
+      }
+    };
+    const refresh = () => {
+      if (document.visibilityState !== "hidden") loadRequests();
+    };
+    loadRequests();
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    const interval = window.setInterval(refresh, 15000);
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [location.key]);
 
-  // 보낸 요청은 아직 수락 대기 중일 때만 프로필로 이동
+  useEffect(() => {
+    const expiries = [...(data?.receivedRequests ?? []), ...(data?.sentRequests ?? [])]
+      .filter((item) => item.status === "PENDING")
+      .map((item) => Date.parse(item.expiresAt))
+      .filter((expiry) => expiry > now);
+    if (expiries.length === 0) return;
+    const nextExpiry = Math.min(...expiries);
+    const timer = window.setTimeout(
+      () => setNow(Date.now()),
+      Math.min(Math.max(0, nextExpiry - Date.now()), 2147483647),
+    );
+    return () => window.clearTimeout(timer);
+  }, [data, now]);
+
+  const visibleRequests = getVisibleMatchRequests(data, now);
+  const receivedData = visibleRequests.receivedRequests.map((item) => toProfile(item, true, now));
+  const sentData = visibleRequests.sentRequests.map((item) => toProfile(item, false, now));
+  const slots = data?.relationshipSlots;
+
+  const handleRequest = async (requestId, accept) => {
+    if (submitting.current) return;
+    submitting.current = true;
+    // 수락/거절 전에 시작한 조회 응답이 변경 후 목록을 덮어쓰지 않도록 무효화
+    loadVersion.current += 1;
+    setIsSubmitting(true);
+    setError("");
+    try {
+      if (accept) {
+        await acceptMatchRequest(requestId);
+        // 관계 확정 후 첫 화면에서 서버의 남은 슬롯 수를 다시 조회
+        navigate("/matching");
+      } else {
+        await rejectMatchRequest(requestId);
+        setData((current) => ({
+          ...current,
+          receivedRequests: current.receivedRequests.filter((item) => item.requestId !== requestId),
+        }));
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      submitting.current = false;
+      setIsSubmitting(false);
+    }
+  };
+
+  // 보낸 요청도 상태에 관계없이 상세 API로 상대 프로필을 확인
   const handleSentClick = (item) => {
-    if (item.accepted) return;
     navigate("/matching/request/profile", { state: { ...item, type: "sent" } });
   };
 
@@ -78,8 +132,8 @@ const MatchingRequest = () => {
     <div className="page MatchingRequest_wrap">
       <MatchingHeader title="수정구" onBack={() => navigate("/matching")} />
       <div className="matchingrequest_top">
-        {[0, 1, 2].map((index) =>
-          index < filledCount ? (
+        {slots && Array.from({ length: slots.total }, (_, index) =>
+          index < slots.used ? (
             <div key={index} className="mr_t_slot">
               <img src={matching_mascot} alt="" />
             </div>
@@ -96,24 +150,29 @@ const MatchingRequest = () => {
           className={tab === "received" ? "active" : ""}
           onClick={() => setTab("received")}
         >
-          받은 요청 {receivedData.length}
+          받은 요청 {data ? receivedData.length : "…"}
         </button>
         <button
           type="button"
           className={tab === "sent" ? "active" : ""}
           onClick={() => setTab("sent")}
         >
-          보낸 요청 {sentData.length}
+          보낸 요청 {data ? sentData.length : "…"}
         </button>
       </div>
       <div className="matchingrequest_main">
+        {error && <p role="alert">{error}</p>}
+        {!data && !error && <p role="status">요청을 불러오고 있어요.</p>}
+        {data && (tab === "received" ? receivedData : sentData).length === 0 && (
+          <p>{tab === "received" ? "받은 요청이 없어요." : "보낸 요청이 없어요."}</p>
+        )}
         {tab === "received" &&
           receivedData.map((item) => (
             <div key={item.id} className="mr_m_item">
               <div
                 className="mr_m_profile"
                 onClick={() =>
-                  navigate("/matching/request/profile", { state: item })
+                  navigate("/matching/request/profile", { state: { ...item, type: "received" } })
                 }
               >
                 <img src={item.profileImage} alt="" />
@@ -124,7 +183,7 @@ const MatchingRequest = () => {
                   <p
                     className="mr_m_name"
                     onClick={() =>
-                      navigate("/matching/request/profile", { state: item })
+                      navigate("/matching/request/profile", { state: { ...item, type: "received" } })
                     }
                   >
                     {item.name}
@@ -132,7 +191,12 @@ const MatchingRequest = () => {
                   </p>
                   <p className="mr_m_expire">{item.expire}</p>
                 </div>
-                <RequestButtons className="mr_m_btns" />
+                <RequestButtons
+                  className="mr_m_btns"
+                  disabled={isSubmitting}
+                  onAccept={() => handleRequest(item.requestId, true)}
+                  onReject={() => handleRequest(item.requestId, false)}
+                />
               </div>
             </div>
           ))}
