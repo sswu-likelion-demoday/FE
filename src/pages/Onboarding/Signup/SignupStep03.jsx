@@ -72,6 +72,8 @@ const SignupStep03 = () => {
 
       await signup(signupData, profileImage);
 
+      sessionStorage.setItem("nickname", nickname.trim());
+
       alert("회원가입이 완료되었습니다.");
       navigate("/signup/complete", { replace: true });
     } catch (error) {

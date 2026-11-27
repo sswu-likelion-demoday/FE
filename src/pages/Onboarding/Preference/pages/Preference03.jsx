@@ -24,7 +24,7 @@ const Preference03 = () => {
     { id: 6, label: "패션·뷰티" },
     { id: 7, label: "책·글쓰기" },
     { id: 8, label: "IT·테크" },
-    { id: 9, label: "경제·재태크" },
+    { id: 9, label: "경제·재테크" },
     { id: 10, label: "동물" },
     { id: 11, label: "게임" },
     { id: 12, label: "스포츠" },

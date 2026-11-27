@@ -23,6 +23,8 @@ const Preference02 = () => {
     { id: 6, label: "한 번 친해지면 오래 깊게 지내는 편이에요" },
   ];
 
+  const canGoNext = selectedValues.length >= 1 && selectedValues.length <= 2;
+
   return (
     <div className="page Preference02_wrap">
       <div className="preference02_top">
@@ -60,14 +62,17 @@ const Preference02 = () => {
       </div>
       <div className="preference02_bot">
         <BottomButton
-          onClick={() =>
+          disabled={!canGoNext}
+          onClick={() => {
+            if (!canGoNext) return;
+
             navigate("/signup/preference03", {
               state: {
                 ...location.state,
                 socialStyleSelectionIds: selectedValues,
               },
-            })
-          }
+            });
+          }}
         >
           다음
         </BottomButton>

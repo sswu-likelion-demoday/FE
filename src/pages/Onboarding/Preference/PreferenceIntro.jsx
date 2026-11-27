@@ -5,6 +5,7 @@ import preferenceIntro_icon from "../../../assets/images/Onboarding/PreferenceIn
 
 const PreferenceIntro = () => {
   const navigate = useNavigate();
+  const nickname = sessionStorage.getItem("nickname");
 
   return (
     <div className="page PreferenceIntro_wrap">
@@ -14,7 +15,7 @@ const PreferenceIntro = () => {
       <div className="preferenceintro_main">
         <p>매칭 유형 파악</p>
         <span>
-          나리님과 잘 맞는
+          {nickname ? `${nickname}님과` : "나와"} 잘 맞는
           <br />
           수정이를 찾기 위해
           <br />

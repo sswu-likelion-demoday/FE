@@ -98,11 +98,13 @@ const SajuSetting = () => {
       !Array.isArray(interestOptionIds) ||
       !Array.isArray(hobbyOptionIds) ||
       !Array.isArray(friendTypeIds) ||
+      socialStyleSelectionIds.length < 1 ||
       socialStyleSelectionIds.length > 2 ||
       interestOptionIds.length < 3 ||
       interestOptionIds.length > 5 ||
       hobbyOptionIds.length < 3 ||
       hobbyOptionIds.length > 5 ||
+      friendTypeIds.length < 1 ||
       friendTypeIds.length > 3
     ) {
       alert("온보딩 정보가 누락되었거나 올바르지 않습니다.");
