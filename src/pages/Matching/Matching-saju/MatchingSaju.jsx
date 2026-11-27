@@ -1,30 +1,64 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./MatchingSaju.scss";
+import { getSajuSettings, saveSajuSettings } from "../../../api/matching";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import MatchingHeader from "../components/MatchingHeader";
 import SajuModal from "../components/SajuModal";
 import logo_symbol_2 from "../../../assets/images/Onboarding/logo_symbol_2.svg";
 
 const MatchingSaju = () => {
-  const location = useLocation();
   const navigate = useNavigate();
 
-  // 사주 매칭을 허용하지 않은 사람은 설정 창부터 보여줌
-  const [showSetting, setShowSetting] = useState(
-    location.state ? location.state.showSetting : false,
-  );
+  // 사주 매칭 허용 여부 - 사주 매칭 설정 조회 API (null: 확인 중)
+  const [isAllowed, setIsAllowed] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // 설정 창이 없을 때 6초 기다린 뒤 결과 화면으로 이동
   useEffect(() => {
-    if (showSetting) return;
+    let active = true;
+    getSajuSettings()
+      .then((data) => active && setIsAllowed(data.matchingEnabled))
+      .catch((err) => {
+        if (!active) return;
+        alert(err.message);
+        navigate("/matching", { replace: true });
+      });
+    return () => {
+      active = false;
+    };
+  }, [navigate]);
+
+  // 사주 매칭을 허용하지 않은 사람은 설정 창부터 보여줌
+  const showSetting = isAllowed === false;
+
+  // 허용된 상태면 6초 기다린 뒤 결과 화면으로 이동
+  useEffect(() => {
+    if (!isAllowed) return;
 
     const timer = setTimeout(() => {
       navigate("/matching/saju/result", { replace: true });
     }, 6000);
 
     return () => clearTimeout(timer);
-  }, [showSetting, navigate]);
+  }, [isAllowed, navigate]);
+
+  // 설정 완료 - 허용하지 않으면 매칭 홈으로, 허용하면 저장 후 진행
+  const handleComplete = async (settings) => {
+    if (!settings.matchingEnabled) {
+      navigate("/matching");
+      return;
+    }
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      const saved = await saveSajuSettings(settings);
+      setIsAllowed(saved.matchingEnabled);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="page MatchingSaju_wrap">
@@ -41,7 +75,7 @@ const MatchingSaju = () => {
       {showSetting && (
         <SajuModal
           onClose={() => navigate("/matching")}
-          onComplete={() => setShowSetting(false)}
+          onComplete={handleComplete}
         />
       )}
     </div>

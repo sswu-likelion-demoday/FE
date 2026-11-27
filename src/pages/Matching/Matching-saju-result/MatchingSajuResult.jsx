@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MatchingSajuResult.scss";
+import { getMatchingStatus, postSajuMatching } from "../../../api/matching";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import MatchingHeader from "../components/MatchingHeader";
 import BottomButton from "../../Onboarding/Preference/components/BottomButton";
@@ -19,20 +21,45 @@ const sajuCards = [saju_1, saju_2, saju_3, saju_4, saju_5, saju_6, saju_7, saju_
 const MatchingSajuResult = () => {
   const navigate = useNavigate();
 
-  // 부족한 기운, 남은 매칭 횟수, 수정구 개수 (확인용 임시 값)
+  // 부족한 기운 (확인용 임시 값 - 아직 API 없음)
   const lackElement = "화(火)";
-  const remainCount = 3;
-  const crystalCount = 100;
-  const hasCrystal = crystalCount >= 30;
-  const isZero = remainCount === 0;
+
+  // 매칭 이용 상태 - 일반 매칭과 무료 횟수를 공유하므로 같은 API 사용
+  const [status, setStatus] = useState(null);
+
+  useEffect(() => {
+    getMatchingStatus()
+      .then(setStatus)
+      .catch((err) => console.error(err));
+  }, []);
+
+  // FREE: 무료 매칭 가능 / CURRENCY: 수정구로 매칭 / INSUFFICIENT_CURRENCY: 수정구 부족
+  const actionType = status?.actionType;
+  const remainCount = status?.weeklyMatching.remaining ?? 3;
+  const crystalCount = status?.currency.balance ?? 0;
+  const matchingCost = status?.currency.matchingCost ?? 30;
+  const isZero = actionType === "CURRENCY" || actionType === "INSUFFICIENT_CURRENCY";
+  const hasCrystal = actionType === "CURRENCY";
 
   let message = "수정구를 모두 소진했어요";
   if (hasCrystal) {
-    message = "수정구 30개를 이용하여 한번 더 매칭할 수 있어요";
+    message = `수정구 ${matchingCost}개를 이용하여 한번 더 매칭할 수 있어요`;
   }
 
-  const handleMatchingClick = () => {
-    navigate("/matching/found", { state: { type: "saju" } });
+  // 사주 매칭 실행 - 추천 결과를 매칭 발견 화면으로 넘김
+  const [isMatching, setIsMatching] = useState(false);
+
+  const handleMatchingClick = async () => {
+    if (isMatching) return;
+    setIsMatching(true);
+    try {
+      const recommendation = await postSajuMatching();
+      navigate("/matching/found", { state: { type: "saju", recommendation } });
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setIsMatching(false);
+    }
   };
 
   return (
@@ -70,7 +97,7 @@ const MatchingSajuResult = () => {
           <BottomButton onClick={handleMatchingClick}>
             한번 더 매칭
             <img src={crystal_orb} alt="" className="msr_b_orb" />
-            -30
+            -{matchingCost}
           </BottomButton>
         )}
         {isZero && !hasCrystal && (

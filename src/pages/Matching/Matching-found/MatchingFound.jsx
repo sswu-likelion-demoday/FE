@@ -9,12 +9,18 @@ const MatchingFound = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 사주 매칭에서 넘어왔는지, 사주 궁합 점수 (확인용 임시 값)
-  const isSaju = location.state && location.state.type === "saju";
-  const sajuScore = 85;
+  // 로그인/회원가입 때 저장한 닉네임
+  const nickname = sessionStorage.getItem("nickname");
 
-  // 일반 매칭 실행 API 결과 (매칭 시작 화면에서 넘겨받음)
-  const candidate = location.state?.recommendation?.candidate;
+  // 사주 매칭에서 넘어왔는지
+  const isSaju = location.state && location.state.type === "saju";
+
+  // 매칭 실행 API 결과 (매칭 시작 / 사주 결과 화면에서 넘겨받음)
+  const recommendation = location.state?.recommendation;
+  const candidate = recommendation?.candidate;
+
+  // 사주 궁합 점수 (API 결과가 없으면 확인용 임시 값)
+  const sajuScore = recommendation?.compatibilityScore ?? 85;
 
   // 매칭된 사람 (API 결과가 없으면 확인용 임시 데이터)
   let profile = {
@@ -28,11 +34,13 @@ const MatchingFound = () => {
 
   if (isSaju) {
     profile = {
-      name: "고양이 집사",
-      studentId: "22",
-      description: "사주 궁합이 80점 이상이에요",
+      name: candidate?.nickname ?? "고양이 집사",
+      studentId: candidate ? candidate.admissionYear ?? "" : "22",
+      description: `사주 궁합이 ${sajuScore}점이에요`,
       type: "found",
       saju: true,
+      recommendationId: recommendation?.recommendationId,
+      userId: candidate?.userId,
     };
   }
 
@@ -48,7 +56,7 @@ const MatchingFound = () => {
           </p>
         ) : (
           <p className="mf_m_title">
-            나리님을 위한
+            {nickname ? `${nickname}님을 위한` : "나를 위한"}
             <br />
             수정을 발견했어요!
           </p>
