@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getBlockedUsers, unblockUser } from "../../../../api/mypage";
 import UnblockModal from "../../components/UnblockModal";
 import MypageHeader from "../../components/MypageHeader";
 import BlockedUserItem from "../../components/BlockedUserItem";
@@ -10,31 +11,61 @@ import check_icon from "../../../../assets/images/Mypage/check_icon.svg";
 const BlockList = () => {
   const navigate = useNavigate();
 
-  const [blockedUsers, setBlockedUsers] = useState([
-    {
-      id: 1,
-      nickname: "달빛여우",
-      blockedDate: "2026.09.24",
-    },
-    {
-      id: 2,
-      nickname: "새벽산책",
-      blockedDate: "2026.09.18",
-    },
-  ]);
-
+  const [blockedUsers, setBlockedUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [toastMessage, setToastMessage] = useState("");
+  const [isUnblocking, setIsUnblocking] = useState(false);
 
-  const handleUnblock = () => {
-    if (!selectedUser) return;
+  useEffect(() => {
+    const fetchBlockedUsers = async () => {
+      const accessToken = sessionStorage.getItem("accessToken");
 
-    setBlockedUsers((prev) =>
-      prev.filter((user) => user.id !== selectedUser.id),
-    );
+      if (!accessToken) return;
 
-    setToastMessage(`${selectedUser.nickname}님의 차단을 해제했어요`);
-    setSelectedUser(null);
+      try {
+        const data = await getBlockedUsers(accessToken);
+
+        setBlockedUsers(
+          data.blockedUsers.map((user) => ({
+            id: user.userId,
+            nickname: user.nickname,
+            blockedDate: user.blockedAt.slice(0, 10).replaceAll("-", "."),
+          })),
+        );
+      } catch (error) {
+        console.error("차단 목록 조회 실패:", error);
+      }
+    };
+
+    fetchBlockedUsers();
+  }, []);
+
+  const handleUnblock = async () => {
+    if (!selectedUser || isUnblocking) return;
+
+    const accessToken = sessionStorage.getItem("accessToken");
+
+    if (!accessToken) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    try {
+      setIsUnblocking(true);
+
+      await unblockUser(selectedUser.id, accessToken);
+
+      setBlockedUsers((prev) =>
+        prev.filter((user) => user.id !== selectedUser.id),
+      );
+
+      setToastMessage(`${selectedUser.nickname}님의 차단을 해제했어요`);
+      setSelectedUser(null);
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setIsUnblocking(false);
+    }
   };
 
   useEffect(() => {

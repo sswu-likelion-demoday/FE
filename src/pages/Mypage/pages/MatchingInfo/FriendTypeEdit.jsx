@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { updateMatchingProfile } from "../../../../api/mypage";
 import OptionGroup from "../../../Onboarding/Preference/components/OptionGroup";
 import MatchingEditLayout from "../../components/MatchingEditLayout";
 import "./FriendTypeEdit.scss";
@@ -16,7 +17,47 @@ const friendOptions = [
 
 const FriendTypeEdit = () => {
   const navigate = useNavigate();
-  const [selectedValues, setSelectedValues] = useState([1, 5]);
+  const location = useLocation();
+
+  const initialFriendTypeIds = location.state?.friendTypeIds;
+
+  const [selectedValues, setSelectedValues] = useState(
+    initialFriendTypeIds ?? [],
+  );
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (selectedValues.length < 1 || selectedValues.length > 3 || isSaving) {
+      return;
+    }
+
+    if (!Array.isArray(initialFriendTypeIds)) {
+      alert("기존 친구 유형 정보를 불러오지 못했습니다.");
+      return;
+    }
+
+    const accessToken = sessionStorage.getItem("accessToken");
+
+    if (!accessToken) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      await updateMatchingProfile(accessToken, {
+        friendTypeIds: selectedValues,
+      });
+
+      alert("친구 유형이 수정되었습니다.");
+      navigate("/mypage/matching-info");
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <MatchingEditLayout
@@ -29,9 +70,12 @@ const FriendTypeEdit = () => {
           만나고 싶나요?
         </>
       }
-      description="최대 2개까지 선택"
+      description="최대 3개까지 선택"
       selectedCount={selectedValues.length}
-      onSave={() => navigate("/mypage/matching-info")}
+      onSave={handleSave}
+      disabled={
+        selectedValues.length < 1 || selectedValues.length > 3 || isSaving
+      }
     >
       <OptionGroup
         options={friendOptions}
@@ -39,7 +83,7 @@ const FriendTypeEdit = () => {
         variant="list"
         selectedValues={selectedValues}
         onChange={setSelectedValues}
-        maxSelect={2}
+        maxSelect={3}
       />
     </MatchingEditLayout>
   );

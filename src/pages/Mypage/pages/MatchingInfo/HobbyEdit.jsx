@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { updateMatchingProfile } from "../../../../api/mypage";
 import OptionGroup from "../../../Onboarding/Preference/components/OptionGroup";
 import MatchingEditLayout from "../../components/MatchingEditLayout";
 import "./HobbyEdit.scss";
@@ -24,7 +25,45 @@ const hobbyOptions = [
 
 const HobbyEdit = () => {
   const navigate = useNavigate();
-  const [selectedValues, setSelectedValues] = useState([3, 13, 14]);
+  const location = useLocation();
+
+  const initialHobbyIds = location.state?.hobbyIds;
+
+  const [selectedValues, setSelectedValues] = useState(initialHobbyIds ?? []);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (selectedValues.length < 3 || selectedValues.length > 5 || isSaving) {
+      return;
+    }
+
+    if (!Array.isArray(initialHobbyIds)) {
+      alert("기존 취미 정보를 불러오지 못했습니다.");
+      return;
+    }
+
+    const accessToken = sessionStorage.getItem("accessToken");
+
+    if (!accessToken) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      await updateMatchingProfile(accessToken, {
+        hobbyIds: selectedValues,
+      });
+
+      alert("취미가 수정되었습니다.");
+      navigate("/mypage/matching-info");
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <MatchingEditLayout
@@ -37,10 +76,12 @@ const HobbyEdit = () => {
           선택해 주세요
         </>
       }
-      description="최소 3개 ~ 최대 6개 선택"
+      description="최소 3개 ~ 최대 5개 선택"
       selectedCount={selectedValues.length}
-      onSave={() => navigate("/mypage/matching-info")}
-      disabled={selectedValues.length < 3}
+      onSave={handleSave}
+      disabled={
+        selectedValues.length < 3 || selectedValues.length > 5 || isSaving
+      }
       footerText="변경한 취미는 다음 매칭부터 반영돼요"
     >
       <OptionGroup
@@ -49,7 +90,7 @@ const HobbyEdit = () => {
         variant="grid"
         selectedValues={selectedValues}
         onChange={setSelectedValues}
-        maxSelect={6}
+        maxSelect={5}
       />
     </MatchingEditLayout>
   );

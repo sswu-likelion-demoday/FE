@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { updateMatchingProfile } from "../../../../api/mypage";
 import OptionGroup from "../../../Onboarding/Preference/components/OptionGroup";
 import MatchingEditLayout from "../../components/MatchingEditLayout";
 import "./InterestCategory.scss";
@@ -24,7 +25,47 @@ const categoryOptions = [
 
 const InterestCategory = () => {
   const navigate = useNavigate();
-  const [selectedValues, setSelectedValues] = useState([1, 3, 5, 14]);
+  const location = useLocation();
+
+  const initialInterestIds = location.state?.interestIds;
+
+  const [selectedValues, setSelectedValues] = useState(
+    initialInterestIds ?? [],
+  );
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (selectedValues.length < 3 || selectedValues.length > 5 || isSaving) {
+      return;
+    }
+
+    if (!Array.isArray(initialInterestIds)) {
+      alert("기존 관심사 정보를 불러오지 못했습니다.");
+      return;
+    }
+
+    const accessToken = sessionStorage.getItem("accessToken");
+
+    if (!accessToken) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      await updateMatchingProfile(accessToken, {
+        interestIds: selectedValues,
+      });
+
+      alert("관심 카테고리가 수정되었습니다.");
+      navigate("/mypage/matching-info");
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <MatchingEditLayout
@@ -39,8 +80,10 @@ const InterestCategory = () => {
       }
       description="최소 3개 이상 선택"
       selectedCount={selectedValues.length}
-      onSave={() => navigate("/mypage/matching-info")}
-      disabled={selectedValues.length < 3}
+      onSave={handleSave}
+      disabled={
+        selectedValues.length < 3 || selectedValues.length > 5 || isSaving
+      }
       footerText="변경한 관심사는 다음 매칭부터 반영돼요"
     >
       <OptionGroup
@@ -49,6 +92,7 @@ const InterestCategory = () => {
         variant="grid"
         selectedValues={selectedValues}
         onChange={setSelectedValues}
+        maxSelect={5}
       />
     </MatchingEditLayout>
   );

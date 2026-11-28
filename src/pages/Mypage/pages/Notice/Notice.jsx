@@ -1,46 +1,45 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getNotices } from "../../../../api/mypage";
 import { useNavigate } from "react-router-dom";
 import MypageHeader from "../../components/MypageHeader";
 import TabMenu from "../../components/TabMenu";
 import NoticeItem from "../../components/NoticeItem";
 import "./Notice.scss";
 
-const notices = [
-  {
-    id: 1,
-    category: "이벤트",
-    title: "IT융합대학인의 날 · 수정 2배 이벤트",
-    date: "2026.09.24",
-    isPinned: true,
-  },
-  {
-    id: 2,
-    category: "서비스 소식",
-    title: "퀘스트 리워드 정책 변경 안내",
-    date: "2026.09.20",
-  },
-  {
-    id: 3,
-    category: "서비스 소식",
-    title: "수정 사용 안내",
-    date: "2026.09.15",
-  },
-  {
-    id: 4,
-    category: "서비스 소식",
-    title: "관계 단계 기능이 추가됐어요",
-    date: "2026.09.10",
-  },
-];
-
 const Notice = () => {
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState("전체");
+  const [notices, setNotices] = useState([]);
+
+  useEffect(() => {
+    const fetchNotices = async () => {
+      const accessToken = sessionStorage.getItem("accessToken");
+
+      if (!accessToken) return;
+
+      try {
+        const data = await getNotices(accessToken);
+        setNotices(data.notices ?? []);
+      } catch (error) {
+        console.error("공지사항 조회 실패:", error);
+      }
+    };
+
+    fetchNotices();
+  }, []);
+
+  const categoryLabels = {
+    EVENT: "이벤트",
+  };
 
   const filteredNotices =
     selectedTab === "전체"
       ? notices
-      : notices.filter((notice) => notice.category === selectedTab);
+      : notices.filter(
+          (notice) =>
+            (categoryLabels[notice.category] ?? notice.category) ===
+            selectedTab,
+        );
 
   return (
     <div className="page Notice_wrap">
@@ -60,11 +59,10 @@ const Notice = () => {
         <div className="notice_list">
           {filteredNotices.map((notice) => (
             <NoticeItem
-              key={notice.id}
-              category={notice.category}
+              key={notice.noticeId}
+              category={categoryLabels[notice.category] ?? notice.category}
               title={notice.title}
-              date={notice.date}
-              isPinned={notice.isPinned}
+              date={notice.createdAt?.replaceAll("-", ".")}
             />
           ))}
         </div>
