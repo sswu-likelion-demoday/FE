@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MatchingSajuResult.scss";
-import { getMatchingStatus, postSajuMatching } from "../../../api/matching";
+import { getMatchingStatus, getSajuElements, postSajuMatching } from "../../../api/matching";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import MatchingHeader from "../components/MatchingHeader";
 import BottomButton from "../../Onboarding/Preference/components/BottomButton";
@@ -18,11 +18,33 @@ import crystal_orb from "../../../assets/images/Matching/crystal_orb.svg";
 
 const sajuCards = [saju_1, saju_2, saju_3, saju_4, saju_5, saju_6, saju_7, saju_8];
 
+// 오행 코드별 표시 문구
+const elementLabels = {
+  WOOD: "목(木)",
+  FIRE: "화(火)",
+  EARTH: "토(土)",
+  METAL: "금(金)",
+  WATER: "수(水)",
+};
+
 const MatchingSajuResult = () => {
   const navigate = useNavigate();
 
-  // 부족한 기운 (확인용 임시 값 - 아직 API 없음)
-  const lackElement = "화(火)";
+  // 부족한 기운 - 부족한 기운 조회 API (여러 개면 "수(水)·화(火)"처럼 표시)
+  const [deficientElements, setDeficientElements] = useState(null);
+
+  useEffect(() => {
+    getSajuElements()
+      .then((data) => setDeficientElements(data.deficientElements ?? []))
+      .catch((err) => {
+        console.error(err);
+        setDeficientElements([]);
+      });
+  }, []);
+
+  const lackElement = (deficientElements ?? [])
+    .map((element) => elementLabels[element] ?? element)
+    .join("·");
 
   // 매칭 이용 상태 - 일반 매칭과 무료 횟수를 공유하므로 같은 API 사용
   const [status, setStatus] = useState(null);
@@ -72,7 +94,11 @@ const MatchingSajuResult = () => {
           ))}
         </div>
         <p className={isZero ? "msr_m_title zero" : "msr_m_title"}>
-          ‘{lackElement}’기운이 부족해요
+          {deficientElements === null
+            ? "기운을 확인하고 있어요"
+            : lackElement
+              ? `‘${lackElement}’기운이 부족해요`
+              : "오행의 기운이 고르게 있어요"}
         </p>
         <p className="msr_m_title second">기운을 채워줄 수정을 찾아볼까요?</p>
         <div className="msr_m_crystal">

@@ -48,6 +48,10 @@ export const postSajuMatching = () => post("/matching/saju/recommendations");
 export const getSajuSettings = () => get("/matching/saju");
 export const saveSajuSettings = (data) => request("PUT", "/matching/saju", data);
 
+// 부족한 기운 조회
+// { deficientElements: ["WATER"], elements: { WOOD, FIRE, EARTH, METAL, WATER } }
+export const getSajuElements = () => get("/matching/saju/elements");
+
 // 추천 자체는 슬롯을 차감하지 않으며, 채팅 요청 수락 후 관계가 생성되면 차감됨
 export const createMatchRequest = (recommendationId) =>
   post("/match-requests", { recommendationId });
