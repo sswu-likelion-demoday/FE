@@ -9,6 +9,11 @@ const ChatModal = ({
     type,
     onClose,
     onConfirm,
+    correctAnswer,
+    correctAnswerLetter,
+    partnerName = '상대방',
+    reward,
+    partnerParticipationStatus,
 }) => {
     const isCorrect =
         type === 'correct';
@@ -17,23 +22,29 @@ const ChatModal = ({
         type === 'wrong';
 
     const isVerification =
-        type === 'verification';
+        type ===
+        'verification';
 
     const isBlockConfirm =
-        type === 'blockConfirm';
+        type ===
+        'blockConfirm';
 
     const isBlockDone =
-        type === 'blockDone';
+        type ===
+        'blockDone';
 
     const isLeaveConfirm =
-        type === 'leaveConfirm';
+        type ===
+        'leaveConfirm';
+
+    const partnerLabel = partnerName === '상대방' ? partnerName : partnerName + '님';
 
     if (isBlockConfirm) {
         return (
             <div className="chat_modal_overlay">
                 <div className="chat_modal chat_modal_confirm">
                     <h2 className="chat_modal_confirm_title">
-                        달빛여우님을 차단할까요?
+                        {partnerLabel}을 차단할까요?
                     </h2>
 
                     <div className="chat_modal_confirm_buttons">
@@ -48,7 +59,9 @@ const ChatModal = ({
                         <button
                             type="button"
                             className="chat_modal_danger"
-                            onClick={onConfirm}
+                            onClick={
+                                onConfirm
+                            }
                         >
                             차단하기
                         </button>
@@ -63,7 +76,7 @@ const ChatModal = ({
             <div className="chat_modal_overlay">
                 <div className="chat_modal chat_modal_confirm">
                     <h2 className="chat_modal_confirm_title">
-                        달빛여우님을 차단했어요
+                        {partnerLabel}을 차단했어요
                     </h2>
 
                     <button
@@ -83,7 +96,7 @@ const ChatModal = ({
             <div className="chat_modal_overlay">
                 <div className="chat_modal chat_modal_confirm">
                     <h2 className="chat_modal_confirm_title">
-                        달빛여우님과
+                        {partnerLabel}과
                         <br />
                         관계를 종료할까요?
                     </h2>
@@ -100,7 +113,9 @@ const ChatModal = ({
                         <button
                             type="button"
                             className="chat_modal_danger"
-                            onClick={onConfirm}
+                            onClick={
+                                onConfirm
+                            }
                         >
                             종료
                         </button>
@@ -136,35 +151,51 @@ const ChatModal = ({
                             : '아쉬워요, 오답이에요!'}
                 </h2>
 
-                {isCorrect && (
-                    <div className="chat_modal_reward">
-                        <img
-                            src={gem}
-                            alt=""
-                        />
+                {isCorrect &&
+                    reward > 0 && (
+                        <div className="chat_modal_reward">
+                            <img
+                                src={gem}
+                                alt=""
+                            />
 
-                        <span>
-                            +5 수정구
-                        </span>
-                    </div>
-                )}
+                            <span>
+                                +{reward} 수정구
+                            </span>
+                        </div>
+                    )}
 
-                {isWrong && (
-                    <div className="chat_modal_answer">
-                        <img
-                            src={eye}
-                            alt=""
-                        />
+                {isWrong &&
+                    correctAnswer && (
+                        <div className="chat_modal_answer">
+                            <img
+                                src={eye}
+                                alt=""
+                            />
 
-                        <span>
-                            정답은{' '}
-                            <strong>
-                                B. 파스타
-                            </strong>
-                            였어요.
-                        </span>
-                    </div>
-                )}
+                            <span>
+                                정답은{' '}
+                                <strong>
+                                    {correctAnswerLetter && `${correctAnswerLetter}. `}
+                                    {
+                                        correctAnswer
+                                            .content
+                                    }
+                                </strong>
+                                였어요.
+                            </span>
+                        </div>
+                    )}
+
+                {!isVerification &&
+                    partnerParticipationStatus ===
+                    'NOT_SUBMITTED' && (
+                        <p>
+                            상대방도 퀴즈를
+                            완료하면 다음 단계로
+                            함께 넘어가요.
+                        </p>
+                    )}
 
                 <button
                     type="button"

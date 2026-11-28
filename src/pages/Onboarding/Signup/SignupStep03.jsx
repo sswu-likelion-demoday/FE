@@ -49,10 +49,10 @@ const SignupStep03 = () => {
       return;
     }
 
-    const { studentNumber, email, name, department_name } =
+    const { studentNumber, email, name, department_name, kakaoId } =
       location.state ?? {};
 
-    if (!studentNumber || !email || !name || !department_name) {
+    if (!studentNumber || !email || !name || !department_name || !kakaoId) {
       alert("이전 회원가입 단계의 정보가 없습니다.");
       return;
     }
@@ -64,12 +64,15 @@ const SignupStep03 = () => {
         studentNumber,
         email,
         name,
-        department_name,
+        departmentName: department_name,
+        contact: kakaoId,
         nickname: nickname.trim(),
         password,
       };
 
       await signup(signupData, profileImage);
+
+      sessionStorage.setItem("nickname", nickname.trim());
 
       alert("회원가입이 완료되었습니다.");
       navigate("/signup/complete", { replace: true });
