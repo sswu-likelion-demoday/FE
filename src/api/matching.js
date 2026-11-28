@@ -48,6 +48,22 @@ export const postSajuMatching = () => post("/matching/saju/recommendations");
 export const getSajuSettings = () => get("/matching/saju");
 export const saveSajuSettings = (data) => request("PUT", "/matching/saju", data);
 
+// 카테고리 매칭 상태 조회 (카테고리 매칭 홈)
+// { categories: [{ category: "MEAL" | "MENTORING" | "STUDY" | "EXERCISE",
+//   state: "NONE" | "WAITING" | "RESULT_PENDING", requestId, hasNewResult }] }
+export const getCategoryMatchStatus = () => get("/category-matches/status");
+
+// 카테고리 매칭 신청 (명세: POST /category-matches, 백엔드 실제 경로 기준)
+// body: { category, memberCount, conditions: { admissionYearMin, admissionYearMax, department, mbti }, allowPartialMatch }
+// { requestId, category, status: "WAITING", createdAt }
+export const createCategoryMatch = (data) => post("/category-matches/requests", data);
+
+// 카테고리 매칭 결과 상세 조회 (명세: /category-matches/{id}/result, 백엔드 실제 경로 기준)
+// { requestId, category, status, groupId,
+//   members: [{ userId, name, departmentName, admissionYear, profileImageUrl, mbti, contact }] }
+export const getCategoryMatchResult = (requestId) =>
+  get(`/category-matches/requests/${encodeURIComponent(requestId)}/result`);
+
 // 추천 자체는 슬롯을 차감하지 않으며, 채팅 요청 수락 후 관계가 생성되면 차감됨
 export const createMatchRequest = (recommendationId) =>
   post("/match-requests", { recommendationId });

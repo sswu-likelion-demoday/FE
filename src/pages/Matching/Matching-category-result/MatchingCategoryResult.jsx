@@ -5,32 +5,24 @@ import MatchingHeader from "../components/MatchingHeader";
 import CategoryMatchResultPage from "../components/CategoryMatchResultPage";
 import { categoryLabels } from "../data/categoryData";
 
-// 매칭된 수정들 (확인용 임시 데이터)
-const profiles = [
-  {
-    id: 1,
-    nickname: "수정1",
-    department: "컴퓨터공학과",
-    studentId: 22,
-    mbti: "INFJ",
-    kakaoId: "sujeong1",
-  },
-  {
-    id: 2,
-    nickname: "수정2",
-    department: "경영학과",
-    studentId: 22,
-    mbti: "ENFP",
-    kakaoId: "sujeong2",
-  },
-];
-
 const MatchingCategoryResult = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   // 매칭된 카테고리 (없으면 밥약)
   const category = (location.state && location.state.category) || "MEAL";
+
+  // 결과 상세 조회 API의 members를 결과 카드 형식으로 변환 (매칭 완료 화면에서 넘겨받음)
+  const members = location.state?.result?.members ?? [];
+  const profiles = members.map((member) => ({
+    id: member.userId,
+    image: member.profileImageUrl,
+    nickname: member.name,
+    department: member.departmentName,
+    studentId: member.admissionYear,
+    mbti: member.mbti,
+    kakaoId: member.contact,
+  }));
 
   return (
     <div className="page MatchingCategoryResult_wrap">
