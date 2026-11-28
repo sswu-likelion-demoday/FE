@@ -10,7 +10,9 @@ const Preference04 = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [selectedValues, setSelectedValues] = useState([]);
+  const [selectedValues, setSelectedValues] = useState(
+    location.state?.hobbyOptionIds ?? [],
+  );
   const canGoNext = selectedValues.length >= 3 && selectedValues.length <= 5;
 
   const options = [
@@ -39,7 +41,10 @@ const Preference04 = () => {
           alt=""
           onClick={() =>
             navigate("/signup/preference03", {
-              state: location.state,
+              state: {
+                ...location.state,
+                hobbyOptionIds: selectedValues,
+              },
             })
           }
         />

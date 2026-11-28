@@ -1,6 +1,10 @@
 import './QuestQuiz.scss';
 
-import { useState } from 'react';
+import {
+    useEffect,
+    useState,
+} from 'react';
+
 import {
     useLocation,
     useNavigate,
@@ -17,112 +21,515 @@ import {
     getQuest,
 } from '../../data/relationshipData';
 
-const quizOptions = [
-    {
-        id: 'A',
-        text: '떡볶이',
-    },
-    {
-        id: 'B',
-        text: '파스타',
-    },
-    {
-        id: 'C',
-        text: '초밥',
-    },
-    {
-        id: 'D',
-        text: '마라탕',
-    },
+import {
+    getAiQuiz,
+    submitAiQuizAnswer,
+} from '../../../../api/quest';
+
+import {
+    getChatRoomDetail,
+} from '../../../../api/chat';
+
+const OPTION_LETTERS = [
+    'A',
+    'B',
+    'C',
+    'D',
 ];
 
 const QuestQuiz = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { chatId } = useParams();
+    const navigate =
+        useNavigate();
 
-    /*
-     * AI 퀴즈는 기본적으로
-     * 2단계 4번째 퀘스트
-     */
-    const currentStage =
-        location.state?.stage ?? 2;
+    const location =
+        useLocation();
 
-    const currentQuestNumber =
-        location.state?.quest ?? 4;
+    const { chatId } =
+        useParams();
 
-    const currentStageData =
-        getRelationshipStage(currentStage);
+    const routeRelationshipId = location.state?.relationshipId;
+    const routeRelationshipQuestId = location.state?.relationshipQuestId;
+    const [resolvedIds, setResolvedIds] = useState(null);
+    const relationshipId = resolvedIds?.relationshipId ?? routeRelationshipId;
+    const relationshipQuestId =
+        resolvedIds?.relationshipQuestId ?? routeRelationshipQuestId;
 
-    const currentQuest =
-        getQuest(
-            currentStage,
-            currentQuestNumber
-        );
+    const [
+        quizData,
+        setQuizData,
+    ] = useState(null);
 
     const [
         selectedAnswer,
         setSelectedAnswer,
-    ] = useState('B');
+    ] = useState(null);
 
-    const [result, setResult] =
-        useState(null);
+    const [
+        quizResult,
+        setQuizResult,
+    ] = useState(null);
 
     const [
         showStageComplete,
         setShowStageComplete,
     ] = useState(false);
 
-    const handleSubmit = () => {
-        if (!selectedAnswer) return;
+    const [
+        isLoading,
+        setIsLoading,
+    ] = useState(true);
 
-        if (selectedAnswer === 'B') {
-            setResult('correct');
-            return;
-        }
+    const [
+        isSubmitting,
+        setIsSubmitting,
+    ] = useState(false);
 
-        setResult('wrong');
-    };
+    const [
+        errorMessage,
+        setErrorMessage,
+    ] = useState('');
 
-    const handleResultClose = () => {
-        if (result === 'correct') {
-            setResult(null);
-            setShowStageComplete(true);
+    /*
+     * location.state가 없는 직접 접근에도 대응.
+     *
+     * 채팅방 상세에서
+     * relationshipId와 현재 퀘스트 ID를 찾는다.
+     */
+    useEffect(() => {
+        let ignore = false;
 
-            return;
-        }
+        const fetchQuiz =
+            async () => {
+                let resolvedRelationshipId = routeRelationshipId;
+                let resolvedRelationshipQuestId = routeRelationshipQuestId;
 
-        /*
-         * 오답이어도 현재
-         * 2단계 4/4 상태 유지
-         */
-        setResult(null);
+                try {
+                    setIsLoading(true);
+                    setErrorMessage('');
 
-        navigate(`/chat/${chatId}`, {
-            state: {
-                stage: currentStage,
-                quest: currentQuestNumber,
-            },
-        });
-    };
+                    if (
+                        !resolvedRelationshipId ||
+                        !resolvedRelationshipQuestId
+                    ) {
+                        const chatRoom =
+                            await getChatRoomDetail(
+                                chatId
+                            );
+
+                        if (ignore) {
+                            return;
+                        }
+
+                        resolvedRelationshipId =
+                            chatRoom.relationshipId;
+
+                        resolvedRelationshipQuestId =
+                            chatRoom.currentQuest
+                                ?.relationshipQuestId;
+
+                    }
+
+                    if (
+                        !resolvedRelationshipId ||
+                        !resolvedRelationshipQuestId
+                    ) {
+                        throw new Error(
+                            '진행 중인 AI 퀴즈를 찾을 수 없습니다.'
+                        );
+                    }
+
+                    const data =
+                        await getAiQuiz(
+                            resolvedRelationshipId,
+                            resolvedRelationshipQuestId
+                        );
+
+                    if (ignore) {
+                        return;
+                    }
+
+                    setResolvedIds({
+                        relationshipId: resolvedRelationshipId,
+                        relationshipQuestId:
+                            data.relationshipQuestId ?? resolvedRelationshipQuestId,
+                    });
+                    setQuizData(data);
+                } catch (error) {
+                    if (ignore) {
+                        return;
+                    }
+                    console.error(
+                        'AI 퀴즈 조회 실패:',
+                        error
+                    );
+
+                    if (
+                        error.code ===
+                        'QUIZ_ALREADY_SUBMITTED'
+                    ) {
+                        navigate(
+                            `/chat/${chatId}/relationship`,
+                            {
+                                state: {
+                                    relationshipId: resolvedRelationshipId,
+                                },
+                            }
+                        );
+
+                        return;
+                    }
+
+                    if (
+                        error.code ===
+                        'QUEST_NOT_ACTIVE' ||
+                        error.code ===
+                        'RELATIONSHIP_QUEST_NOT_FOUND' ||
+                        error.code ===
+                        'QUEST_TYPE_MISMATCH'
+                    ) {
+                        navigate(
+                            `/chat/${chatId}/relationship`,
+                            {
+                                state: {
+                                    relationshipId: resolvedRelationshipId,
+                                },
+                            }
+                        );
+
+                        return;
+                    }
+
+                    if (
+                        error.code ===
+                        'RELATIONSHIP_NOT_FOUND' ||
+                        error.code ===
+                        'RELATIONSHIP_ACCESS_DENIED'
+                    ) {
+                        navigate('/chat');
+
+                        return;
+                    }
+
+                    setErrorMessage(
+                        error.message ||
+                        'AI 퀴즈를 불러오지 못했습니다.'
+                    );
+                } finally {
+                    if (!ignore) {
+                        setIsLoading(false);
+                    }
+                }
+            };
+
+        fetchQuiz();
+
+        return () => {
+            ignore = true;
+        };
+    }, [chatId, routeRelationshipId, routeRelationshipQuestId, navigate]);
+
+    /*
+     * 서버에서 받은 단계가 기준.
+     *
+     * 로딩 전에는 location.state를
+     * fallback으로 사용.
+     */
+    const currentStage =
+        quizData?.stage?.stage ??
+        location.state?.stage ??
+        2;
+
+    const currentQuestNumber =
+        location.state?.quest ??
+        4;
+
+    const currentStageData =
+        getRelationshipStage(
+            currentStage
+        );
+
+    const localCurrentQuest =
+        getQuest(
+            currentStage,
+            currentQuestNumber
+        );
+
+    /*
+     * 답변 제출
+     */
+    const handleSubmit =
+        async () => {
+            if (
+                !selectedAnswer ||
+                !relationshipId ||
+                !relationshipQuestId ||
+                isSubmitting
+            ) {
+                return;
+            }
+
+            try {
+                setIsSubmitting(true);
+
+                const data =
+                    await submitAiQuizAnswer(
+                        relationshipId,
+                        relationshipQuestId,
+                        selectedAnswer
+                    );
+
+                /*
+                 * 재도전은 없으므로
+                 * 제출 완료 후 결과를 고정.
+                 */
+                setQuizResult(data);
+            } catch (error) {
+                console.error(
+                    'AI 퀴즈 답변 제출 실패:',
+                    error
+                );
+
+                if (
+                    error.code ===
+                    'QUIZ_ALREADY_SUBMITTED'
+                ) {
+                    navigate(
+                        `/chat/${chatId}/relationship`,
+                        {
+                            state: {
+                                relationshipId,
+                            },
+                        }
+                    );
+
+                    return;
+                }
+
+                if (
+                    error.code ===
+                    'QUEST_NOT_ACTIVE' ||
+                    error.code ===
+                    'RELATIONSHIP_QUEST_NOT_FOUND' ||
+                    error.code ===
+                    'QUEST_TYPE_MISMATCH'
+                ) {
+                    navigate(
+                        `/chat/${chatId}/relationship`,
+                        {
+                            state: {
+                                relationshipId,
+                            },
+                        }
+                    );
+
+                    return;
+                }
+
+                if (
+                    error.code ===
+                    'INVALID_QUIZ_ANSWER'
+                ) {
+                    /*
+                     * 선택지가 서버와 맞지 않으면
+                     * 퀴즈를 다시 조회하게 한다.
+                     */
+                    setSelectedAnswer(
+                        null
+                    );
+
+                    try {
+                        const refreshedQuiz =
+                            await getAiQuiz(
+                                relationshipId,
+                                relationshipQuestId
+                            );
+
+                        setQuizData(
+                            refreshedQuiz
+                        );
+                    } catch (
+                    refreshError
+                    ) {
+                        console.error(
+                            'AI 퀴즈 재조회 실패:',
+                            refreshError
+                        );
+                    }
+
+                    return;
+                }
+
+                if (
+                    error.code ===
+                    'RELATIONSHIP_NOT_FOUND' ||
+                    error.code ===
+                    'RELATIONSHIP_ACCESS_DENIED'
+                ) {
+                    navigate('/chat');
+
+                    return;
+                }
+
+                window.alert(
+                    error.message ||
+                    '퀴즈 답변 제출에 실패했습니다.'
+                );
+            } finally {
+                setIsSubmitting(
+                    false
+                );
+            }
+        };
+
+    const correctAnswerIndex = (quizData?.options ?? []).findIndex(
+        (option) => option.optionId === quizResult?.correctAnswer?.optionId
+    );
+
+    /*
+     * 정답/오답 결과 모달 닫기
+     */
+    const handleResultClose =
+        () => {
+            if (!quizResult) {
+                return;
+            }
+
+            /*
+             * 둘 다 제출해서
+             * 현재 단계까지 완료된 경우
+             *
+             * 정답/오답 여부와 관계없이
+             * 단계 완료 모달을 보여준다.
+             */
+            if (
+                quizResult
+                    .completion
+                    ?.stageCompleted
+            ) {
+                setShowStageComplete(
+                    true
+                );
+
+                return;
+            }
+
+            /*
+             * 나는 제출했지만
+             * 상대방이 아직 제출하지 않은 상태.
+             *
+             * 다시 퀴즈를 풀 수 없으므로
+             * 관계 진행 화면으로 이동.
+             */
+            setQuizResult(null);
+
+            navigate(
+                `/chat/${chatId}/relationship`,
+                {
+                    state: {
+                        relationshipId,
+                        stage:
+                            currentStage,
+                        quest:
+                            currentQuestNumber,
+                        waitingForPartner:
+                            quizResult
+                                .partnerParticipationStatus ===
+                            'NOT_SUBMITTED',
+                    },
+                }
+            );
+        };
 
     const handleBack = () => {
-        navigate(`/chat/${chatId}`, {
-            state: {
-                stage: currentStage,
-                quest: currentQuestNumber,
-            },
-        });
+        navigate(
+            `/chat/${chatId}`
+        );
     };
 
     const handleContinue = () => {
-        navigate(`/chat/${chatId}`, {
-            state: {
-                stage: 3,
-                quest: 1,
-            },
-        });
+        const newStage =
+            quizResult
+                ?.completion
+                ?.newStage ??
+            currentStage + 1;
+
+        navigate(
+            `/chat/${chatId}`,
+            {
+                state: {
+                    stage:
+                        newStage,
+                    quest: 1,
+                },
+            }
+        );
     };
+
+    const handleProfile = () => {
+        const completion =
+            quizResult
+                ?.completion;
+
+        navigate(
+            `/chat/${chatId}/profile`,
+            {
+                state: {
+                    relationshipId,
+
+                    completedStage:
+                        completion
+                            ?.completedStage ??
+                        currentStage,
+
+                    currentStage:
+                        completion
+                            ?.newStage ??
+                        currentStage + 1,
+
+                    currentQuestNumber:
+                        1,
+                },
+            }
+        );
+    };
+
+    if (isLoading) {
+        return (
+            <div className="page">
+                <div className="quest_quiz">
+                    <p>
+                        AI 퀴즈를 만들고
+                        있어요.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    if (
+        errorMessage ||
+        !quizData
+    ) {
+        return (
+            <div className="page">
+                <div className="quest_quiz">
+                    <p>
+                        {errorMessage ||
+                            'AI 퀴즈를 불러오지 못했습니다.'}
+                    </p>
+
+                    <button
+                        type="button"
+                        onClick={
+                            handleBack
+                        }
+                    >
+                        채팅으로 돌아가기
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="page">
@@ -131,7 +538,9 @@ const QuestQuiz = () => {
                     <button
                         type="button"
                         className="quest_quiz_back"
-                        onClick={handleBack}
+                        onClick={
+                            handleBack
+                        }
                         aria-label="뒤로가기"
                     >
                         <img
@@ -147,17 +556,30 @@ const QuestQuiz = () => {
 
                 <main className="quest_quiz_content">
                     <span className="quest_quiz_stage">
-                        ✦ {currentStageData.stage}단계{' '}
-                        {currentStageData.stageName} 퀘스트
+                        ✦{' '}
+                        {
+                            quizData.stage
+                                ?.stage
+                        }
+                        단계{' '}
+                        {
+                            quizData.stage
+                                ?.name
+                        }{' '}
+                        퀘스트
                     </span>
 
                     <h2 className="quest_quiz_title">
-                        {currentQuest.title}
+                        {
+                            quizData.title ||
+                            localCurrentQuest
+                                ?.title
+                        }
                     </h2>
 
                     <p className="quest_quiz_description">
-                        대화에서 나온 이야기를 떠올려
-                        보세요!
+                        대화에서 나온 이야기를
+                        떠올려 보세요!
                     </p>
 
                     <div className="quest_quiz_question">
@@ -166,33 +588,55 @@ const QuestQuiz = () => {
                         </span>
 
                         <strong>
-                            달빛여우님이 가장 좋아하는 음식은?
+                            {
+                                quizData.question
+                            }
                         </strong>
                     </div>
 
                     <div className="quest_quiz_options">
-                        {quizOptions.map(
-                            (option) => (
+                        {(
+                            quizData.options ??
+                            []
+                        ).map(
+                            (
+                                option,
+                                index
+                            ) => (
                                 <button
                                     type="button"
-                                    key={option.id}
+                                    key={
+                                        option.optionId
+                                    }
                                     className={`quest_quiz_option ${selectedAnswer ===
-                                            option.id
-                                            ? 'quest_quiz_option_selected'
-                                            : ''
+                                        option.optionId
+                                        ? 'quest_quiz_option_selected'
+                                        : ''
                                         }`}
+                                    disabled={
+                                        isSubmitting ||
+                                        Boolean(
+                                            quizResult
+                                        )
+                                    }
                                     onClick={() =>
                                         setSelectedAnswer(
-                                            option.id
+                                            option.optionId
                                         )
                                     }
                                 >
                                     <span className="quest_quiz_option_letter">
-                                        {option.id}.
+                                        {OPTION_LETTERS[
+                                            index
+                                        ] ??
+                                            option.optionId}
+                                        .
                                     </span>
 
                                     <span>
-                                        {option.text}
+                                        {
+                                            option.content
+                                        }
                                     </span>
                                 </button>
                             )
@@ -204,16 +648,42 @@ const QuestQuiz = () => {
                     <button
                         type="button"
                         className="quest_quiz_submit"
-                        disabled={!selectedAnswer}
-                        onClick={handleSubmit}
+                        disabled={
+                            !selectedAnswer ||
+                            isSubmitting ||
+                            Boolean(
+                                quizResult
+                            )
+                        }
+                        onClick={
+                            handleSubmit
+                        }
                     >
-                        선택 완료
+                        {isSubmitting
+                            ? '제출 중...'
+                            : '선택 완료'}
                     </button>
                 </div>
 
-                {result && (
+                {quizResult && !showStageComplete && (
                     <ChatModal
-                        type={result}
+                        type={
+                            quizResult.correct
+                                ? 'correct'
+                                : 'wrong'
+                        }
+                        correctAnswerLetter={OPTION_LETTERS[correctAnswerIndex]}
+                        correctAnswer={
+                            quizResult
+                                .correctAnswer
+                        }
+                        reward={
+                            quizResult.reward
+                        }
+                        partnerParticipationStatus={
+                            quizResult
+                                .partnerParticipationStatus
+                        }
                         onClose={
                             handleResultClose
                         }
@@ -223,30 +693,30 @@ const QuestQuiz = () => {
                 {showStageComplete && (
                     <StageCompleteModal
                         stage={
+                            quizResult
+                                ?.completion
+                                ?.completedStage ??
                             currentStageData.stage
                         }
-                        title={`${currentStageData.unlockTitle}가 해금됐어요!`}
-                        reward="+10 수정구"
+                        title={`${quizResult
+                            ?.completion
+                            ?.unlockLabel ??
+                            currentStageData
+                                .unlockTitle
+                            }가 해금됐어요!`}
+                        reward=""
                         infoLabel="해금된 정보"
                         infoValue={
-                            currentStageData.unlockTitle
+                            quizResult
+                                ?.completion
+                                ?.unlockLabel ??
+                            currentStageData
+                                .unlockTitle
                         }
                         profileButtonText="프로필에서 보기"
                         continueButtonText="대화 계속하기"
-                        onProfile={() =>
-                            navigate(
-                                `/chat/${chatId}/profile`,
-                                {
-                                    state: {
-                                        completedStage:
-                                            2,
-                                        currentStage:
-                                            3,
-                                        currentQuestNumber:
-                                            1,
-                                    },
-                                }
-                            )
+                        onProfile={
+                            handleProfile
                         }
                         onContinue={
                             handleContinue

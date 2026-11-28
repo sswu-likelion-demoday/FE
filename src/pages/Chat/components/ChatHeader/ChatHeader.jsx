@@ -15,11 +15,27 @@ const ChatHeader = ({
   currentQuestNumber = 1,
   isRelationshipComplete = false,
   isRelationshipEnded = false,
+
+  partnerName = '상대방',
+  partnerProfileImage = null,
+  partnerProfileImageUnlocked = false,
 }) => {
   const navigate = useNavigate();
   const { chatId } = useParams();
 
   const numericChatId = Number(chatId);
+
+  const hasUnlockedProfileImage =
+    partnerProfileImageUnlocked === true &&
+    partnerProfileImage;
+
+  const profileImage =
+    hasUnlockedProfileImage
+      ? partnerProfileImage
+      : profile_purple;
+
+  const profileText =
+    partnerName?.charAt(0) ?? '';
 
   const handleBack = () => {
     if (isRelationshipComplete) {
@@ -83,22 +99,24 @@ const ChatHeader = ({
         type="button"
         className="chat_header_user"
         onClick={onProfileClick}
-        aria-label="달빛여우 메뉴 열기"
+        aria-label={`${partnerName} 메뉴 열기`}
       >
         <div className="chat_header_profile_wrap">
           <img
-            src={profile_purple}
+            src={profileImage}
             alt=""
             className="chat_header_profile"
           />
 
-          <span className="chat_header_profile_text">
-            달
-          </span>
+          {!hasUnlockedProfileImage && (
+            <span className="chat_header_profile_text">
+              {profileText}
+            </span>
+          )}
         </div>
 
         <strong className="chat_header_name">
-          달빛여우
+          {partnerName}
         </strong>
       </button>
 

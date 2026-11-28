@@ -1,163 +1,343 @@
 import './Relationship.scss';
 
 import {
+    useLayoutEffect,
+    useState,
+} from 'react';
+
+import {
     useLocation,
     useNavigate,
     useParams,
 } from 'react-router-dom';
+
+import {
+    getRelationshipDetail,
+} from '../../../api/relationship';
+
+import { getChatRoomDetail } from '../../../api/chat';
 
 import arrow_left from '../../../assets/images/Chat/arrow_left.svg';
 
 import RelationshipSummaryCard from '../components/RelationshipSummaryCard/RelationshipSummaryCard';
 import RelationshipStageItem from '../components/RelationshipStageItem/RelationshipStageItem';
 
-import {
-    relationshipStages,
-} from '../data/relationshipData';
-
 const Relationship = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { chatId } = useParams();
 
+    const routeRelationshipId = location.state?.relationshipId;
+    const [resolvedRelationshipId, setResolvedRelationshipId] = useState(null);
+    const [resolvedPartner, setResolvedPartner] = useState(null);
+    const relationshipId = routeRelationshipId ?? resolvedRelationshipId;
+
+    const [
+        relationshipDetail,
+        setRelationshipDetail,
+    ] = useState(null);
+
+    const [
+        isLoading,
+        setIsLoading,
+    ] = useState(true);
+
+    const [
+        errorMessage,
+        setErrorMessage,
+    ] = useState('');
+
+    useLayoutEffect(() => {
+        let ignore = false;
+
+        const fetchRelationship = async () => {
+            try {
+                setIsLoading(true);
+                setErrorMessage('');
+
+                const chatRoom = routeRelationshipId
+                    ? null
+                    : await getChatRoomDetail(chatId);
+                if (ignore) {
+                    return;
+                }
+
+                const id = routeRelationshipId ?? chatRoom?.relationshipId;
+                if (!id) {
+                    throw new Error('관계 정보를 확인할 수 없습니다.');
+                }
+
+                const data = await getRelationshipDetail(id);
+                if (ignore) {
+                    return;
+                }
+
+                setResolvedRelationshipId(id);
+                setResolvedPartner(chatRoom?.partner);
+                setRelationshipDetail(data);
+            } catch (error) {
+                if (ignore) {
+                    return;
+                }
+
+                if (
+                    error.code ===
+                    'RELATIONSHIP_NOT_FOUND' ||
+                    error.code ===
+                    'RELATIONSHIP_ENDED'
+                ) {
+                    navigate(
+                        '/chat'
+                    );
+                    return;
+                }
+
+                if (
+                    error.code ===
+                    'RELATIONSHIP_ACCESS_DENIED'
+                ) {
+                    setErrorMessage(
+                        '이 관계 정보에 접근할 수 없습니다.'
+                    );
+                    return;
+                }
+
+                setErrorMessage(
+                    error.message ||
+                    '관계 진행 정보를 불러오지 못했습니다.'
+                );
+            } finally {
+                if (!ignore) {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        fetchRelationship();
+
+        return () => {
+            ignore = true;
+        };
+    }, [chatId, routeRelationshipId, navigate]);
+
+    const relationshipStatus =
+        relationshipDetail
+            ?.relationshipStatus;
+
     const isRelationshipComplete =
-        location.state?.relationshipComplete === true;
+        relationshipStatus ===
+        'COMPLETED';
 
-    const isRelationshipEnded =
-        location.state?.relationshipEnded === true;
-
-    /*
-     * ChatRoom과 동일하게
-     * 기본 진행도는 1단계 1번째 퀘스트
-     */
     const currentStage =
-        location.state?.stage ??
-        (isRelationshipComplete ? 4 : 1);
+        relationshipDetail
+            ?.currentStage?.stage ??
+        (isRelationshipComplete
+            ? 4
+            : 1);
 
-    const currentQuestNumber =
-        location.state?.quest ??
-        (isRelationshipComplete ? 4 : 1);
+    const currentStageName =
+        relationshipDetail
+            ?.currentStage?.name ??
+        (isRelationshipComplete
+            ? '인연 완료'
+            : '');
+
+    const stages =
+        relationshipDetail?.stages ??
+        [];
 
     const currentStageData =
-        relationshipStages[currentStage];
+        stages.find(
+            (stage) =>
+                stage.stage ===
+                currentStage
+        );
 
     const completedQuest =
-        isRelationshipComplete
-            ? currentStageData.quests.length
-            : currentQuestNumber - 1;
+        currentStageData
+            ?.questProgress
+            ?.completed ?? 0;
 
-    const getStageStatus = (stage) => {
-        if (isRelationshipComplete) {
+    const totalQuest =
+        currentStageData
+            ?.questProgress
+            ?.total ?? 0;
+
+    /*
+     * API 상태를 기존
+     * RelationshipStageItem 상태로 변환
+     */
+    const getStageStatus = (
+        status
+    ) => {
+        if (
+            status === 'COMPLETED'
+        ) {
             return 'complete';
         }
 
-        if (stage < currentStage) {
-            return 'complete';
-        }
-
-        if (stage === currentStage) {
+        if (
+            status === 'ACTIVE'
+        ) {
             return 'progress';
         }
 
         return 'locked';
     };
 
-    const getUnlockText = (stage) => {
-        const stageData =
-            relationshipStages[stage];
+    const getUnlockText = (
+        stage
+    ) => {
+        const unlock =
+            stage.unlock;
 
-        const status =
-            getStageStatus(stage);
-
-        if (status === 'complete') {
-            return `해금됨 · ${stageData.unlockTitle}`;
+        if (!unlock?.label) {
+            return '';
         }
 
-        return `완료하면 해금 · ${stageData.unlockTitle}`;
-    };
-
-    const getQuestPath = (quest) => {
-        if (!quest.path) {
-            return `/chat/${chatId}`;
+        if (
+            unlock.status ===
+            'UNLOCKED'
+        ) {
+            return `해금됨 · ${unlock.label}`;
         }
 
-        return quest.path.replace(
-            '/chat/1',
-            `/chat/${chatId}`
-        );
+        return `완료하면 해금 · ${unlock.label}`;
     };
 
-    const getStageQuests = (stage) => {
-        const stageData =
-            relationshipStages[stage];
+    /*
+     * 현재 ACTIVE 퀘스트만
+     * 이동 가능하도록 처리
+     */
+    const getQuestPath = (
+        quest
+    ) => {
+        if (
+            quest.status !==
+            'ACTIVE'
+        ) {
+            return undefined;
+        }
 
-        const status =
-            getStageStatus(stage);
+        if (
+            quest.type ===
+            'AI_QUIZ'
+        ) {
+            return `/chat/${chatId}/quest/quiz`;
+        }
 
-        if (status === 'locked') {
+        if (
+            quest.type ===
+            'MEETING_VERIFICATION'
+        ) {
+            return `/chat/${chatId}/quest/verification`;
+        }
+
+        /*
+         * AI_ANALYSIS 퀘스트는
+         * 채팅에서 자연스럽게 수행
+         */
+        return `/chat/${chatId}`;
+    };
+
+    const getStageQuests = (
+        stage
+    ) => {
+        if (
+            stage.status ===
+            'LOCKED'
+        ) {
             return [];
         }
 
-        if (status === 'complete') {
-            return stageData.quests.map(
-                (quest) => ({
-                    id: quest.id,
-                    title: quest.title,
-                    complete: true,
-                    path: undefined,
-                    state: undefined,
-                })
-            );
-        }
+        return (
+            stage.quests ?? []
+        ).map((quest, index) => {
+            const isCompleted =
+                quest.status ===
+                'COMPLETED';
 
-        return stageData.quests.map(
-            (quest) => {
-                const isCompleted =
-                    quest.id < currentQuestNumber;
+            const path =
+                getQuestPath(
+                    quest
+                );
 
-                const isCurrent =
-                    quest.id === currentQuestNumber;
+            return {
+                id:
+                    quest
+                        .relationshipQuestId,
+                title:
+                    quest.title,
+                complete:
+                    isCompleted,
 
-                return {
-                    id: quest.id,
-                    title: quest.title,
-                    complete: isCompleted,
+                path,
 
-                    path: isCurrent
-                        ? getQuestPath(quest)
-                        : undefined,
+                state: path
+                    ? {
+                        relationshipId,
+                        relationshipQuestId:
+                            quest
+                                .relationshipQuestId,
+                        stage:
+                            stage.stage,
+                        quest: index + 1,
+                    }
+                    : undefined,
+            };
+        });
+    };
 
-                    state: isCurrent
-                        ? {
-                            stage: currentStage,
-                            quest: currentQuestNumber,
-                            relationshipEnded:
-                                isRelationshipEnded,
-                        }
-                        : undefined,
-                };
+    const handleBack = () => {
+        navigate(
+            `/chat/${chatId}`,
+            {
+                state: {
+                    relationshipId,
+                },
             }
         );
     };
 
-    const handleBack = () => {
-        navigate(`/chat/${chatId}`, {
-            state: isRelationshipComplete
-                ? {
-                    relationshipComplete: true,
-                    completedStage: 4,
-                    currentStage: 4,
-                    stage: 4,
-                    quest: 4,
-                }
-                : {
-                    stage: currentStage,
-                    quest: currentQuestNumber,
-                    relationshipEnded:
-                        isRelationshipEnded,
-                },
-        });
-    };
+    if (isLoading) {
+        return (
+            <div className="page">
+                <div className="relationship">
+                    <p>
+                        인연 정보를
+                        불러오는 중이에요.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    if (
+        errorMessage ||
+        !relationshipDetail
+    ) {
+        return (
+            <div className="page">
+                <div className="relationship">
+                    <p>
+                        {errorMessage ||
+                            '관계 정보를 불러오지 못했습니다.'}
+                    </p>
+
+                    <button
+                        type="button"
+                        onClick={() =>
+                            navigate(
+                                `/chat/${chatId}`
+                            )
+                        }
+                    >
+                        채팅으로 돌아가기
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="page">
@@ -166,11 +346,15 @@ const Relationship = () => {
                     <button
                         type="button"
                         className="relationship_back"
-                        onClick={handleBack}
+                        onClick={
+                            handleBack
+                        }
                         aria-label="뒤로가기"
                     >
                         <img
-                            src={arrow_left}
+                            src={
+                                arrow_left
+                            }
                             alt=""
                         />
                     </button>
@@ -182,43 +366,60 @@ const Relationship = () => {
 
                 <main className="relationship_content">
                     <RelationshipSummaryCard
-                        stage={currentStage}
+                        partnerNickname={
+                            location.state?.partnerNickname ?? resolvedPartner?.nickname
+                        }
+                        partnerImageUrl={
+                            location.state?.partnerImageUrl ??
+                            (resolvedPartner?.profileImageUnlocked
+                                ? resolvedPartner.profileImageUrl
+                                : undefined)
+                        }
+                        stage={
+                            currentStage
+                        }
                         stageName={
                             isRelationshipComplete
                                 ? '인연 완료'
-                                : currentStageData.stageName
+                                : currentStageName
                         }
                         completedQuest={
                             completedQuest
                         }
                         totalQuest={
-                            currentStageData.quests.length
+                            totalQuest
                         }
                     />
 
                     <div className="relationship_stage_list">
-                        {Object.values(
-                            relationshipStages
-                        ).map((stageData) => (
-                            <RelationshipStageItem
-                                key={stageData.stage}
-                                stage={stageData.stage}
-                                title={stageData.stageName}
-                                status={getStageStatus(
-                                    stageData.stage
-                                )}
-                                quests={getStageQuests(
-                                    stageData.stage
-                                )}
-                                unlockText={getUnlockText(
-                                    stageData.stage
-                                )}
-                                defaultOpen={
-                                    stageData.stage ===
-                                    currentStage
-                                }
-                            />
-                        ))}
+                        {stages.map(
+                            (stage) => (
+                                <RelationshipStageItem
+                                    key={
+                                        stage.stage
+                                    }
+                                    stage={
+                                        stage.stage
+                                    }
+                                    title={
+                                        stage.name
+                                    }
+                                    status={getStageStatus(
+                                        stage.status
+                                    )}
+                                    quests={getStageQuests(
+                                        stage
+                                    )}
+                                    unlockText={getUnlockText(
+                                        stage
+                                    )}
+                                    defaultOpen={
+                                        stage.status ===
+                                        'ACTIVE'
+                                    }
+                                />
+                            )
+                        )}
                     </div>
                 </main>
             </div>

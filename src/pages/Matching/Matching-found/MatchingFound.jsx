@@ -13,12 +13,17 @@ const MatchingFound = () => {
   const isSaju = location.state && location.state.type === "saju";
   const sajuScore = 85;
 
-  // 매칭된 사람 (확인용 임시 데이터)
+  // 일반 매칭 실행 API 결과 (매칭 시작 화면에서 넘겨받음)
+  const candidate = location.state?.recommendation?.candidate;
+
+  // 매칭된 사람 (API 결과가 없으면 확인용 임시 데이터)
   let profile = {
-    name: "달빛여우",
-    studentId: "24",
-    description: "같은 취미를 가졌어요",
+    name: candidate?.nickname ?? "달빛여우",
+    studentId: candidate ? candidate.admissionYear ?? "" : "24",
+    description: candidate?.introduction ?? "같은 취미를 가졌어요",
     type: "found",
+    recommendationId: location.state?.recommendation?.recommendationId,
+    userId: candidate?.userId,
   };
 
   if (isSaju) {
