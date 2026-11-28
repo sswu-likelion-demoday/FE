@@ -1,7 +1,7 @@
 import { BASE_URL } from "./config";
 
 export const completeOnboarding = async (onboardingData) => {
-  const accessToken = localStorage.getItem("accessToken");
+  const accessToken = sessionStorage.getItem("accessToken");
 
   if (!accessToken) {
     throw new Error("로그인이 필요합니다.");

@@ -20,14 +20,9 @@ const Login = () => {
 
       const data = await login(studentId.trim(), password);
 
-<<<<<<< HEAD
-      localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("refreshToken", data.refreshToken);
-=======
       sessionStorage.setItem("accessToken", data.accessToken);
       sessionStorage.setItem("refreshToken", data.refreshToken);
       sessionStorage.setItem("nickname", data.nickname);
->>>>>>> 25fcf15e7f4df98c2a1952a861efd29f7ca03a3c
 
       if (data.onboardingCompleted) {
         navigate("/matching", { replace: true });

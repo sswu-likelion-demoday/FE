@@ -42,7 +42,7 @@ const HobbyEdit = () => {
       return;
     }
 
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = sessionStorage.getItem("accessToken");
 
     if (!accessToken) {
       alert("로그인이 필요합니다.");

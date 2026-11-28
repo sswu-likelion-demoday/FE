@@ -18,7 +18,7 @@ const ItemHistory = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchTransactions = async (cursor = null) => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = sessionStorage.getItem("accessToken");
 
     if (!accessToken || isLoading) return;
 

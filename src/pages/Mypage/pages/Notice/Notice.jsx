@@ -13,7 +13,7 @@ const Notice = () => {
 
   useEffect(() => {
     const fetchNotices = async () => {
-      const accessToken = localStorage.getItem("accessToken");
+      const accessToken = sessionStorage.getItem("accessToken");
 
       if (!accessToken) return;
 
