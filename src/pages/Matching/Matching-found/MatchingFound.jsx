@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import "./MatchingFound.scss";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import MatchingHeader from "../components/MatchingHeader";
@@ -9,29 +9,38 @@ const MatchingFound = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 사주 매칭에서 넘어왔는지, 사주 궁합 점수 (확인용 임시 값)
+  // 로그인/회원가입 때 저장한 닉네임
+  const nickname = sessionStorage.getItem("nickname");
+
+  // 사주 매칭에서 넘어왔는지
   const isSaju = location.state && location.state.type === "saju";
-  const sajuScore = 85;
 
-  // 일반 매칭 실행 API 결과 (매칭 시작 화면에서 넘겨받음)
-  const candidate = location.state?.recommendation?.candidate;
+  // 매칭 실행 API 결과 (매칭 시작 / 사주 결과 화면에서 넘겨받음)
+  const recommendation = location.state?.recommendation;
+  const candidate = recommendation?.candidate;
 
-  // 매칭된 사람 (API 결과가 없으면 확인용 임시 데이터)
+  // 주소로 바로 들어오거나 새로고침해서 매칭 결과가 없으면 매칭 홈으로 이동
+  if (!candidate) {
+    return <Navigate to="/matching" replace />;
+  }
+
+  // 사주 궁합 점수
+  const sajuScore = recommendation.compatibilityScore;
+
+  // 매칭된 사람
   let profile = {
-    name: candidate?.nickname ?? "달빛여우",
-    studentId: candidate ? candidate.admissionYear ?? "" : "24",
-    description: candidate?.introduction ?? "같은 취미를 가졌어요",
+    name: candidate.nickname,
+    studentId: candidate.admissionYear ?? "",
+    description: candidate.introduction ?? "",
     type: "found",
-    recommendationId: location.state?.recommendation?.recommendationId,
-    userId: candidate?.userId,
+    recommendationId: recommendation.recommendationId,
+    userId: candidate.userId,
   };
 
   if (isSaju) {
     profile = {
-      name: "고양이 집사",
-      studentId: "22",
-      description: "사주 궁합이 80점 이상이에요",
-      type: "found",
+      ...profile,
+      description: sajuScore != null ? `사주 궁합이 ${sajuScore}점이에요` : "",
       saju: true,
     };
   }
@@ -48,14 +57,14 @@ const MatchingFound = () => {
           </p>
         ) : (
           <p className="mf_m_title">
-            나리님을 위한
+            {nickname ? `${nickname}님을 위한` : "나를 위한"}
             <br />
             수정을 발견했어요!
           </p>
         )}
         <div className="mf_m_card">
           <img src={card_matching} alt="" />
-          {isSaju && <p className="mf_m_score">{sajuScore}점</p>}
+          {isSaju && sajuScore != null && <p className="mf_m_score">{sajuScore}점</p>}
         </div>
         <p className="mf_m_question">확인해볼까요?</p>
       </div>

@@ -10,6 +10,8 @@ import logo_matching from "../../../assets/images/Matching/logo_symbol_matching.
 const Matchinghome = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  // 로그인/회원가입 때 저장한 닉네임
+  const nickname = sessionStorage.getItem("nickname");
 
   // 관계 슬롯 { used, available, total } - 매칭 홈 조회 API
   const [slots, setSlots] = useState(null);
@@ -52,12 +54,9 @@ const Matchinghome = () => {
   const isFull = slots !== null && emptySlotCount === 0;
   const canMatch = slots !== null && !isFull;
 
-  // 사주 매칭 허용 여부 (확인용 임시 값)
-  const isSajuAllowed = false;
-
-  // 사주 매칭 화면으로 이동 (허용 안 한 사람은 설정 창이 같이 뜸)
+  // 사주 매칭 화면으로 이동 (허용 여부는 사주 매칭 화면에서 조회)
   const handleSajuClick = () => {
-    navigate("/matching/saju", { state: { showSetting: !isSajuAllowed } });
+    navigate("/matching/saju");
   };
 
   return (
@@ -67,7 +66,7 @@ const Matchinghome = () => {
       </div>
       <div className="matchinghome_main">
         <div className="mh_m_title">
-          <p>오늘 나리님에게는</p>
+          <p>오늘 {nickname ? `${nickname}님에게는` : "나에게는"}</p>
           <p>어떤 인연이 찾아올까요?</p>
         </div>
         <button
