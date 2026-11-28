@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import "./MatchingFound.scss";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import MatchingHeader from "../components/MatchingHeader";
@@ -19,28 +19,29 @@ const MatchingFound = () => {
   const recommendation = location.state?.recommendation;
   const candidate = recommendation?.candidate;
 
-  // 사주 궁합 점수 (API 결과가 없으면 확인용 임시 값)
-  const sajuScore = recommendation?.compatibilityScore ?? 85;
+  // 주소로 바로 들어오거나 새로고침해서 매칭 결과가 없으면 매칭 홈으로 이동
+  if (!candidate) {
+    return <Navigate to="/matching" replace />;
+  }
 
-  // 매칭된 사람 (API 결과가 없으면 확인용 임시 데이터)
+  // 사주 궁합 점수
+  const sajuScore = recommendation.compatibilityScore;
+
+  // 매칭된 사람
   let profile = {
-    name: candidate?.nickname ?? "달빛여우",
-    studentId: candidate ? candidate.admissionYear ?? "" : "24",
-    description: candidate?.introduction ?? "같은 취미를 가졌어요",
+    name: candidate.nickname,
+    studentId: candidate.admissionYear ?? "",
+    description: candidate.introduction ?? "",
     type: "found",
-    recommendationId: location.state?.recommendation?.recommendationId,
-    userId: candidate?.userId,
+    recommendationId: recommendation.recommendationId,
+    userId: candidate.userId,
   };
 
   if (isSaju) {
     profile = {
-      name: candidate?.nickname ?? "고양이 집사",
-      studentId: candidate ? candidate.admissionYear ?? "" : "22",
-      description: `사주 궁합이 ${sajuScore}점이에요`,
-      type: "found",
+      ...profile,
+      description: sajuScore != null ? `사주 궁합이 ${sajuScore}점이에요` : "",
       saju: true,
-      recommendationId: recommendation?.recommendationId,
-      userId: candidate?.userId,
     };
   }
 
@@ -63,7 +64,7 @@ const MatchingFound = () => {
         )}
         <div className="mf_m_card">
           <img src={card_matching} alt="" />
-          {isSaju && <p className="mf_m_score">{sajuScore}점</p>}
+          {isSaju && sajuScore != null && <p className="mf_m_score">{sajuScore}점</p>}
         </div>
         <p className="mf_m_question">확인해볼까요?</p>
       </div>
