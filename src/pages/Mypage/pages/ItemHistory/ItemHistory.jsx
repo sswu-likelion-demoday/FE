@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { getWalletTransactions } from "../../../../api/mypage";
 import TabMenu from "../../components/TabMenu";
 import MypageHeader from "../../components/MypageHeader";
@@ -16,20 +16,31 @@ const ItemHistory = () => {
   const [nextCursor, setNextCursor] = useState(null);
   const [hasNext, setHasNext] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const requestIdRef = useRef(0);
 
-  const fetchTransactions = async (cursor = null) => {
+  const fetchTransactions = useCallback(async (tab, cursor = null) => {
     const accessToken = sessionStorage.getItem("accessToken");
 
-    if (!accessToken || isLoading) return;
+    if (!accessToken) return;
+
+    const requestId = ++requestIdRef.current;
+
+    if (cursor === null) {
+      setTransactions([]);
+      setNextCursor(null);
+      setHasNext(false);
+    }
 
     try {
       setIsLoading(true);
 
       const data = await getWalletTransactions(accessToken, {
-        type: "EARN",
+        type: tab === "획득 내역" ? "EARN" : "USE",
         cursor,
         size: 20,
       });
+
+      if (requestId !== requestIdRef.current) return;
 
       setBalance(data.balance);
       setTransactions((prev) =>
@@ -38,17 +49,30 @@ const ItemHistory = () => {
       setNextCursor(data.nextCursor);
       setHasNext(data.hasNext);
     } catch (error) {
-      console.error("수정구 내역 조회 실패:", error);
+      if (requestId === requestIdRef.current) {
+        console.error("수정구 내역 조회 실패:", error);
+      }
     } finally {
-      setIsLoading(false);
+      if (requestId === requestIdRef.current) {
+        setIsLoading(false);
+      }
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchTransactions();
-    // 최초 화면 진입 시 조회
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    fetchTransactions("획득 내역");
+
+    return () => {
+      requestIdRef.current += 1;
+    };
+  }, [fetchTransactions]);
+
+  const handleTabChange = (tab) => {
+    if (tab === selectedTab) return;
+
+    setSelectedTab(tab);
+    fetchTransactions(tab);
+  };
 
   const groupedTransactions = transactions.reduce((acc, item) => {
     const date = item.createdAt?.slice(0, 10) ?? "";
@@ -81,7 +105,7 @@ const ItemHistory = () => {
           <TabMenu
             tabs={["획득 내역", "사용 내역"]}
             selected={selectedTab}
-            onChange={setSelectedTab}
+            onChange={handleTabChange}
           />
         </div>
 
@@ -103,6 +127,7 @@ const ItemHistory = () => {
                         category={reasonLabels[item.reason] ?? item.reason}
                         title={item.description}
                         amount={item.amount}
+                        type={item.type}
                       />
                     ))}
                   </div>
@@ -110,10 +135,10 @@ const ItemHistory = () => {
               );
             })}
 
-            {hasNext && (
+            {hasNext && nextCursor != null && (
               <button
                 type="button"
-                onClick={() => fetchTransactions(nextCursor)}
+                onClick={() => fetchTransactions(selectedTab, nextCursor)}
                 disabled={isLoading}
               >
                 {isLoading ? "불러오는 중..." : "더 보기"}

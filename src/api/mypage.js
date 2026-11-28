@@ -146,6 +146,24 @@ export const updateMatchingProfile = async (accessToken, updateData) => {
   return result.data;
 };
 
+// 사주 매칭 설정 조회
+export const getSajuSettings = async (accessToken) => {
+  const response = await fetch(`${BASE_URL}/users/me/saju-settings`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  const result = await response.json();
+
+  if (!response.ok || !result.success) {
+    throw new Error(result.message || "사주 매칭 설정 조회에 실패했습니다.");
+  }
+
+  return result.data;
+};
+
 // 사주 매칭 설정 수정
 export const updateSajuSettings = async (accessToken, sajuData) => {
   const response = await fetch(`${BASE_URL}/users/me/saju-settings`, {

@@ -105,7 +105,9 @@ const EditProfile = () => {
     try {
       setIsSaving(true);
 
-      await updateMyProfile(accessToken, updateData, profileImage);
+      const data = await updateMyProfile(accessToken, updateData, profileImage);
+
+      sessionStorage.setItem("nickname", data.nickname);
 
       alert("내 정보가 수정되었습니다.");
       navigate("/mypage");

@@ -1,6 +1,6 @@
-import './PointHistoryItem.scss'
+import "./PointHistoryItem.scss";
 
-const PointHistoryItem = ({ category, title, amount }) => {
+const PointHistoryItem = ({ category, title, amount, type }) => {
   return (
     <div className="PointHistoryItem_wrap">
       <div className="point_history_txt">
@@ -8,7 +8,7 @@ const PointHistoryItem = ({ category, title, amount }) => {
         <p>{title}</p>
       </div>
       <span className="point_history_amount">
-        {amount > 0 ? `+${amount}` : amount}
+        {type === "USE" ? `-${Math.abs(amount)}` : `+${Math.abs(amount)}`}
       </span>
     </div>
   );

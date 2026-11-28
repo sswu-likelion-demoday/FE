@@ -35,13 +35,13 @@ const SajuEdit = () => {
 
     const sajuData = isAllowed
       ? {
-          enabled: true,
+          matchingEnabled: true,
           birthDate,
           calendarType,
           ...(birthTime && { birthTime }),
         }
       : {
-          enabled: false,
+          matchingEnabled: false,
         };
 
     try {

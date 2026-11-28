@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getMatchingProfile } from "../../../../api/mypage";
+import { getMatchingProfile, getSajuSettings } from "../../../../api/mypage";
 import "./MatchingInfo.scss";
 import MatchingInfoCard from "../../components/MatchingInfoCard";
 import SajuMatchingCard from "../../components/SajuMatchingCard";
@@ -10,13 +10,14 @@ import star_purple from "../../../../assets/images/Mypage/star_purple.svg";
 const MatchingInfo = () => {
   const navigate = useNavigate();
   const [matchingData, setMatchingData] = useState(null);
+  const [sajuData, setSajuData] = useState(null);
 
   useEffect(() => {
+    const accessToken = sessionStorage.getItem("accessToken");
+
+    if (!accessToken) return;
+
     const fetchMatchingProfile = async () => {
-      const accessToken = sessionStorage.getItem("accessToken");
-
-      if (!accessToken) return;
-
       try {
         const data = await getMatchingProfile(accessToken);
         setMatchingData(data);
@@ -25,7 +26,17 @@ const MatchingInfo = () => {
       }
     };
 
+    const fetchSajuSettings = async () => {
+      try {
+        const data = await getSajuSettings(accessToken);
+        setSajuData(data);
+      } catch (error) {
+        console.error("사주 설정 조회 실패:", error);
+      }
+    };
+
     fetchMatchingProfile();
+    fetchSajuSettings();
   }, []);
 
   const infoList = [
@@ -41,9 +52,7 @@ const MatchingInfo = () => {
       id: "meeting",
       title: "사람을 만나는 방식",
       description: "최대 2개",
-      items: matchingData?.socialStyle
-        ? Object.values(matchingData.socialStyle)
-        : [],
+      items: matchingData?.socialStyles?.map((item) => item.name) ?? [],
       path: "/mypage/meeting-style-edit",
     },
     {
@@ -91,30 +100,38 @@ const MatchingInfo = () => {
                   navigate(info.path, {
                     state: { mbti: matchingData?.mbti },
                   });
+                } else if (info.id === "meeting") {
+                  navigate(info.path, {
+                    state: {
+                      socialStyleCodes: matchingData?.socialStyles?.map(
+                        (item) => item.code,
+                      ),
+                    },
+                  });
                 } else if (info.id === "category") {
                   navigate(info.path, {
                     state: {
-                      interestIds: matchingData?.interests?.map(
-                        (item) => item.id,
+                      interestCodes: matchingData?.interests?.map(
+                        (item) => item.code,
                       ),
                     },
                   });
                 } else if (info.id === "hobby") {
                   navigate(info.path, {
                     state: {
-                      hobbyIds: matchingData?.hobbies?.map((item) => item.id),
+                      hobbyCodes: matchingData?.hobbies?.map(
+                        (item) => item.code,
+                      ),
                     },
                   });
                 } else if (info.id === "friend") {
                   navigate(info.path, {
                     state: {
-                      friendTypeIds: matchingData?.friendTypes?.map(
-                        (item) => item.id,
+                      friendTypeCodes: matchingData?.friendTypes?.map(
+                        (item) => item.code,
                       ),
                     },
                   });
-                } else {
-                  navigate(info.path);
                 }
               }}
             />
@@ -123,22 +140,31 @@ const MatchingInfo = () => {
         <div className="mi_m_2">
           <SajuMatchingCard
             birthDate={
-              matchingData?.saju?.enabled
-                ? `${matchingData.saju.birthDate?.replaceAll("-", ".") ?? ""} (${
-                    matchingData.saju.calendarType === "SOLAR"
-                      ? "양력"
-                      : matchingData.saju.calendarType === "LUNAR"
-                        ? "음력"
-                        : "-"
-                  })`
-                : "사주 매칭 미사용"
+              !sajuData
+                ? "-"
+                : sajuData.matchingEnabled
+                  ? `${sajuData.birthDate?.replaceAll("-", ".") ?? ""} (${
+                      sajuData.calendarType === "SOLAR"
+                        ? "양력"
+                        : sajuData.calendarType === "LUNAR"
+                          ? "음력"
+                          : "-"
+                    })`
+                  : "사주 매칭 미사용"
             }
             birthTime={
-              matchingData?.saju?.enabled
-                ? (matchingData.saju.birthTime ?? "-")
-                : "-"
+              sajuData?.matchingEnabled ? (sajuData.birthTime ?? "-") : "-"
             }
-            onEdit={() => navigate("/mypage/saju-edit")}
+            onEdit={() => {
+              if (!sajuData) {
+                alert("사주 설정을 불러오지 못했습니다.");
+                return;
+              }
+
+              navigate("/mypage/saju-edit", {
+                state: { saju: sajuData },
+              });
+            }}
           />
         </div>
       </div>
